@@ -1,11 +1,38 @@
+# Dependencias
 node_modules/
-data/
+
+# Secretos y entorno local
 .env
 .env.local
+.env.*.local
+
+# Base de datos SQLite (runtime)
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# SO / editores
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
 *.swp
+*~
+
+# Herramientas locales de agentes (no son código del producto)
+.agents/
+.claude/
+.cursor/
+skills-lock.json
+
+# Tests / cobertura
+coverage/
+.nyc_output/

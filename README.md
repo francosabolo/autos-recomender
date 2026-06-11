@@ -1,6 +1,6 @@
-# El Garaje · App (`auto-recomendador`)
+# El Garaje
 
-Node + Express + SQLite + scraping multiportal. El núcleo es un **ojeador con alertas**: buscás autos en varios portales a la vez, guardás la búsqueda como **alerta** (watch) y El Garaje vigila los portales por vos. Cada auto guarda **de qué portal salió y desde cuándo** (trazabilidad), y "Revisar novedades" re-corre la búsqueda y resalta solo lo que apareció desde la última vez. El chat con Claude queda como asesor secundario que conoce lo que tenés en pantalla. Visión, casos de uso y roadmap: [**`../SPECS.md`**](../SPECS.md).
+Node + Express + SQLite + scraping multiportal. El núcleo es un **ojeador con alertas**: buscás autos en varios portales a la vez, guardás la búsqueda como **alerta** (watch) y El Garaje vigila los portales por vos. Cada auto guarda **de qué portal salió y desde cuándo** (trazabilidad), y "Revisar novedades" re-corre la búsqueda y resalta solo lo que apareció desde la última vez. El chat con Claude queda como asesor secundario que conoce lo que tenés en pantalla. Visión, casos de uso y roadmap: [**SPECS.md**](SPECS.md).
 
 ## Alertas y trazabilidad (núcleo)
 
