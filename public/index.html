@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>El Garaje · Agregador de autos usados</title>
+<style>
+  :root {
+    --canvas: #f3f1ec;
+    --panel: #ffffff;
+    --panel-soft: #faf9f6;
+    --ink: #18170f;
+    --muted: #6c675d;
+    --subtle: #9a9489;
+    --line: #e6e1d6;
+    --line-strong: #d6cdbb;
+    --brand: #e23d2b;
+    --brand-dark: #9e2419;
+    --good: #157a4f;
+    --good-soft: rgba(21,122,79,0.12);
+    --blue: #255c99;
+    --r-sm: 8px;
+    --r-md: 11px;
+    --r-lg: 16px;
+    --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 28px;
+    --t-xs: 11px; --t-sm: 13px; --t-md: 15px; --t-lg: 18px; --t-xl: 22px; --t-2xl: 28px;
+    --sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--canvas); color: var(--ink); font-family: var(--sans); line-height: 1.45; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:disabled { cursor: not-allowed; opacity: 0.55; }
+  a { color: inherit; }
+
+  .app { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
+
+  /* ---------- Rail ---------- */
+  .rail {
+    position: sticky; top: 0; align-self: start; height: 100vh;
+    display: grid; grid-template-rows: auto auto auto 1fr auto;
+    border-right: 1px solid var(--line); background: var(--panel);
+    padding: var(--s4) var(--s3);
+    gap: var(--s2);
+  }
+  .brand { display: flex; align-items: center; gap: var(--s3); padding: var(--s2) var(--s2) var(--s4); }
+  .brand-mark { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: var(--brand); color: #fff; font-weight: 900; }
+  .brand b { font-size: var(--t-md); }
+  .brand small { display: block; color: var(--muted); font-size: var(--t-xs); }
+
+  .nav { display: grid; gap: 2px; }
+  .nav button {
+    display: flex; align-items: center; gap: var(--s3); width: 100%;
+    border: 0; background: transparent; border-radius: var(--r-sm);
+    padding: 9px var(--s3); text-align: left; font-weight: 700; font-size: var(--t-sm); color: var(--muted);
+  }
+  .nav button .ico { width: 18px; text-align: center; opacity: 0.8; }
+  .nav button:hover { background: var(--panel-soft); color: var(--ink); }
+  .nav button.active { background: var(--ink); color: #fff; }
+  .nav .nav-badge { margin-left: auto; background: var(--brand); color: #fff; border-radius: 999px; font-size: 10px; font-weight: 850; padding: 1px 7px; }
+  .nav button.active .nav-badge { background: #fff; color: var(--brand); }
+
+  .rail-label { display: flex; align-items: center; justify-content: space-between; padding: var(--s3) var(--s3) var(--s1); color: var(--subtle); font-size: var(--t-xs); font-weight: 850; text-transform: uppercase; letter-spacing: 0.04em; }
+  .alerts { list-style: none; margin: 0; padding: 0 var(--s1); overflow-y: auto; display: grid; gap: 2px; align-content: start; }
+  .alert-item { display: grid; gap: 2px; width: 100%; border: 0; background: transparent; border-radius: var(--r-sm); padding: 8px var(--s3); text-align: left; }
+  .alert-item:hover { background: var(--panel-soft); }
+  .alert-item.active { background: var(--panel-soft); box-shadow: inset 2px 0 0 var(--brand); }
+  .alert-item .row { display: flex; align-items: center; gap: var(--s2); }
+  .alert-item strong { font-size: var(--t-sm); font-weight: 750; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .alert-item .mini-badge { margin-left: auto; flex: none; background: var(--brand); color: #fff; border-radius: 999px; font-size: 10px; font-weight: 850; padding: 1px 6px; }
+  .alert-item span.sub { color: var(--subtle); font-size: var(--t-xs); }
+  .alerts-empty { padding: var(--s3); color: var(--subtle); font-size: var(--t-xs); }
+
+  .rail-foot { display: grid; gap: var(--s2); padding-top: var(--s3); border-top: 1px solid var(--line); }
+  .rail-foot .status { display: flex; align-items: center; gap: var(--s2); color: var(--muted); font-size: var(--t-xs); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); flex: none; }
+
+  /* ---------- Main ---------- */
+  .main { min-width: 0; padding: var(--s5) var(--s6); }
+  .view { display: none; }
+  .view.active { display: block; }
+  .head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s4); margin-bottom: var(--s5); flex-wrap: wrap; }
+  .head h2 { margin: 0; font-size: var(--t-2xl); letter-spacing: -0.01em; }
+  .head p { margin: var(--s1) 0 0; color: var(--muted); font-size: var(--t-md); max-width: 640px; }
+  .head-actions { display: flex; align-items: center; gap: var(--s2); }
+
+  .btn { border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--panel); min-height: 38px; padding: 8px 14px; font-weight: 750; font-size: var(--t-sm); }
+  .btn:hover { border-color: var(--ink); }
+  .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .btn.primary:hover { background: var(--brand-dark); border-color: var(--brand-dark); }
+  .btn.ghost { background: transparent; border-color: transparent; color: var(--muted); }
+  .btn.ghost:hover { background: var(--panel-soft); border-color: var(--line); color: var(--ink); }
+
+  /* ---------- Card grid ---------- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(238px, 1fr)); gap: var(--s4); align-items: start; }
+  .section { grid-column: 1 / -1; display: flex; align-items: baseline; gap: var(--s2); margin: var(--s3) 0 calc(var(--s1) * -1); padding-bottom: var(--s2); border-bottom: 1px solid var(--line); }
+  .section:first-child { margin-top: 0; }
+  .section h3 { margin: 0; font-size: var(--t-md); }
+  .section span { color: var(--muted); font-size: var(--t-sm); }
+
+  .card { position: relative; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--panel); overflow: hidden; box-shadow: 0 4px 16px rgba(30,24,16,0.05); display: flex; flex-direction: column; }
+  .card.fresh { border-color: var(--brand); box-shadow: 0 4px 18px rgba(226,61,43,0.16); }
+  .card.discarded { opacity: 0.5; }
+  .ribbon { position: absolute; top: 10px; left: 10px; background: var(--brand); color: #fff; font-size: 10px; font-weight: 850; border-radius: 999px; padding: 3px 9px; letter-spacing: 0.03em; }
+  .media { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: #e3ddd0; }
+  .ph { width: 100%; aspect-ratio: 4 / 3; display: grid; place-items: center; background: linear-gradient(135deg, #e3ddd0, #f4efe7); color: var(--subtle); font-weight: 800; font-size: var(--t-sm); }
+  .body { padding: var(--s3) var(--s4) var(--s4); display: grid; gap: var(--s2); flex: 1; }
+  .title { margin: 0; font-size: var(--t-md); line-height: 1.25; overflow-wrap: anywhere; }
+  .price { font-size: var(--t-xl); font-weight: 900; color: var(--brand-dark); line-height: 1; display: flex; align-items: baseline; gap: var(--s2); flex-wrap: wrap; }
+  .price .was { font-size: var(--t-sm); color: var(--subtle); text-decoration: line-through; font-weight: 600; }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; }
+  .drop { display: inline-block; background: var(--good-soft); color: var(--good); border-radius: 999px; font-size: var(--t-xs); font-weight: 850; padding: 2px 8px; width: fit-content; }
+  .mkt { display: inline-block; border-radius: 999px; font-size: var(--t-xs); font-weight: 850; padding: 2px 8px; width: fit-content; }
+  .mkt.good { background: var(--good-soft); color: var(--good); }
+  .mkt.bad { background: rgba(226,61,43,0.12); color: var(--brand-dark); }
+  .mkt.mid { background: var(--panel-soft); color: var(--muted); border: 1px solid var(--line); }
+  .specs { display: flex; flex-wrap: wrap; gap: var(--s1); }
+  .pill { display: inline-flex; align-items: center; padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--panel-soft); font-family: var(--mono); font-size: var(--t-xs); }
+  .insight { color: var(--muted); font-size: var(--t-sm); background: var(--panel-soft); border: 1px solid var(--line); border-radius: var(--r-sm); padding: var(--s2); }
+  .trace { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; color: var(--subtle); font-size: var(--t-xs); margin-top: auto; }
+  .trace .tag { border: 1px solid var(--line-strong); border-radius: 999px; padding: 2px 8px; color: var(--muted); font-weight: 700; background: var(--panel-soft); }
+  .trace .tag.alert { color: var(--blue); }
+  .trace .st { font-weight: 800; }
+  .trace .st.contacted { color: var(--blue); }
+  .trace .st.discarded { color: var(--subtle); }
+  .actions { display: flex; gap: var(--s2); padding-top: var(--s1); }
+  .actions a, .actions .pin { flex: 1; text-align: center; text-decoration: none; }
+  .life { display: flex; gap: var(--s2); flex-wrap: wrap; }
+  .life button { flex: 1; min-width: 72px; border: 1px solid var(--line-strong); background: var(--panel-soft); border-radius: var(--r-sm); padding: 7px 6px; font-size: var(--t-xs); font-weight: 800; color: var(--muted); min-height: 32px; }
+  .life button:hover { border-color: var(--brand); color: var(--brand-dark); }
+  .life button.star.on { border-color: var(--brand); color: var(--brand-dark); background: #fff4f0; }
+  .card.starred { border-color: var(--brand); }
+  .note-toggle { justify-self: start; border: 0; background: transparent; color: var(--muted); font-size: var(--t-xs); font-weight: 750; padding: 2px 0; text-align: left; }
+  .note-toggle:hover { color: var(--brand-dark); }
+  .note-edit { display: grid; gap: 6px; }
+  .note-edit textarea { border: 1px solid var(--line-strong); border-radius: var(--r-sm); padding: 8px 9px; resize: vertical; min-height: 46px; outline: none; font-size: var(--t-sm); }
+  .note-edit textarea:focus { border-color: var(--brand); }
+
+  /* ---------- Explorar ---------- */
+  .search { display: grid; grid-template-columns: 1fr auto; gap: var(--s2); padding: var(--s2); border: 1px solid var(--line-strong); border-radius: 999px; background: var(--panel); margin-bottom: var(--s4); }
+  .search input { border: 0; outline: 0; background: transparent; padding: 0 var(--s4); font-size: var(--t-md); min-width: 0; }
+  .search button { border: 0; border-radius: 999px; padding: 0 var(--s5); min-height: 42px; background: var(--brand); color: #fff; font-weight: 800; }
+  .search.big { padding: 6px; box-shadow: 0 8px 26px rgba(30,24,16,0.07); }
+  .search.big input { padding: 8px var(--s4); font-size: var(--t-lg); }
+  .search.big button { min-height: 50px; padding: 0 var(--s6); font-size: var(--t-md); }
+  .ml-banner { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); border: 1px solid #ffe08a; background: #fff8e6; border-radius: var(--r-md); padding: var(--s3) var(--s4); margin-bottom: var(--s4); font-size: var(--t-sm); color: var(--ink); }
+  .ml-banner a { font-weight: 850; color: var(--brand-dark); white-space: nowrap; text-decoration: none; }
+  .ml-banner a:hover { text-decoration: underline; }
+  details.adv { margin-bottom: var(--s4); }
+  details.adv > summary { cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: var(--s2); color: var(--muted); font-size: var(--t-sm); font-weight: 750; padding: var(--s2) 0; user-select: none; }
+  details.adv > summary::-webkit-details-marker { display: none; }
+  details.adv > summary::before { content: "+ "; font-weight: 900; color: var(--brand); }
+  details.adv[open] > summary::before { content: "− "; }
+  details.adv[open] > summary { margin-bottom: var(--s2); }
+  .filters { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: flex-end; margin-bottom: var(--s4); padding: var(--s4); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); }
+  .field { display: grid; gap: var(--s1); }
+  .field.grow { flex: 1; min-width: 120px; }
+  .field label { color: var(--muted); font-size: var(--t-xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; }
+  .field input, .field select { border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: #fff; padding: 9px 10px; outline: none; }
+  .field input:focus, .field select:focus, .search:focus-within { border-color: var(--brand); }
+  .portals { display: flex; flex-wrap: wrap; gap: var(--s2); }
+  .pchoice { display: inline-flex; gap: var(--s2); align-items: center; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--panel-soft); padding: 8px 10px; font-size: var(--t-sm); font-weight: 700; color: var(--muted); }
+  .pchoice input { accent-color: var(--brand); }
+  .knowledge { border: 1px solid var(--line); border-radius: var(--r-md); background: #fcfbf8; padding: var(--s4); margin-bottom: var(--s4); }
+  .kn-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); margin-bottom: var(--s2); }
+  .kn-head h3 { margin: 0; font-size: var(--t-md); }
+  .kn-head h3 span { color: var(--muted); font-weight: 600; }
+  .kn-resumen { margin: 0 0 var(--s3); color: var(--ink); }
+  .kn-block { margin-bottom: var(--s3); }
+  .kn-block h4 { margin: 0 0 var(--s1); font-size: var(--t-sm); text-transform: uppercase; letter-spacing: 0.02em; color: var(--muted); }
+  .kn-block ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: var(--t-sm); }
+  .kn-precio { margin: 0 0 var(--s2); font-size: var(--t-sm); color: var(--good); font-weight: 700; }
+  .kn-empty { color: var(--muted); font-size: var(--t-sm); margin: 0; }
+  .kn-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); border-top: 1px solid var(--line); padding-top: var(--s2); margin-top: var(--s2); }
+  .kn-src { color: var(--subtle); font-size: var(--t-xs); }
+  .kn-eq { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--s2); font-size: var(--t-sm); }
+  .kn-eq li strong { display: block; color: var(--ink); }
+  .kn-eq li span { color: var(--muted); font-size: var(--t-xs); }
+
+  /* ---------- Hero búsqueda coloquial ---------- */
+  .hero { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--panel); padding: var(--s6); margin-bottom: var(--s5); box-shadow: 0 10px 32px rgba(30,24,16,0.06); }
+  .hero h2 { margin: 0 0 var(--s2); font-size: var(--t-2xl); letter-spacing: -0.02em; }
+  .hero .lead { margin: 0 0 var(--s5); color: var(--muted); font-size: var(--t-md); max-width: 640px; }
+  .hero-form { display: grid; gap: var(--s3); }
+  .hero-form textarea { border: 1px solid var(--line-strong); border-radius: var(--r-md); padding: var(--s4); min-height: 88px; resize: vertical; outline: none; font-size: var(--t-md); line-height: 1.45; }
+  .hero-form textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(226,61,43,0.12); }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+  .hero-actions .btn.primary { min-height: 48px; padding: 0 var(--s6); font-size: var(--t-md); }
+  .hero-status { color: var(--muted); font-size: var(--t-sm); font-weight: 700; }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--s2); }
+  .chip { border: 1px solid var(--line-strong); background: var(--panel-soft); border-radius: 999px; padding: 8px 14px; font-size: var(--t-sm); font-weight: 700; color: var(--muted); }
+  .chip:hover { border-color: var(--brand); color: var(--brand-dark); background: #fff4f0; }
+
+  /* ---------- Brief del asesor en tablero ---------- */
+  .advisor-brief { border: 1px solid var(--line); border-left: 4px solid var(--brand); border-radius: var(--r-md); background: #fcfbf8; padding: var(--s4); margin-bottom: var(--s4); display: grid; gap: var(--s3); }
+  .advisor-brief .ab-query { margin: 0; color: var(--muted); font-size: var(--t-sm); font-style: italic; }
+  .advisor-brief .ab-text { margin: 0; font-size: var(--t-md); line-height: 1.5; }
+  .ab-section h4 { margin: 0 0 var(--s2); font-size: var(--t-xs); text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
+  .ab-models { display: grid; gap: var(--s2); }
+  .ab-model { border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--panel); padding: var(--s3); }
+  .ab-model strong { display: block; font-size: var(--t-sm); }
+  .ab-model span { color: var(--muted); font-size: var(--t-sm); }
+  .ab-warn { display: flex; flex-wrap: wrap; gap: var(--s2); }
+  .ab-warn span { background: rgba(226,61,43,0.1); color: var(--brand-dark); border-radius: 999px; padding: 4px 10px; font-size: var(--t-xs); font-weight: 800; }
+  .mkt.rec { background: rgba(37,92,153,0.12); color: var(--blue); }
+
+  /* ---------- Checklist por publicación ---------- */
+  .checklist-toggle { justify-self: start; border: 0; background: transparent; color: var(--blue); font-size: var(--t-xs); font-weight: 800; padding: 2px 0; text-align: left; }
+  .checklist-toggle:hover { text-decoration: underline; }
+  .checklist-box { display: grid; gap: var(--s2); border-top: 1px solid var(--line); padding-top: var(--s2); margin-top: var(--s1); }
+  .checklist-progress { color: var(--muted); font-size: var(--t-xs); font-weight: 800; }
+  .check-row { display: grid; grid-template-columns: 1fr auto; gap: var(--s2); align-items: center; font-size: var(--t-sm); }
+  .check-btns { display: inline-flex; gap: 4px; }
+  .check-btns button { border: 1px solid var(--line-strong); background: var(--panel-soft); border-radius: var(--r-sm); padding: 4px 8px; font-size: 10px; font-weight: 850; color: var(--muted); min-width: 36px; }
+  .check-btns button.on-yes { border-color: var(--good); color: var(--good); background: var(--good-soft); }
+  .check-btns button.on-no { border-color: var(--brand-dark); color: var(--brand-dark); background: rgba(226,61,43,0.1); }
+
+  .notes { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); padding: var(--s4); margin-bottom: var(--s4); display: grid; gap: var(--s2); }
+  .notes label { font-size: var(--t-xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; color: var(--muted); }
+  .notes textarea { border: 1px solid var(--line-strong); border-radius: var(--r-sm); padding: 10px 11px; resize: vertical; min-height: 54px; outline: none; font-size: var(--t-sm); }
+  .notes textarea:focus { border-color: var(--brand); }
+  .notes-actions { display: flex; align-items: center; gap: var(--s3); }
+  .notes-hint { color: var(--good); font-size: var(--t-xs); font-weight: 750; }
+  .note-preview { color: var(--ink); font-size: var(--t-sm); background: #fff7ed; border: 1px solid #f5d9b8; border-radius: var(--r-sm); padding: var(--s2); }
+
+  .report { display: grid; gap: var(--s2); margin-bottom: var(--s4); }
+  .report-row { border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--panel-soft); padding: var(--s3); font-size: var(--t-sm); color: var(--muted); }
+  .report-row strong { color: var(--ink); }
+  .report-row a { color: var(--brand-dark); }
+
+  .empty { grid-column: 1 / -1; border: 1px dashed var(--line-strong); border-radius: var(--r-lg); background: var(--panel-soft); padding: 48px var(--s5); text-align: center; color: var(--muted); }
+  .empty b { display: block; color: var(--ink); margin-bottom: var(--s2); font-size: var(--t-lg); }
+
+  /* ---------- Asesor dock ---------- */
+  .overlay { position: fixed; inset: 0; z-index: 35; background: rgba(24,23,15,0.28); opacity: 0; pointer-events: none; transition: opacity .22s; }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+  .dock { position: fixed; top: 0; right: 0; z-index: 40; width: min(420px, 94vw); height: 100vh; display: grid; grid-template-rows: auto auto 1fr auto; background: var(--panel); border-left: 1px solid var(--line-strong); box-shadow: -18px 0 44px rgba(30,24,16,0.18); transform: translateX(100%); transition: transform .24s; }
+  .dock.open { transform: translateX(0); }
+  .dock-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); padding: var(--s4); border-bottom: 1px solid var(--line); }
+  .dock-head h3 { margin: 0; font-size: var(--t-md); }
+  .dock-head small { display: block; color: var(--muted); font-size: var(--t-xs); }
+  .dock-x { border: 1px solid var(--line-strong); background: var(--panel-soft); border-radius: var(--r-sm); width: 34px; height: 34px; font-size: var(--t-lg); color: var(--muted); }
+  .dock-ctx { padding: var(--s2) var(--s4); border-bottom: 1px solid var(--line); background: var(--panel-soft); color: var(--muted); font-size: var(--t-xs); }
+  .stream { overflow-y: auto; padding: var(--s4); display: grid; gap: var(--s3); align-content: start; }
+  .msg { max-width: 88%; padding: 10px 12px; border-radius: var(--r-md); font-size: var(--t-sm); line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .msg.user { justify-self: end; background: var(--brand); color: #fff; border-bottom-right-radius: 3px; }
+  .msg.assistant { justify-self: start; background: var(--panel-soft); border: 1px solid var(--line); border-bottom-left-radius: 3px; }
+  .msg.thinking { color: var(--muted); font-style: italic; }
+  .sugg { display: flex; flex-wrap: wrap; gap: var(--s2); }
+  .sugg button { border: 1px solid var(--line-strong); background: var(--panel); border-radius: 999px; padding: 6px 10px; font-size: var(--t-xs); font-weight: 750; color: var(--muted); }
+  .sugg button:hover { border-color: var(--brand); color: var(--brand-dark); }
+  .dock-empty { color: var(--muted); font-size: var(--t-sm); }
+  .dock-empty b { display: block; color: var(--ink); margin-bottom: var(--s2); }
+  .compose { border-top: 1px solid var(--line); padding: var(--s3); display: grid; grid-template-columns: 1fr auto; gap: var(--s2); align-items: end; }
+  .compose textarea { border: 1px solid var(--line-strong); border-radius: var(--r-sm); padding: 10px 11px; resize: none; max-height: 140px; outline: none; }
+  .compose textarea:focus { border-color: var(--brand); }
+
+  .toast { position: fixed; right: var(--s5); bottom: var(--s5); z-index: 50; max-width: 340px; border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--panel); box-shadow: 0 14px 34px rgba(30,24,16,0.16); padding: var(--s4); display: none; }
+  .toast.active { display: block; }
+
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    .rail { position: static; height: auto; grid-template-rows: none; }
+    .alerts { max-height: 180px; }
+    .main { padding: var(--s4); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ============ RAIL ============ -->
+  <aside class="rail">
+    <div class="brand">
+      <div class="brand-mark">G</div>
+      <div><b>El Garaje</b><small>Autos usados · AR</small></div>
+    </div>
+
+    <nav class="nav">
+      <button id="navInicio" type="button"><span class="ico">⌕</span> Buscar</button>
+      <button id="navHoy" type="button"><span class="ico">◆</span> Novedades</button>
+    </nav>
+
+    <div class="rail-label"><span>Tus búsquedas</span><span id="alertsCount">0</span></div>
+    <ul class="alerts" id="alertsList"></ul>
+
+    <div class="rail-foot">
+      <button class="btn" id="openAdvisor" type="button">Asesor ✦</button>
+      <div class="status"><span class="dot"></span><span id="status">Listo</span></div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <!-- INICIO (home: buscar + guardadas) -->
+    <section class="view" id="view-inicio">
+      <div class="hero">
+        <h2>¿Qué auto estás buscando?</h2>
+        <p class="lead">Contanos qué necesitás — te decimos qué modelos convienen y por qué, y te mostramos los usados publicados en todos los portales.</p>
+        <form class="hero-form" id="searchForm">
+          <textarea id="q" autocomplete="off" rows="3" placeholder="Ej: busco un auto de ciudad para mi esposa de menos de 20 millones de pesos"></textarea>
+          <div class="chips" id="exampleChips">
+            <button class="chip" type="button" data-example="Auto de ciudad para mi esposa, menos de $20M">Auto de ciudad · hasta $20M</button>
+            <button class="chip" type="button" data-example="Pickup 4x4 diesel para campo, hasta $35M">Pickup 4x4 diesel · campo</button>
+            <button class="chip" type="button" data-example="Algo parecido a un Gol pero más nuevo, hasta $18M">Como un Gol pero más nuevo</button>
+          </div>
+          <div class="hero-actions">
+            <button class="btn primary" id="discoverBtn" type="submit">Encontrar mi auto</button>
+            <span class="hero-status" id="heroStatus" hidden></span>
+          </div>
+        </form>
+      </div>
+
+      <div class="ml-banner" id="mlBanner" hidden></div>
+
+      <details class="adv" id="advFilters">
+        <summary>Ajustar filtros a mano</summary>
+        <div class="filters">
+          <div class="field grow"><label>Marca</label><input id="marca" placeholder="Ford" /></div>
+          <div class="field grow"><label>Modelo</label><input id="modelo" placeholder="Ka" /></div>
+          <div class="field"><label>Precio máx</label><input id="precioMax" inputmode="numeric" placeholder="20000000" /></div>
+          <div class="field"><label>Año</label><input id="anioMin" inputmode="numeric" placeholder="2020" /></div>
+          <div class="field"><label>Combustible</label>
+            <select id="combustible">
+              <option value="">Cualquiera</option><option value="nafta">Nafta</option>
+              <option value="diesel">Diesel</option><option value="hibrido">Híbrido</option><option value="electrico">Eléctrico</option>
+            </select>
+          </div>
+          <div class="field"><label>Transmisión</label>
+            <select id="transmision">
+              <option value="">Cualquiera</option><option value="manual">Manual</option><option value="automatico">Automático</option>
+            </select>
+          </div>
+          <div class="field"><label>Tracción</label>
+            <select id="traccion">
+              <option value="">Cualquiera</option><option value="4x2">4x2</option><option value="4x4">4x4</option>
+            </select>
+          </div>
+          <div class="field"><label>Tipo</label>
+            <select id="tipo">
+              <option value="">Cualquiera</option>
+              <option value="sedan">Sedán</option><option value="hatchback">Hatchback</option>
+              <option value="suv">SUV</option><option value="pickup">Pickup</option>
+              <option value="familiar">Familiar</option><option value="monovolumen">Monovolumen</option>
+              <option value="coupe">Coupé</option><option value="furgon">Furgón</option>
+            </select>
+          </div>
+        </div>
+      </details>
+
+      <div class="head-actions" id="searchActions" hidden>
+        <button class="btn primary" id="saveWatchBtn" type="button">Guardar como búsqueda</button>
+        <select class="btn" id="boardPicker" style="font-weight:700"></select>
+        <button class="btn ghost" id="clearSearchBtn" type="button">Limpiar</button>
+      </div>
+
+      <div class="report" id="portalReport"></div>
+
+      <div id="resultsWrap" hidden>
+        <div class="section"><h3 id="resultsTitle">Resultados</h3><span id="resultsCount"></span></div>
+        <div class="grid" id="inicioGrid"></div>
+      </div>
+
+      <div id="savedWrap">
+        <div class="section"><h3>Tus búsquedas guardadas</h3><span id="savedCount"></span></div>
+        <div class="grid" id="savedGrid"></div>
+      </div>
+    </section>
+
+    <!-- NOVEDADES -->
+    <section class="view" id="view-hoy">
+      <div class="head">
+        <div><h2>Novedades</h2><p id="hoySub">Lo que cambió en tus búsquedas guardadas desde la última vez.</p></div>
+      </div>
+      <div class="grid" id="hoyGrid"></div>
+    </section>
+
+    <!-- BOARD (detalle de búsqueda guardada) -->
+    <section class="view" id="view-board">
+      <div class="head">
+        <div><h2 id="boardTitle">Búsqueda</h2><p id="boardSub"></p></div>
+        <div class="head-actions">
+          <button class="btn ghost" id="backInicioBtn" type="button">← Volver</button>
+          <label class="pchoice"><input type="checkbox" id="showShortlisted" /> Solo guardadas</label>
+          <label class="pchoice" id="discardWrap"><input type="checkbox" id="showDiscarded" /> Ver descartados</label>
+          <button class="btn primary" id="refreshBoardBtn" type="button">Revisar novedades</button>
+        </div>
+      </div>
+      <div class="advisor-brief" id="advisorBrief" hidden></div>
+      <div class="knowledge" id="knowledgeBox" hidden>
+        <div class="kn-head">
+          <h3>Conocimiento del modelo <span id="knModel"></span></h3>
+          <button class="btn" id="genKnowledgeBtn" type="button">Generar ficha</button>
+        </div>
+        <div id="knowledgeBody"></div>
+      </div>
+      <div class="notes">
+        <label for="boardNotes">Notas de esta búsqueda</label>
+        <textarea id="boardNotes" rows="2" placeholder="Ej: la caja THP tiene problemas, no comprar · ojo con la cadena de distribución · evitar versión 1.6 8v"></textarea>
+        <div class="notes-actions"><button class="btn" id="saveNotesBtn" type="button">Guardar nota</button><span class="notes-hint" id="notesSaved"></span></div>
+      </div>
+      <div class="report" id="boardReport"></div>
+      <div class="grid" id="boardGrid"></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Asesor -->
+<div class="overlay" id="overlay"></div>
+<aside class="dock" id="dock" aria-label="Asesor">
+  <div class="dock-head">
+    <div><h3>Asesor</h3><small>Conoce lo que estás viendo</small></div>
+    <button class="dock-x" id="closeAdvisor" type="button" aria-label="Cerrar">×</button>
+  </div>
+  <div class="dock-ctx" id="dockCtx">Sin autos a la vista.</div>
+  <div class="stream" id="stream"></div>
+  <form class="compose" id="advisorForm">
+    <textarea id="advisorInput" rows="1" placeholder="¿De estos cuál conviene? ¿Alguno está caro?"></textarea>
+    <button class="btn primary" type="submit">Enviar</button>
+  </form>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  const state = {
+    portals: [],
+    boards: [],
+    pinnedLinks: new Set(),
+    view: 'inicio',
+    today: { nuevos: [], bajaron: [], counts: { nuevos: 0, bajaron: 0 } },
+    boardFeed: [],
+    explorarFeed: [],
+    viewBoard: null,
+    viewKnowledge: null,
+    viewBoardId: '',
+    showDiscarded: false,
+    showShortlisted: false,
+    lastSearch: null,
+    advisor: { open: false, messages: [], sending: false, sessionId: '' }
+  };
+
+  /* ---------- helpers ---------- */
+  function escapeHtml(v) {
+    return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  }
+  function toNumber(v) { const c = String(v||'').replace(/[^\d]/g,''); return c ? Number(c) : null; }
+  function fmtPrice(v, cur='ARS') { if (!v) return 'Sin precio'; const n = Number(v).toLocaleString('es-AR'); return cur === 'USD' ? `US$ ${n}` : `$ ${n}`; }
+  function fmtAgo(ts) {
+    if (!ts) return null;
+    const d = Date.now() - Number(ts); if (d < 0) return 'recién';
+    const m = Math.floor(d/60000); if (m < 1) return 'recién'; if (m < 60) return `hace ${m} min`;
+    const h = Math.floor(m/60); if (h < 24) return `hace ${h} h`;
+    const dd = Math.floor(h/24); return dd === 1 ? 'ayer' : `hace ${dd} días`;
+  }
+  function portalLabel(s) { if (!s) return 'Portal'; const f = state.portals.find(p => p.id === s); return f ? f.label : s; }
+
+  /* Precio de mercado: compara cada auto contra sus pares (mismo modelo + año). */
+  function marketKey(c) {
+    const brand = (c.marca || c.brand || '').toLowerCase().trim();
+    const model = (c.modelo || c.model || (c.titulo || c.title || '').toLowerCase().split(/\s+/).slice(0, 2).join(' ')).toLowerCase().trim();
+    return `${brand}|${model}|${c.año || c.year || ''}`;
+  }
+  function quantile(sorted, q) {
+    const pos = (sorted.length - 1) * q, b = Math.floor(pos), rest = pos - b;
+    return sorted[b + 1] !== undefined ? sorted[b] + rest * (sorted[b + 1] - sorted[b]) : sorted[b];
+  }
+  // Una publicación sin precio NI foto no merece ser card (se ve rota). Se demota al reporte.
+  function withData(list) {
+    return (list || []).filter(c => (c.precio || c.price) || (c.imagen || c.image));
+  }
+  function tagMarket(list) {
+    const groups = {};
+    for (const c of list) { const p = Number(c.precio || c.price); if (p) (groups[marketKey(c)] ||= []).push(p); }
+    const stats = {};
+    for (const [k, a] of Object.entries(groups)) { if (a.length < 4) continue; a.sort((x, y) => x - y); stats[k] = { p25: quantile(a, 0.25), p75: quantile(a, 0.75) }; }
+    for (const c of list) { const p = Number(c.precio || c.price), s = stats[marketKey(c)]; c._mercado = (p && s) ? (p <= s.p25 ? 'barato' : p >= s.p75 ? 'caro' : 'normal') : null; }
+    return list;
+  }
+  function setStatus(t) { $('status').textContent = t; }
+  function showToast(t) { const el = $('toast'); el.textContent = t; el.classList.add('active'); clearTimeout(showToast.t); showToast.t = setTimeout(() => el.classList.remove('active'), 2800); }
+
+  const CHECKLIST_KEYS = ['vtv_ok', 'service_al_dia', 'dueno_unico', 'precio_negociable', 'titular_ok', 'sin_siniestros'];
+  const CHECKLIST_LABELS = {
+    vtv_ok: 'VTV al día',
+    service_al_dia: 'Service documentado',
+    dueno_unico: 'Dueño único',
+    precio_negociable: 'Precio negociable',
+    titular_ok: 'Titular / papeles ok',
+    sin_siniestros: 'Sin siniestros declarados'
+  };
+  function normTxt(v) { return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+  function listingIsRecommended(car, modelos) {
+    if (!modelos?.length) return false;
+    const hay = normTxt([car.marca, car.modelo, car.brand, car.model, car.titulo, car.title].filter(Boolean).join(' '));
+    return modelos.some(m => {
+      const b = normTxt(m.marca), mo = normTxt(m.modelo);
+      if (b && !hay.includes(b)) return false;
+      if (mo && !hay.includes(mo)) return false;
+      return Boolean(mo || b);
+    });
+  }
+  function checklistProgress(cl) {
+    let done = 0;
+    for (const k of CHECKLIST_KEYS) if (cl?.[k] === true || cl?.[k] === false) done++;
+    return { done, total: CHECKLIST_KEYS.length };
+  }
+  function buildChecklistHtml(car) {
+    const id = escapeHtml(car.id);
+    const cl = car.checklist || {};
+    const { done, total } = checklistProgress(cl);
+    const rows = CHECKLIST_KEYS.map(key => {
+      const val = cl[key];
+      return `<div class="check-row"><span>${escapeHtml(CHECKLIST_LABELS[key])}</span><div class="check-btns">
+        <button type="button" class="${val===true?'on-yes':''}" data-check-key="${key}" data-check-val="true" data-listing="${id}">Sí</button>
+        <button type="button" class="${val===false?'on-no':''}" data-check-key="${key}" data-check-val="false" data-listing="${id}">No</button>
+        <button type="button" class="${val==null?'on-yes':''}" data-check-key="${key}" data-check-val="null" data-listing="${id}">—</button>
+      </div></div>`;
+    }).join('');
+    return `
+      <button class="checklist-toggle" type="button" data-checklist-toggle="${id}">Checklist de compra · ${done}/${total}</button>
+      <div class="checklist-box" data-checklist-box="${id}" hidden>
+        <span class="checklist-progress">${done} de ${total} revisados</span>
+        ${rows}
+      </div>`;
+  }
+
+  async function api(path, opts = {}) {
+    const res = await fetch(path, opts);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) throw new Error(data.error || `Error HTTP ${res.status}`);
+    return data;
+  }
+
+  /* ---------- card ---------- */
+  function buildCard(car, mode) {
+    const persisted = mode === 'hoy' || mode === 'board';
+    const status = car.status || 'saved';
+    const isNew = car.is_new === true;
+    const moneda = car.moneda || car.currency;
+    const drop = car.precio_bajo === true && car.precio_anterior;
+    const tipoLabel = { sedan:'Sedán', hatchback:'Hatchback', suv:'SUV', pickup:'Pickup', familiar:'Familiar', monovolumen:'Monovolumen', coupe:'Coupé', furgon:'Furgón' };
+    const transLabel = { manual:'Manual', automatico:'Automático' };
+    const specs = [
+      car.año || car.year,
+      (car.kilometros || car.km) ? `${Number(car.kilometros||car.km).toLocaleString('es-AR')} km` : null,
+      car.combustible || car.fuel,
+      transLabel[car.transmision || car.transmission] || (car.transmision || car.transmission),
+      car.traccion || car.traction,
+      tipoLabel[car.tipo] || car.tipo,
+      car.ubicacion || car.location
+    ].filter(Boolean).map(s => `<span class="pill">${escapeHtml(s)}</span>`).join('');
+
+    const media = (car.imagen || car.image)
+      ? `<img class="media" src="${escapeHtml(car.imagen||car.image)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;ph&quot;>Sin foto</div>'" />`
+      : '<div class="ph">Sin foto</div>';
+
+    const since = fmtAgo(car.first_seen_at);
+    const st = status === 'contacted' ? '<span class="st contacted">Contactado</span>'
+      : status === 'discarded' ? '<span class="st discarded">Descartado</span>' : '';
+
+    let actions;
+    if (persisted) {
+      const id = escapeHtml(car.id);
+      const short = car.shortlisted === true;
+      const note = car.notes || '';
+      const life = status === 'discarded'
+        ? `<button type="button" data-status="saved" data-listing="${id}">Recuperar</button>`
+        : `<button type="button" class="star ${short?'on':''}" data-shortlist="${id}" data-current="${short?1:0}">${short?'★ Guardada':'☆ Guardar'}</button>
+           <button type="button" data-status="contacted" data-listing="${id}">Contactado</button>
+           <button type="button" data-status="discarded" data-listing="${id}">Descartar</button>`;
+      actions = `
+        <div class="actions"><a class="btn" href="${escapeHtml(car.link)}" target="_blank" rel="noopener">Ver origen</a></div>
+        <div class="life">${life}</div>
+        ${note ? `<div class="note-preview">📝 ${escapeHtml(note)}</div>` : ''}
+        <button class="note-toggle" type="button" data-note-toggle="${id}">${note ? '✎ Editar nota' : '+ Agregar nota'}</button>
+        <div class="note-edit" data-note-box="${id}" hidden>
+          <textarea class="note-input" rows="2" placeholder="Nota de esta publicación (ej: dueño dice que está impecable, pedir VTV)">${escapeHtml(note)}</textarea>
+          <button class="btn" type="button" data-note-save="${id}">Guardar nota</button>
+        </div>
+        ${buildChecklistHtml(car)}`;
+    } else {
+      const pinned = state.pinnedLinks.has(car.link);
+      actions = `<div class="actions">
+        <a class="btn" href="${escapeHtml(car.link)}" target="_blank" rel="noopener">Ver origen</a>
+        <button class="btn primary pin" type="button" data-pin="${escapeHtml(car.id||car.link)}">${pinned ? 'Pineado' : 'Pinear'}</button>
+      </div>`;
+    }
+
+    return `
+      <article class="card ${isNew?'fresh':''} ${status==='discarded'?'discarded':''} ${car.shortlisted?'starred':''} ${car.recomendado?'recommended':''}" data-car-id="${escapeHtml(car.id||car.link)}">
+        ${isNew ? '<span class="ribbon">Nuevo</span>' : ''}
+        ${car.recomendado ? '<span class="ribbon" style="left:auto;right:10px;background:var(--blue)">Recomendado</span>' : ''}
+        ${media}
+        <div class="body">
+          <h4 class="title">${escapeHtml(car.titulo||car.title)}</h4>
+          <div class="price">${escapeHtml(fmtPrice(car.precio||car.price, moneda))}${drop ? `<span class="was">${escapeHtml(fmtPrice(car.precio_anterior, moneda))}</span>` : ''}</div>
+          <div class="badges">
+            ${drop ? '<span class="drop">↓ Bajó de precio</span>' : ''}
+            ${car.recomendado ? '<span class="mkt rec">Recomendado</span>' : ''}
+            ${car._mercado === 'barato' ? '<span class="mkt good">Buen precio</span>' : car._mercado === 'caro' ? '<span class="mkt bad">Por encima del mercado</span>' : car._mercado === 'normal' ? '<span class="mkt mid">En precio</span>' : ''}
+          </div>
+          <div class="specs">${specs}</div>
+          ${car.insight ? `<div class="insight">${escapeHtml(car.insight)}</div>` : ''}
+          <div class="trace">
+            <span class="tag">${escapeHtml(car.fuente || portalLabel(car.source) || 'Portal')}</span>
+            ${car.board_name ? `<span class="tag alert">${escapeHtml(car.board_name)}</span>` : ''}
+            ${since ? `<span>visto ${escapeHtml(since)}</span>` : ''}
+            ${st}
+          </div>
+          ${actions}
+        </div>
+      </article>`;
+  }
+
+  const PORTAL_STATUS = {
+    ok: ['var(--good)', 'ok'],
+    pending: ['var(--blue)', 'buscando en segundo plano…'],
+    partial: ['var(--warn, #9b6a00)', 'parcial — links sin precio/foto'],
+    changed: ['var(--warn, #9b6a00)', 'el sitio cambió — no pudimos leerlo'],
+    blocked: ['var(--brand-dark)', 'bloqueado / sin respuesta'],
+    empty: ['var(--muted)', 'sin resultados'],
+    link_only: ['var(--blue)', 'solo link (requiere sesión)']
+  };
+  function renderReport(target, results) {
+    $(target).innerHTML = (results || []).map(r => {
+      const [color, label] = PORTAL_STATUS[r.status] || ['var(--muted)', r.status || ''];
+      return `
+      <div class="report-row">
+        <strong><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:6px"></span>${escapeHtml(r.portal_label || r.portal)}</strong>
+        · ${Number(r.total||0)} resultados${label ? ` · ${escapeHtml(label)}` : ''}
+        ${r.error && r.status !== 'link_only' ? `<br>${escapeHtml(r.error)}` : ''}
+        <br><a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">Abrir búsqueda en el portal</a>
+      </div>`;
+    }).join('');
+  }
+
+  /* ---------- rail / nav ---------- */
+  function setView(view) {
+    state.view = view;
+    ['inicio','hoy','board'].forEach(v => $('view-' + v).classList.toggle('active', v === view));
+    $('navInicio').classList.toggle('active', view === 'inicio' || view === 'board');
+    $('navHoy').classList.toggle('active', view === 'hoy');
+    if (view !== 'board') state.viewBoardId = '';
+    renderRail();
+    if (state.advisor.open) updateDockCtx();
+  }
+
+  function renderRail() {
+    $('alertsCount').textContent = String(state.boards.length);
+    const todayN = state.today.counts.nuevos + state.today.counts.bajaron;
+    $('navInicio').innerHTML = `<span class="ico">⌕</span> Buscar`;
+    $('navHoy').innerHTML = `<span class="ico">◆</span> Novedades${todayN ? `<span class="nav-badge">${todayN}</span>` : ''}`;
+
+    $('alertsList').innerHTML = state.boards.length
+      ? state.boards.map(b => `
+        <li><button class="alert-item ${b.id===state.viewBoardId?'active':''}" type="button" data-board-id="${escapeHtml(b.id)}">
+          <span class="row"><strong>${escapeHtml(b.name)}</strong>${b.new_count?`<span class="mini-badge">${b.new_count}</span>`:''}</span>
+          <span class="sub">${b.total} autos · ${b.last_checked_at ? 'revisado '+fmtAgo(b.last_checked_at) : 'sin revisar'}</span>
+        </button></li>`).join('')
+      : '<li class="alerts-empty">Todavía no tenés búsquedas. Andá a Explorar y guardá una búsqueda.</li>';
+
+    $('boardPicker').innerHTML = '<option value="">Pinear a… (elegí búsqueda)</option>' +
+      state.boards.map(b => `<option value="${escapeHtml(b.id)}">${escapeHtml(b.name)}</option>`).join('');
+  }
+
+  /* ---------- data loads ---------- */
+  async function loadPortals() {
+    const data = await api('/api/portals');
+    state.portals = data.portals || [];
+  }
+  async function loadBoards() {
+    const data = await api('/api/boards');
+    state.boards = data.boards || [];
+    const links = new Set();
+    for (const b of state.boards) {
+      if (!b.total) continue;
+      try { const d = await api(`/api/boards/${encodeURIComponent(b.id)}`); for (const l of d.board.listings||[]) links.add(l.link); } catch {}
+    }
+    state.pinnedLinks = links;
+    renderRail();
+  }
+  async function loadToday() {
+    try { const d = await api('/api/today'); state.today = { nuevos: d.nuevos||[], bajaron: d.bajaron||[], counts: d.counts||{nuevos:0,bajaron:0} }; }
+    catch { state.today = { nuevos: [], bajaron: [], counts: {nuevos:0,bajaron:0} }; }
+    renderRail();
+  }
+
+  /* ---------- HOY ---------- */
+  function showHoy() {
+    setView('hoy');
+    const nuevos = withData(state.today.nuevos);
+    const bajaron = withData(state.today.bajaron);
+    tagMarket([...nuevos, ...bajaron]);
+    const total = nuevos.length + bajaron.length;
+    $('hoySub').textContent = total
+      ? `${nuevos.length} nuevo${nuevos.length===1?'':'s'} · ${bajaron.length} bajaron de precio`
+      : 'Sin cambios desde la última vez.';
+    const sec = (t, n) => `<div class="section"><h3>${t}</h3><span>${n}</span></div>`;
+    let html = '';
+    if (nuevos.length) html += sec('Autos nuevos', nuevos.length) + nuevos.map(c => buildCard(c, 'hoy')).join('');
+    if (bajaron.length) html += sec('Bajaron de precio', bajaron.length) + bajaron.map(c => buildCard(c, 'hoy')).join('');
+    if (!total) html = state.boards.length
+      ? '<div class="empty"><b>Nada nuevo por ahora</b>Abrí una búsqueda y tocá “Revisar novedades”, o creá una nueva desde Explorar.</div>'
+      : '<div class="empty"><b>Empecemos</b>Andá a Explorar, buscá un modelo (Ford Ka, Polo, Sandero…) y guardalo como búsqueda. Te aviso acá cuando aparezca algo nuevo o baje de precio.</div>';
+    $('hoyGrid').innerHTML = html;
+  }
+
+  /* ---------- INICIO (home) ---------- */
+  function showInicio() {
+    setView('inicio');
+    renderSaved();
+    // Si no hay búsqueda activa, mostramos solo las guardadas.
+    if (!state.explorarFeed.length) { $('resultsWrap').hidden = true; $('searchActions').hidden = true; }
+  }
+  function renderSaved() {
+    $('savedCount').textContent = state.boards.length ? `${state.boards.length}` : '';
+    $('savedGrid').innerHTML = state.boards.length
+      ? state.boards.map(b => `
+        <article class="card saved" data-open-board="${escapeHtml(b.id)}" style="cursor:pointer">
+          <div class="body">
+            <h4 class="title">${escapeHtml(b.name)} ${b.new_count?`<span class="mini-badge">${b.new_count} nuevo${b.new_count>1?'s':''}</span>`:''}</h4>
+            <div class="specs">
+              <span class="pill">${b.total} autos</span>
+              <span class="pill">${b.contacted} contactados</span>
+              ${(b.portals||[]).length?`<span class="pill">${b.portals.length} portales</span>`:''}
+            </div>
+            ${b.notes ? `<div class="note-preview">📝 ${escapeHtml(b.notes)}</div>` : ''}
+            <div class="trace">${b.last_checked_at ? 'revisado '+fmtAgo(b.last_checked_at) : 'sin revisar todavía'}</div>
+            <div class="actions"><button class="btn primary" type="button" data-open-board="${escapeHtml(b.id)}">Abrir</button></div>
+          </div>
+        </article>`).join('')
+      : '<div class="empty"><b>Todavía no guardaste ninguna búsqueda</b>Escribí arriba qué auto buscás y tocá “Encontrar mi auto”. Te armamos un tablero con la explicación del asesor y los usados publicados.</div>';
+  }
+
+  /* ---------- BOARD (búsqueda) ---------- */
+  async function openBoard(boardId) {
+    setStatus('Abriendo búsqueda...');
+    try {
+      const data = await api(`/api/boards/${encodeURIComponent(boardId)}`);
+      const b = data.board;
+      state.viewBoardId = b.id;
+      const newCount = (b.listings||[]).filter(l => l.is_new).length;
+      $('boardTitle').textContent = b.name;
+      $('boardSub').textContent = newCount
+        ? `${newCount} novedad${newCount>1?'es':''} desde la última revisión.`
+        : `${b.total} autos · ${b.last_checked_at ? 'revisado '+fmtAgo(b.last_checked_at) : 'sin revisar'}`;
+      $('boardNotes').value = b.notes || '';
+      $('notesSaved').textContent = '';
+      state.viewBoard = b;
+      const modelos = b.advisor_brief?.modelos_recomendados || [];
+      state.boardFeed = (b.listings || []).map(l => ({
+        ...l,
+        recomendado: l.recomendado ?? listingIsRecommended(l, modelos)
+      }));
+      renderAdvisorBrief(b.advisor_brief);
+      renderReport('boardReport', b.runs?.[0]?.portal_results || []);
+      setView('board');
+      renderBoardGrid();
+      loadKnowledge(b);
+      setStatus(`${b.total} autos en “${b.name}”`);
+      if (newCount) { try { await api(`/api/boards/${encodeURIComponent(boardId)}/seen`, { method:'POST' }); await loadBoards(); state.viewBoardId = b.id; renderRail(); } catch {} }
+    } catch (err) { showToast(err.message); setStatus(err.message); }
+  }
+  function renderBoardGrid() {
+    tagMarket(state.boardFeed);
+    let list = withData(state.showDiscarded ? state.boardFeed : state.boardFeed.filter(c => (c.status||'saved') !== 'discarded'));
+    if (state.showShortlisted) list = list.filter(c => c.shortlisted);
+    const emptyMsg = state.showShortlisted
+      ? 'No guardaste ninguna publicación todavía. Tocá “☆ Guardar” en las que te interesen.'
+      : 'Esta búsqueda no tiene autos. Tocá “Revisar novedades”.';
+    $('boardGrid').innerHTML = list.length ? list.map(c => buildCard(c, 'board')).join('') : `<div class="empty">${emptyMsg}</div>`;
+    if (state.advisor.open) updateDockCtx();
+  }
+  function renderAdvisorBrief(brief) {
+    const el = $('advisorBrief');
+    if (!brief) { el.hidden = true; el.innerHTML = ''; return; }
+    el.hidden = false;
+    const models = (brief.modelos_recomendados || []).map(m => `
+      <div class="ab-model"><strong>${escapeHtml([m.marca, m.modelo].filter(Boolean).join(' '))}</strong><span>${escapeHtml(m.motivo || '')}</span></div>`).join('');
+    const criterios = (brief.criterios || []).map(c => `<span class="pill">${escapeHtml(c)}</span>`).join('');
+    const evitar = (brief.evitar || []).map(x => `<span>${escapeHtml(x)}</span>`).join('');
+    el.innerHTML = `
+      ${brief.query_original ? `<p class="ab-query">“${escapeHtml(brief.query_original)}”</p>` : ''}
+      ${brief.explicacion ? `<p class="ab-text">${escapeHtml(brief.explicacion)}</p>` : ''}
+      ${models ? `<div class="ab-section"><h4>Modelos recomendados</h4><div class="ab-models">${models}</div></div>` : ''}
+      ${evitar ? `<div class="ab-section"><h4>Qué evitar</h4><div class="ab-warn">${evitar}</div></div>` : ''}
+      ${criterios ? `<div class="ab-section"><h4>Criterios aplicados</h4><div class="specs">${criterios}</div></div>` : ''}`;
+  }
+  /* ---------- Conocimiento del modelo ---------- */
+  function modelOf(board) {
+    const f = board?.filters || {};
+    if (f.modelo) return { marca: f.marca || '', modelo: f.modelo };
+    const first = board?.advisor_brief?.modelos_recomendados?.[0];
+    if (first?.modelo) return { marca: first.marca || '', modelo: first.modelo };
+    return { marca: '', modelo: '' };
+  }
+  async function loadKnowledge(board) {
+    const { marca, modelo } = modelOf(board);
+    state.viewKnowledge = null;
+    if (!modelo) { $('knowledgeBox').hidden = true; return; }
+    $('knowledgeBox').hidden = false;
+    $('knModel').textContent = `· ${[marca, modelo].filter(Boolean).join(' ')}`;
+    $('knowledgeBody').innerHTML = '<p class="kn-empty">Cargando…</p>';
+    try {
+      const data = await api(`/api/knowledge?marca=${encodeURIComponent(marca)}&modelo=${encodeURIComponent(modelo)}`);
+      renderKnowledge(data.knowledge, data.source);
+    } catch (err) { $('knowledgeBody').innerHTML = `<p class="kn-empty">${escapeHtml(err.message)}</p>`; }
+  }
+  function renderKnowledge(k, source) {
+    state.viewKnowledge = k || null;
+    if (!k) {
+      $('knowledgeBody').innerHTML = '<p class="kn-empty">Todavía no hay ficha de este modelo. Generá una (versiones, problemas comunes en AR, qué chequear).</p>';
+      $('genKnowledgeBtn').textContent = 'Generar ficha';
+      return;
+    }
+    const li = arr => (arr || []).map(x => `<li>${escapeHtml(typeof x === 'string' ? x : `${x.nombre}: ${x.detalle}`)}</li>`).join('');
+    const eq = (arr) => (arr || []).map(x => `<li><strong>${escapeHtml(x.nombre)} · ${escapeHtml(x.valor || '')}</strong><span>${escapeHtml(x.explicacion_coloquial || '')}</span></li>`).join('');
+    const srcTxt = source === 'ai' ? 'Generado con IA + web · verificá datos puntuales' : source === 'curated' ? 'Ficha base orientativa' : '';
+    const seg = k.seguridad;
+    $('knowledgeBody').innerHTML = `
+      ${k.resumen ? `<p class="kn-resumen">${escapeHtml(k.resumen)}</p>` : ''}
+      ${k.versiones?.length ? `<div class="kn-block"><h4>Versiones</h4><ul>${li(k.versiones)}</ul></div>` : ''}
+      ${k.equipamiento?.length ? `<div class="kn-block"><h4>Equipamiento</h4><ul class="kn-eq">${eq(k.equipamiento)}</ul></div>` : ''}
+      ${seg ? `<div class="kn-block"><h4>Seguridad</h4><ul>${[
+        seg.airbags ? `<li>Airbags: ${escapeHtml(seg.airbags)}</li>` : '',
+        seg.ncap_estrellas ? `<li>NCAP: ${escapeHtml(seg.ncap_estrellas)}</li>` : '',
+        seg.explicacion_coloquial ? `<li>${escapeHtml(seg.explicacion_coloquial)}</li>` : ''
+      ].filter(Boolean).join('')}</ul></div>` : ''}
+      ${k.evitar_si?.length ? `<div class="kn-block"><h4>Evitar si…</h4><ul>${li(k.evitar_si)}</ul></div>` : ''}
+      ${k.problemas_comunes?.length ? `<div class="kn-block"><h4>Problemas comunes en AR</h4><ul>${li(k.problemas_comunes)}</ul></div>` : ''}
+      ${k.que_chequear?.length ? `<div class="kn-block"><h4>Qué chequear</h4><ul>${li(k.que_chequear)}</ul></div>` : ''}
+      ${k.precio_orientativo ? `<p class="kn-precio">💰 ${escapeHtml(k.precio_orientativo)}</p>` : ''}
+      <div class="kn-foot"><span class="kn-src">${srcTxt}</span><button class="btn ghost" type="button" data-kn-notes>Pegar en notas ↓</button></div>`;
+    $('genKnowledgeBtn').textContent = 'Actualizar ficha';
+  }
+  async function generateKnowledge() {
+    if (!state.viewBoard) return;
+    const { marca, modelo } = modelOf(state.viewBoard);
+    if (!modelo) return;
+    $('genKnowledgeBtn').disabled = true;
+    $('knowledgeBody').innerHTML = '<p class="kn-empty">Generando ficha (puede tardar unos segundos)…</p>';
+    try {
+      const data = await api('/api/knowledge', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ marca, modelo }) });
+      renderKnowledge(data.knowledge, data.source);
+      showToast('Ficha lista');
+    } catch (err) { $('knowledgeBody').innerHTML = `<p class="kn-empty">${escapeHtml(err.message)}</p>`; showToast(err.message); }
+    finally { $('genKnowledgeBtn').disabled = false; }
+  }
+  function pasteKnowledgeToNotes() {
+    const k = state.viewKnowledge;
+    if (!k) return;
+    const parts = [];
+    if (k.problemas_comunes?.length) parts.push('Problemas: ' + k.problemas_comunes.join(' · '));
+    if (k.que_chequear?.length) parts.push('Chequear: ' + k.que_chequear.join(' · '));
+    const text = parts.join('\n');
+    const ta = $('boardNotes');
+    ta.value = ta.value ? `${ta.value}\n${text}` : text;
+    ta.focus();
+    $('notesSaved').textContent = 'Pegado — acordate de Guardar nota';
+  }
+
+  async function saveNotes() {
+    if (!state.viewBoardId) return;
+    try {
+      await api(`/api/boards/${encodeURIComponent(state.viewBoardId)}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ notes: $('boardNotes').value }) });
+      $('notesSaved').textContent = 'Guardado ✓';
+      await loadBoards(); state.viewBoardId = state.viewBoardId; renderRail();
+    } catch (err) { showToast(err.message); }
+  }
+  async function refreshBoard() {
+    if (!state.viewBoardId) return;
+    const id = state.viewBoardId;
+    setStatus('Revisando portales...'); $('refreshBoardBtn').disabled = true;
+    try {
+      const data = await api(`/api/boards/${encodeURIComponent(id)}/refresh`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ limit: 60 }) });
+      const modelos = state.viewBoard?.advisor_brief?.modelos_recomendados || [];
+      state.boardFeed = (data.board.listings || []).map(l => ({
+        ...l,
+        recomendado: l.recomendado ?? listingIsRecommended(l, modelos)
+      }));
+      $('boardSub').textContent = data.new_count ? `¡${data.new_count} auto${data.new_count>1?'s':''} nuevo${data.new_count>1?'s':''}!` : 'Sin novedades desde la última revisión.';
+      renderReport('boardReport', data.portal_results);
+      renderBoardGrid();
+      showToast(data.new_count ? `${data.new_count} novedad${data.new_count>1?'es':''}` : 'Sin novedades por ahora');
+      setStatus(`${data.board.total} autos · ${data.new_count} nuevos`);
+      if (data.new_count) { await api(`/api/boards/${encodeURIComponent(id)}/seen`, { method:'POST' }); }
+      await loadBoards(); await loadToday(); state.viewBoardId = id; renderRail();
+    } catch (err) { showToast(err.message); setStatus(err.message); }
+    finally { $('refreshBoardBtn').disabled = false; }
+  }
+
+  async function patchListing(listingId, payload) {
+    const boardId = state.viewBoardId || [...state.today.nuevos, ...state.today.bajaron].find(c => c.id === listingId)?.board_id;
+    if (!boardId) return null;
+    const data = await api(`/api/boards/${encodeURIComponent(boardId)}/listings/${encodeURIComponent(listingId)}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    if (state.view === 'board') {
+      const modelos = state.viewBoard?.advisor_brief?.modelos_recomendados || [];
+      state.boardFeed = (data.board.listings || []).map(l => ({
+        ...l,
+        recomendado: l.recomendado ?? listingIsRecommended(l, modelos)
+      }));
+      renderBoardGrid();
+    }
+    else if (state.view === 'hoy') { await loadToday(); showHoy(); }
+    await loadBoards(); if (state.view === 'board') state.viewBoardId = boardId; renderRail();
+    return data;
+  }
+  async function setListingStatus(listingId, status) {
+    try { await patchListing(listingId, { status }); showToast(status==='contacted'?'Marcado como contactado':status==='discarded'?'Descartado':'Recuperado'); }
+    catch (err) { showToast(err.message); }
+  }
+  async function toggleShortlist(listingId, current) {
+    try { await patchListing(listingId, { shortlisted: !current }); showToast(current ? 'Quitado de guardados' : 'Guardado en la búsqueda'); }
+    catch (err) { showToast(err.message); }
+  }
+  async function saveListingNote(listingId, notes) {
+    try { await patchListing(listingId, { notes }); showToast('Nota guardada'); }
+    catch (err) { showToast(err.message); }
+  }
+
+  async function saveListingChecklist(listingId, key, rawVal) {
+    const val = rawVal === 'null' ? null : rawVal === 'true';
+    try {
+      await patchListing(listingId, { checklist: { [key]: val } });
+    } catch (err) { showToast(err.message); }
+  }
+
+  /* ---------- Búsqueda coloquial (hero) ---------- */
+  async function recommendSearch(e) {
+    e.preventDefault();
+    const query = $('q').value.trim();
+    if (query.length < 3) { showToast('Contanos qué buscás (al menos 3 caracteres).'); return; }
+    $('discoverBtn').disabled = true;
+    $('heroStatus').hidden = false;
+    $('heroStatus').textContent = 'Entendiendo qué buscás…';
+    setStatus('El asesor interpreta tu búsqueda…');
+    try {
+      $('heroStatus').textContent = 'Buscando en portales…';
+      const data = await api('/api/recommend-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, ciudad: 'Rosario', provincia: 'Santa Fe', portalIds: selectedPortals(), limit: 48 })
+      });
+      await loadBoards();
+      showToast(`Listo — “${data.board.name}”`);
+      await openBoard(data.board.id);
+    } catch (err) { showToast(err.message); setStatus(err.message); }
+    finally { $('discoverBtn').disabled = false; $('heroStatus').hidden = true; }
+  }
+
+  /* ---------- Explorar manual (filtros) ---------- */
+  function getFilters() {
+    const y = toNumber($('anioMin').value);
+    return {
+      marca: $('marca').value.trim()||null, modelo: $('modelo').value.trim()||null,
+      precioMax: toNumber($('precioMax').value), anioMin: y, anioMax: y,
+      combustible: $('combustible').value||null,
+      transmision: $('transmision').value||null,
+      traccion: $('traccion').value||null,
+      tipo: $('tipo').value||null,
+      ciudad: 'Rosario', provincia: 'Santa Fe'
+    };
+  }
+  function selectedPortals() {
+    // Siempre buscamos en todos los portales scrapeables (sin elección manual).
+    return state.portals.filter(p => p.canScrape).map(p => p.id);
+  }
+  let discoverPollTimer = null;
+  async function discover(e) {
+    e.preventDefault();
+    if (discoverPollTimer) { clearTimeout(discoverPollTimer); discoverPollTimer = null; }
+    const query = $('q').value.trim();
+    const filters = getFilters();
+    if (!query && !Object.values(filters).some(v => v && v !== 'Rosario' && v !== 'Santa Fe')) { showToast('Escribí algo, ej: “Ford Ka menos de 20 millones”.'); return; }
+    const payload = { query, filters, portalIds: selectedPortals(), limit: 60 };
+    state.lastSearch = { query, filters, portalIds: payload.portalIds };
+    $('discoverBtn').disabled = true; setStatus('Buscando en portales...');
+    await pollDiscover(payload, 0);
+    $('discoverBtn').disabled = false;
+  }
+  // Re-consulta mientras haya portales en segundo plano (async): los resultados van apareciendo.
+  async function pollDiscover(payload, attempt) {
+    try {
+      const data = await api('/api/discover', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      state.explorarFeed = data.listings || [];
+      state.lastSearch.filters = data.filters || payload.filters;
+      $('searchActions').hidden = !state.explorarFeed.length;
+      $('resultsWrap').hidden = false;
+      $('resultsTitle').textContent = payload.query ? `Resultados · ${payload.query}` : 'Resultados';
+      $('resultsCount').textContent = data.pending ? `${state.explorarFeed.length} · buscando más…` : `${state.explorarFeed.length}`;
+      renderReport('portalReport', data.portal_results);
+      renderResultsGrid();
+      if (data.pending && attempt < 10) {
+        setStatus(`Buscando en segundo plano… (${state.explorarFeed.length} hasta ahora)`);
+        discoverPollTimer = setTimeout(() => pollDiscover(payload, attempt + 1), 9000);
+      } else {
+        setStatus(`${state.explorarFeed.length} resultados`);
+        discoverPollTimer = null;
+      }
+    } catch (err) { showToast(err.message); setStatus(err.message); discoverPollTimer = null; }
+  }
+  function renderResultsGrid() {
+    const list = withData(state.explorarFeed);
+    tagMarket(list);
+    const hidden = state.explorarFeed.length - list.length;
+    $('resultsCount').textContent = String(list.length);
+    const extra = hidden ? `<div class="empty" style="grid-column:1/-1">+${hidden} resultado${hidden > 1 ? 's' : ''} sin precio ni foto — abrilos desde el reporte de portales (arriba).</div>` : '';
+    $('inicioGrid').innerHTML = list.length
+      ? list.map(c => buildCard(c, 'explorar')).join('') + extra
+      : '<div class="empty">No encontramos publicaciones con datos. Abrí las búsquedas de cada portal en el reporte de arriba.</div>';
+    if (state.advisor.open) updateDockCtx();
+  }
+  function clearSearch() {
+    state.explorarFeed = []; state.lastSearch = null;
+    $('resultsWrap').hidden = true; $('searchActions').hidden = true;
+    $('portalReport').innerHTML = ''; $('q').value = '';
+    setStatus('Listo');
+  }
+  async function saveSearchAsWatch() {
+    if (!state.lastSearch) { showToast('Primero hacé una búsqueda.'); return; }
+    const { query, filters, portalIds } = state.lastSearch;
+    const suggested = query || [filters.marca, filters.modelo].filter(Boolean).join(' ') || 'Mi búsqueda';
+    const name = (window.prompt('Nombre de la búsqueda', suggested) || '').trim();
+    if (!name) return;
+    setStatus('Creando búsqueda...');
+    try {
+      const data = await api('/api/searches', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ query, filters, portalIds, boardName: name, limit: 60 }) });
+      await loadBoards();
+      showToast(`Búsqueda “${name}” creada`);
+      openBoard(data.board.id);
+    } catch (err) { showToast(err.message); }
+  }
+  async function pinCar(carId) {
+    const car = state.explorarFeed.find(c => String(c.id||c.link) === String(carId));
+    if (!car) return;
+    let boardId = $('boardPicker').value;
+    let boardName = '';
+    if (!boardId) {
+      boardName = (window.prompt('¿A qué búsqueda? (nombre nuevo o existente)', 'Mi búsqueda') || '').trim();
+      if (!boardName) return;
+      const existing = state.boards.find(b => b.name.toLowerCase() === boardName.toLowerCase());
+      if (existing) { boardId = existing.id; boardName = ''; }
+    }
+    try {
+      const data = await api('/api/pins', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ boardId: boardId||undefined, boardName: boardId?undefined:boardName, listing: car }) });
+      state.pinnedLinks.add(car.link);
+      await loadBoards();
+      renderResultsGrid(); renderSaved();
+      showToast(`Pineado en “${data.board.name}”`);
+    } catch (err) { showToast(err.message); }
+  }
+
+  /* ---------- Asesor ---------- */
+  function ensureSession() {
+    if (state.advisor.sessionId) return state.advisor.sessionId;
+    let id = localStorage.getItem('garaje_session');
+    if (!id) { id = (crypto.randomUUID && crypto.randomUUID()) || String(Date.now()); localStorage.setItem('garaje_session', id); }
+    return (state.advisor.sessionId = id);
+  }
+  function currentFeed() {
+    if (state.view === 'hoy') return [...state.today.nuevos, ...state.today.bajaron];
+    if (state.view === 'board') return state.boardFeed;
+    if (state.view === 'inicio') return state.explorarFeed;
+    return [];
+  }
+  function toggleAdvisor(open) {
+    state.advisor.open = open;
+    $('dock').classList.toggle('open', open);
+    $('overlay').classList.toggle('open', open);
+    if (open) { updateDockCtx(); renderAdvisor(); $('advisorInput').focus(); }
+  }
+  function updateDockCtx() {
+    const feed = currentFeed();
+    const b = state.boards.find(x => x.id === state.viewBoardId);
+    $('dockCtx').textContent = b ? `Mirando la búsqueda “${b.name}” · ${feed.length} autos`
+      : feed.length ? `Mirando ${feed.length} autos` : 'Sin autos a la vista.';
+  }
+  function advisorContext() {
+    const ctx = { ciudad: 'Rosario', provincia: 'Santa Fe' };
+    const top = currentFeed().slice(0, 14);
+    const lines = top.map((c, i) => {
+      const price = (c.precio||c.price) ? fmtPrice(c.precio||c.price, c.moneda||c.currency) : 's/precio';
+      return `${i+1}. ${[c.titulo||c.title, price, c.año||c.year, (c.kilometros||c.km)?`${c.kilometros||c.km}km`:null, portalLabel(c.source)].filter(Boolean).join(' · ')}${c.is_new?' [NUEVO]':''}${c.precio_bajo?' [BAJÓ]':''}`;
+    });
+    if (lines.length) ctx.feedResumen = lines.join('\n').slice(0, 7800);
+    const b = state.boards.find(x => x.id === state.viewBoardId);
+    if (b) ctx.tableroActivo = `Búsqueda "${b.name}" (${b.total} autos).${b.notes ? `\nNotas del usuario: ${b.notes}` : ''}\n${top.map((c,i)=>`${i+1}. ${c.titulo||c.title} — ${c.status||'guardado'}`).join('\n')}`.slice(0, 7800);
+    return ctx;
+  }
+  function ingestAdvisorCards(cards) {
+    const mapped = (cards||[]).filter(c => c.link).map(c => ({ id: c.link, source: 'asesor', fuente: c.fuente||'Sugerencia del asesor', titulo: c.titulo, precio: c.precio, moneda: c.moneda||'ARS', año: c.año, kilometros: c.kilometros, link: c.link, imagen: c.imagen, insight: c.justificacion }));
+    const ex = new Set(state.explorarFeed.map(c => c.link));
+    const fresh = mapped.filter(c => !ex.has(c.link));
+    if (!fresh.length) return;
+    state.explorarFeed = [...fresh, ...state.explorarFeed];
+    if (state.view === 'inicio') { $('resultsWrap').hidden = false; renderResultsGrid(); }
+    showToast(`${fresh.length} sugerencia${fresh.length>1?'s':''} del asesor — mirá Buscar`);
+  }
+  function renderAdvisor(thinking) {
+    const sugg = ['¿De estos cuál conviene?', '¿Alguno está caro?', 'Analizá esta búsqueda', 'Mostrame una alternativa'];
+    let html = state.advisor.messages.map(m => `<div class="msg ${m.role}">${escapeHtml(m.content)}</div>`).join('');
+    if (thinking || state.advisor.sending) html += '<div class="msg assistant thinking">Pensando…</div>';
+    if (!state.advisor.messages.length && !thinking) html = `<div class="dock-empty"><b>Preguntame sobre lo que ves.</b>Conozco los autos del feed y de la búsqueda abierta: los taso, te digo cuál está caro o te sugiero una alternativa.</div><div class="sugg">${sugg.map(s=>`<button type="button" data-sugg="${escapeHtml(s)}">${escapeHtml(s)}</button>`).join('')}</div>`;
+    $('stream').innerHTML = html;
+    $('stream').scrollTop = $('stream').scrollHeight;
+  }
+  async function sendAdvisor(text) {
+    const msg = String(text||'').trim();
+    if (!msg || state.advisor.sending) return;
+    ensureSession();
+    state.advisor.messages.push({ role:'user', content: msg });
+    $('advisorInput').value = ''; renderAdvisor(true); state.advisor.sending = true;
+    try {
+      const data = await api('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ messages: state.advisor.messages, contexto: advisorContext(), sessionId: state.advisor.sessionId }) });
+      state.advisor.messages.push({ role:'assistant', content: data.texto || 'Listo.' });
+      if (Array.isArray(data.cards) && data.cards.length) ingestAdvisorCards(data.cards);
+    } catch (err) { state.advisor.messages.push({ role:'assistant', content: `Uy, se complicó: ${err.message}` }); }
+    finally { state.advisor.sending = false; renderAdvisor(); }
+  }
+
+  /* ---------- events ---------- */
+  $('navInicio').addEventListener('click', () => showInicio());
+  $('navHoy').addEventListener('click', async () => { await loadToday(); showHoy(); });
+  $('searchForm').addEventListener('submit', recommendSearch);
+  $('exampleChips').addEventListener('click', e => {
+    const chip = e.target.closest('[data-example]');
+    if (chip) { $('q').value = chip.dataset.example; $('q').focus(); }
+  });
+  $('saveWatchBtn').addEventListener('click', saveSearchAsWatch);
+  $('clearSearchBtn').addEventListener('click', clearSearch);
+  $('refreshBoardBtn').addEventListener('click', refreshBoard);
+  $('saveNotesBtn').addEventListener('click', saveNotes);
+  $('genKnowledgeBtn').addEventListener('click', generateKnowledge);
+  $('boardNotes').addEventListener('input', () => { $('notesSaved').textContent = ''; });
+  $('backInicioBtn').addEventListener('click', () => showInicio());
+  $('showDiscarded').addEventListener('change', e => { state.showDiscarded = e.target.checked; renderBoardGrid(); });
+  $('showShortlisted').addEventListener('change', e => { state.showShortlisted = e.target.checked; renderBoardGrid(); });
+
+  $('alertsList').addEventListener('click', e => { const b = e.target.closest('[data-board-id]'); if (b) openBoard(b.dataset.boardId); });
+
+  document.querySelector('.main').addEventListener('click', e => {
+    const ob = e.target.closest('[data-open-board]'); if (ob) { openBoard(ob.dataset.openBoard); return; }
+    const pin = e.target.closest('[data-pin]'); if (pin) { pinCar(pin.dataset.pin); return; }
+    const sl = e.target.closest('[data-shortlist]'); if (sl) { toggleShortlist(sl.dataset.shortlist, sl.dataset.current === '1'); return; }
+    const nt = e.target.closest('[data-note-toggle]'); if (nt) { const box = document.querySelector(`[data-note-box="${CSS.escape(nt.dataset.noteToggle)}"]`); if (box) box.hidden = !box.hidden; return; }
+    const ct = e.target.closest('[data-checklist-toggle]'); if (ct) { const box = document.querySelector(`[data-checklist-box="${CSS.escape(ct.dataset.checklistToggle)}"]`); if (box) box.hidden = !box.hidden; return; }
+    const ck = e.target.closest('[data-check-key]'); if (ck) { saveListingChecklist(ck.dataset.listing, ck.dataset.checkKey, ck.dataset.checkVal); return; }
+    const ns = e.target.closest('[data-note-save]'); if (ns) { const ta = ns.closest('.card')?.querySelector('.note-input'); saveListingNote(ns.dataset.noteSave, ta ? ta.value : ''); return; }
+    if (e.target.closest('[data-kn-notes]')) { pasteKnowledgeToNotes(); return; }
+    const st = e.target.closest('[data-status]'); if (st) setListingStatus(st.dataset.listing, st.dataset.status);
+  });
+
+  $('openAdvisor').addEventListener('click', () => toggleAdvisor(true));
+  $('closeAdvisor').addEventListener('click', () => toggleAdvisor(false));
+  $('overlay').addEventListener('click', () => toggleAdvisor(false));
+  $('advisorForm').addEventListener('submit', e => { e.preventDefault(); sendAdvisor($('advisorInput').value); });
+  $('advisorInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAdvisor($('advisorInput').value); } });
+  $('stream').addEventListener('click', e => { const b = e.target.closest('[data-sugg]'); if (b) sendAdvisor(b.dataset.sugg); });
+
+  /* ---------- init ---------- */
+  async function checkMl() {
+    try {
+      const s = await api('/api/ml/status');
+      const b = $('mlBanner');
+      if (s.configured && !s.connected) {
+        b.hidden = false;
+        b.innerHTML = '<span>📡 Conectá tu cuenta de MercadoLibre para traer resultados reales de ML.</span><a href="/api/ml/auth">Conectar MercadoLibre →</a>';
+      } else {
+        b.hidden = true;
+      }
+    } catch { /* opcional */ }
+  }
+
+  (async function init() {
+    if (new URLSearchParams(location.search).get('ml') === 'connected') {
+      showToast('MercadoLibre conectado ✓');
+      history.replaceState({}, '', location.pathname);
+    }
+    try { await loadPortals(); await loadBoards(); await loadToday(); showInicio(); checkMl(); setStatus('Listo'); }
+    catch (err) { setStatus(err.message); showInicio(); }
+  })();
+</script>
+</body>
+</html>

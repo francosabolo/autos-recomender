@@ -1,0 +1,49 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "description": "Baseline file for scraperapi-price-monitoring. Pass the path to this file when invoking the skill so it can compute deltas. Add or remove products freely; the skill merges on the `id` field.",
+    "last_updated": "2026-06-01T00:00:00Z",
+    "default_country": "us"
+  },
+  "products": [
+    {
+      "id": "amazon:B08N5WRWNW",
+      "kind": "amazon",
+      "asin": "B08N5WRWNW",
+      "country": "us",
+      "title": "Echo Dot (4th Gen)",
+      "price": 39.99,
+      "currency": "USD",
+      "availability": "in_stock",
+      "captured_at": "2026-05-25T14:00:00Z",
+      "alert_below": 30.00,
+      "notes": "buy for office"
+    },
+    {
+      "id": "walmart:5021188053",
+      "kind": "walmart",
+      "url": "https://www.walmart.com/ip/5021188053",
+      "country": "us",
+      "title": "Instant Pot Duo 7-in-1",
+      "price": 79.00,
+      "currency": "USD",
+      "availability": "in_stock",
+      "captured_at": "2026-05-25T14:00:00Z",
+      "alert_below": null,
+      "notes": null
+    },
+    {
+      "id": "google_shopping:airpods-pro-2",
+      "kind": "google_shopping",
+      "query": "airpods pro 2",
+      "country": "us",
+      "title": "AirPods Pro (2nd Generation)",
+      "price": 249.00,
+      "currency": "USD",
+      "source": "apple.com",
+      "captured_at": "2026-05-25T14:00:00Z",
+      "alert_below": 200.00,
+      "notes": "watch for sales"
+    }
+  ]
+}

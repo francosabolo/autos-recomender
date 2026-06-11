@@ -1,0 +1,23 @@
+{
+  "skill_name": "seo-audit",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Can you do an SEO audit on scraperapi.com? We're trying to rank for 'web scraping API' and 'scraping API for python'. Want to know where we stand vs competitors.",
+      "expected_output": "A full site-wide SEO audit with SERP ranking checks for both keywords, on-page analysis of key pages, competitor gap analysis against the top-ranking domains, and prioritized recommendations.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Our blog post at https://www.scraperapi.com/blog/python-web-scraping/ used to rank #3 for 'python web scraping tutorial' and now it's dropped to like page 3. Can you figure out what happened?",
+      "expected_output": "A single-page audit focused on that URL: SERP ranking check for the keyword, on-page analysis of the page itself, scrape of the current top-ranking competitor pages to identify what they have that this page lacks, and specific recommendations.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I'm building a new SaaS product — proxiesapi.com. Can you do a quick SEO audit and tell me what keywords the site is going after and whether the on-page SEO is in good shape?",
+      "expected_output": "Infer target keywords from scraping the homepage, run SERP checks, do on-page analysis, and produce a prioritized recommendation list. Since no keywords were provided, the skill should infer them and confirm before proceeding (or proceed and present findings).",
+      "files": []
+    }
+  ]
+}

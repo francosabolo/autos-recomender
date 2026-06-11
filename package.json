@@ -1,0 +1,26 @@
+{
+  "name": "auto-recomendador",
+  "version": "1.0.0",
+  "description": "El Garaje — ojeador de autos con búsqueda multiportal, tableros persistentes y asesor conversacional.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node scripts/seed-demo.js",
+    "diagnose": "node scripts/diagnose-portals.js",
+    "test": "node --test tests/"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "better-sqlite3": "^11.10.0",
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "pino": "^9.6.0",
+    "zod": "^3.24.4"
+  }
+}
