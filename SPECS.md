@@ -541,123 +541,36 @@ No agregues opiniones, solo datos verificables.
 
 ## 7. Frontend: diseño, componentes y estado
 
-### 7.1 Filosofía de diseño
+> **Fuente de verdad visual:** [`docs/UX_STYLE_GUIDE.md`](docs/UX_STYLE_GUIDE.md)  
+> El layout oscuro chat-first descrito abajo está **obsoleto**. El UI actual es mobile-first, tema claro, agregador + asesor en dock.
 
-- **Editorial / industrial**: tipografía Fraunces (serif italic) + JetBrains Mono. Cero "AI gradient purple".
-- **Dark mode por defecto**: el contexto del usuario es "estoy mirando autos en mi tiempo", suele ser de noche.
-- **El chat es el protagonista**: cards abajo y panel de contexto colapsable.
-- **Sin frameworks**: vanilla JS. El día que la complejidad lo justifique, migrar a Next.js o similar.
+### 7.1 Resumen técnico
 
-### 7.2 Paleta y tipografía
+- **Archivo:** `public/index.html` (HTML + CSS + vanilla JS, sin build).
+- **Vistas:** `inicio` (buscar), `hoy` (novedades), `board` (tablero por búsqueda).
+- **Nav:** bottom nav &lt;1024px; rail lateral ≥1024px.
+- **Tablero:** grid de avisos primero; brief, trámite y herramientas en paneles colapsables.
 
-```css
-:root {
-  /* Fondos */
-  --bg: #1a1a1a;
-  --bg-card: #232323;
-  --bg-elevated: #2a2a2a;
+Tokens, breakpoints, componentes y anti-patrones: ver guía UX.
 
-  /* Texto */
-  --ink: #f4ede0;          /* off-white cálido */
-  --ink-dim: #a8a095;
-  --ink-muted: #6b665d;
-
-  /* Acento (naranja óxido, industrial) */
-  --accent: #d97706;
-  --accent-bright: #f59e0b;
-
-  /* Semánticos */
-  --good: #84cc16;
-  --bad: #ef4444;
-
-  /* Fuentes */
-  --serif: 'Fraunces', Georgia, serif;
-  --mono: 'JetBrains Mono', monospace;
-  --sans: 'Inter', system-ui, sans-serif;
-}
-```
-
-### 7.3 Layout
-
-```
-┌─────────────────────────────────────────────────┐
-│  HEADER · Marca + botón "Contexto"               │
-├─────────────────────────────────────────────────┤
-│  PANEL CONTEXTO (colapsable)                     │
-│  · auto actual · ciudad · provincia · presup     │
-├─────────────────────────────────────────────────┤
-│                                                  │
-│  ÁREA SCROLLEABLE:                               │
-│  ┌──────────────────────┐                       │
-│  │  CHAT                │                       │
-│  │  · mensajes user/IA  │                       │
-│  └──────────────────────┘                       │
-│  ┌──────────────────────┐                       │
-│  │  CARDS               │                       │
-│  │  · agrupadas por     │                       │
-│  │    tipo, acumuladas  │                       │
-│  └──────────────────────┘                       │
-│                                                  │
-├─────────────────────────────────────────────────┤
-│  COMPOSER (sticky)                               │
-│  [ textarea con auto-resize ] [ Enviar ]         │
-└─────────────────────────────────────────────────┘
-```
-
-### 7.4 Componentes (cuando migremos a framework)
-
-Si en algún momento se migra a React/Vue, estos son los componentes naturales:
-
-```
-<App>
-  <Header>
-    <Brand />
-    <ContextToggleButton />
-  </Header>
-
-  <ContextPanel collapsed={true|false}>
-    <ContextField name="autoActual" />
-    <ContextField name="ciudad" />
-    ...
-  </ContextPanel>
-
-  <MainScrollArea>
-    <ChatStream>
-      <EmptyState />            <!-- mientras no hay mensajes -->
-      <Message role="user" />
-      <Message role="assistant" />
-      <ThinkingIndicator />     <!-- mientras esperás respuesta -->
-    </ChatStream>
-
-    <CardsSection>
-      <CardGroup tipo="tasacion">
-        <CarCard />
-      </CardGroup>
-      <CardGroup tipo="recomendacion">
-        <CarCard />
-      </CardGroup>
-    </CardsSection>
-  </MainScrollArea>
-
-  <Composer onSend={...} />
-</App>
-```
-
-### 7.5 Estado del frontend
+### 7.2 Estado del frontend
 
 ```javascript
-// Estado actual: vive en una variable global `state` en index.html
+// Variable global `state` en public/index.html
 const state = {
-  messages: [],      // historial completo, se manda al backend cada turno
-  cards: [],         // acumulado (no se borra entre turnos)
-  loading: false,
-  contexto: {        // del panel colapsable
-    autoActual, ciudad, provincia, presupuesto
-  }
+  view: 'inicio' | 'hoy' | 'board',
+  boards: [],
+  boardFeed: [],
+  viewBoard: null,
+  viewBoardId: '',
+  today: { nuevos, bajaron, counts },
+  advisor: { open, messages, sending, sessionId },
+  advisorGridFilter: null,
+  showDiscarded, showShortlisted
 };
 ```
 
-Cuando migremos a framework, usar **Zustand** (más liviano que Redux, menos boilerplate que useReducer).
+Cuando migremos a framework, usar **Zustand** para estado cliente.
 
 ---
 

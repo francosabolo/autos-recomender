@@ -8,6 +8,7 @@ import { PORTALS, buscarEnPortales } from './scraper.js';
 import { getCuratedKnowledge } from './lib/knowledge.js';
 import { mlAuthUrl, mlExchangeCode, mlStatus, mlConfigured } from './lib/mercadolibre-api.js';
 import { logger } from './lib/logger.js';
+import { hasLlmKey, initLlmClient, llmProvider } from './lib/llm-client.js';
 import {
   parseChatRequest,
   parseCreateBoardRequest,
@@ -21,6 +22,12 @@ import {
 } from './lib/validation.js';
 import { mergeSearchFilters, compactFilters } from './lib/search-filters.js';
 import { dedupeListings, sortListingsForBoard, tagRecommendedListings } from './lib/recommend.js';
+import { analyzeAdvisorQuery, cardsFromAnalisis } from './lib/advisor-query.js';
+import { annotateListingsWithCatalog } from './lib/catalog-filters.js';
+import { buildListingAnalysis } from './lib/listing-score.js';
+import { tagListingsWithMarket } from './lib/listing-analytics.js';
+import { enrichBriefWithTramite, getTransactionGuidePayload } from './lib/transaction-guide.js';
+import { enrichRecommendedModels } from './lib/model-profiles.js';
 import {
   getDb,
   saveSessionMessages,
@@ -87,7 +94,7 @@ app.post('/api/knowledge', async (req, res) => {
   const modelo = (req.body?.modelo || '').toString().trim();
   if (!modelo) return res.status(400).json({ ok: false, error: 'Falta el modelo.' });
   try {
-    if (process.env.ANTHROPIC_API_KEY) {
+    if (hasLlmKey()) {
       const content = await generarConocimientoModelo({ marca, modelo });
       const saved = saveKnowledge({ marca, modelo, content, source: 'ai' });
       return res.json({ ok: true, knowledge: saved.content, source: 'ai', updated_at: saved.updated_at });
@@ -98,7 +105,7 @@ app.post('/api/knowledge', async (req, res) => {
       const saved = saveKnowledge({ marca, modelo, content: curated, source: 'curated' });
       return res.json({ ok: true, knowledge: saved.content, source: 'curated', updated_at: saved.updated_at });
     }
-    res.status(400).json({ ok: false, error: 'Para generar la ficha de este modelo necesitás configurar ANTHROPIC_API_KEY.' });
+    res.status(400).json({ ok: false, error: 'Para generar la ficha de este modelo necesitás configurar CURSOR_API_KEY o ANTHROPIC_API_KEY.' });
   } catch (err) {
     logger.error({ err: err.message, marca, modelo }, '[api] knowledge generate');
     res.status(500).json({ ok: false, error: err.message });
@@ -162,9 +169,43 @@ app.post('/api/boards', (req, res) => {
   }
 });
 
+function catalogsFromBrief(brief) {
+  return (brief?.modelos_recomendados || [])
+    .map(m => m.catalog || m.ficha)
+    .filter(c => c?.generaciones?.length);
+}
+
+function hydrateBoardCatalog(board) {
+  if (!board) return board;
+  if (board.advisor_brief) {
+    board = { ...board, advisor_brief: enrichBriefWithTramite(board.advisor_brief) };
+  }
+  if (!board.listings?.length) return board;
+  const catalogs = catalogsFromBrief(board.advisor_brief);
+  const brief = board.advisor_brief || null;
+  let listings = board.listings;
+  if (catalogs.length) {
+    listings = annotateListingsWithCatalog(listings, catalogs);
+  }
+  listings = tagListingsWithMarket(listings);
+  listings = listings.map(l => ({
+    ...l,
+    listing_analysis: buildListingAnalysis(l, {
+      catalogs,
+      brief,
+      mercado: l._mercado
+    })
+  }));
+  return { ...board, listings };
+}
+
+app.get('/api/transaction-guide', (_req, res) => {
+  res.json({ ok: true, guide: getTransactionGuidePayload() });
+});
+
 app.get('/api/boards/:id', (req, res) => {
   try {
-    const board = getBoardById(req.params.id);
+    const board = hydrateBoardCatalog(getBoardById(req.params.id));
     if (!board) return res.status(404).json({ ok: false, error: 'Tablero no encontrado' });
     res.json({ ok: true, board });
   } catch (err) {
@@ -229,7 +270,7 @@ app.post('/api/boards/:id/refresh', async (req, res) => {
 
     const t0 = Date.now();
     const { newIds, portalResults } = await runBoardRefresh(board, parsed.data?.limit || 60);
-    const hydrated = getBoardById(board.id);
+    const hydrated = hydrateBoardCatalog(getBoardById(board.id));
     const newListings = (hydrated.listings || []).filter(l => l.is_new);
 
     logger.info({ duration_ms: Date.now() - t0, boardId: board.id, new_count: newIds.length }, '[api] board refresh ok');
@@ -310,7 +351,11 @@ app.post('/api/recommend-search', async (req, res) => {
 
   try {
     const t0 = Date.now();
-    const brief = await interpretarBusqueda({ query, ciudad, provincia });
+    const brief = enrichBriefWithTramite(await interpretarBusqueda({ query, ciudad, provincia }));
+    brief.modelos_recomendados = await enrichRecommendedModels(brief.modelos_recomendados || [], {
+      query,
+      precioMax: brief.filtros?.precioMax
+    });
     const mergedFilters = compactFilters({
       ...(brief.filtros || {}),
       query: brief.query_original || query,
@@ -340,7 +385,7 @@ app.post('/api/recommend-search', async (req, res) => {
       totalFound: savedIds.length,
       portalResults
     });
-    const hydrated = getBoardById(board.id);
+    const hydrated = hydrateBoardCatalog(getBoardById(board.id));
     const taggedListings = tagRecommendedListings(hydrated.listings || [], brief.modelos_recomendados || []);
 
     logger.info(
@@ -355,7 +400,7 @@ app.post('/api/recommend-search', async (req, res) => {
 
     res.json({
       ok: true,
-      board: { ...hydrated, listings: taggedListings },
+      board: hydrateBoardCatalog({ ...hydrated, listings: taggedListings }),
       advisor_brief: brief,
       filters: mergedFilters,
       run,
@@ -528,7 +573,7 @@ app.patch('/api/boards/:boardId/listings/:listingId', (req, res) => {
       ...parsed.data
     });
     if (!board) return res.status(404).json({ ok: false, error: 'Anuncio no encontrado en el tablero' });
-    res.json({ ok: true, board });
+    res.json({ ok: true, board: hydrateBoardCatalog(board) });
   } catch (err) {
     logger.error({ err: err.message, boardId: req.params.boardId, listingId: req.params.listingId }, '[api] update listing');
     res.status(500).json({ ok: false, error: err.message });
@@ -567,11 +612,22 @@ app.post('/api/chat', async (req, res) => {
   }
 
   const { messages, contexto, sessionId } = parsed.data;
-  const ctx = contexto ?? {};
+  const ctx = { ...(contexto ?? {}) };
+  const lastUser = [...messages].reverse().find(m => m.role === 'user');
+  const catalogs = Array.isArray(ctx.catalogs) ? ctx.catalogs : catalogsFromBrief(ctx.advisor_brief);
+  if (lastUser?.content && Array.isArray(ctx.listings) && ctx.listings.length) {
+    ctx.analisisTablero = analyzeAdvisorQuery(
+      lastUser.content,
+      ctx.listings,
+      catalogs,
+      ctx.advisor_brief || null
+    );
+  }
 
   try {
     const t0 = Date.now();
-    const { texto, cards } = await chat({ messages, contexto: ctx });
+    const { texto, cards: llmCards } = await chat({ messages, contexto: ctx });
+    const cards = llmCards?.length ? llmCards : cardsFromAnalisis(ctx.analisisTablero);
     const dt = Date.now() - t0;
 
     logger.info(
@@ -593,7 +649,22 @@ app.post('/api/chat', async (req, res) => {
       }
     }
 
-    res.json({ ok: true, texto, cards });
+    res.json({
+      ok: true,
+      texto,
+      cards,
+      filtros: ctx.analisisTablero?.filtros || null,
+      analisis: ctx.analisisTablero
+        ? {
+            mode: ctx.analisisTablero.mode,
+            resumen: ctx.analisisTablero.resumen,
+            modelosDestacados: ctx.analisisTablero.modelosDestacados,
+            destacados: ctx.analisisTablero.destacados,
+            caros: ctx.analisisTablero.caros,
+            baratos: ctx.analisisTablero.baratos
+          }
+        : null
+    });
   } catch (err) {
     logger.error({ err: err.message, stack: err.stack }, '[api] error');
     res.status(500).json({ ok: false, error: err.message });
@@ -626,7 +697,14 @@ function startAutoRefresh() {
   logger.info({ minutes }, '[auto-refresh] activado');
 }
 
-app.listen(PORT, () => {
-  logger.info({ port: PORT }, 'El Garaje listo');
+app.listen(PORT, async () => {
+  if (hasLlmKey() && process.env.DEV_SKIP_LLM !== 'true') {
+    try {
+      await initLlmClient();
+    } catch (err) {
+      logger.warn({ err: err.message }, '[llm] proxy Cursor no disponible — el chat fallará hasta que arranque');
+    }
+  }
+  logger.info({ port: PORT, llm: llmProvider() || 'none' }, 'El Garaje listo');
   startAutoRefresh();
 });

@@ -6,13 +6,20 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import Anthropic from '@anthropic-ai/sdk';
 import { buscarEnMercadoLibre, buscarEnPortales, PORTALS } from './scraper.js';
+import {
+  getLlmClient,
+  getModel,
+  hasLlmKey,
+  llmKeyError,
+  supportsNativeWebSearch
+} from './lib/llm-client.js';
 import { extraerCards } from './lib/cards.js';
 import { logger } from './lib/logger.js';
 import { parseNaturalLanguageFilters, compactFilters } from './lib/search-filters.js';
 import { getCuratedKnowledge } from './lib/knowledge.js';
 import { getKnowledge } from './lib/db.js';
+import { enrichBriefWithTramite } from './lib/transaction-guide.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -23,10 +30,15 @@ function loadSystemPrompt() {
 
 const SYSTEM = loadSystemPrompt();
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-const MODEL = 'claude-sonnet-4-5';
+function chatTools() {
+  const tools = TOOLS_BASE.slice();
+  if (!supportsNativeWebSearch()) {
+    return tools.filter(t => t.name !== 'web_search');
+  }
+  return tools;
+}
 
-const TOOLS = [
+const TOOLS_BASE = [
   {
     name: 'buscar_en_portales',
     description: 'Busca publicaciones reales de autos en múltiples portales argentinos y devuelve resultados normalizados. Usar cuando el usuario quiere ojear mercado, armar una lista de candidatos o comparar disponibilidad entre portales.',
@@ -166,13 +178,18 @@ async function ejecutarTool(name, input) {
   }
 
   if (name === 'web_search') {
+    const client = await getLlmClient();
     const sub = await client.messages.create({
-      model: MODEL,
+      model: getModel(),
       max_tokens: 1024,
-      tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+      ...(supportsNativeWebSearch()
+        ? { tools: [{ type: 'web_search_20250305', name: 'web_search' }] }
+        : {}),
       messages: [{
         role: 'user',
-        content: `Buscá en la web y devolveme un resumen factual y conciso sobre: ${input.query}. No agregues opiniones, solo datos verificables.`
+        content: supportsNativeWebSearch()
+          ? `Buscá en la web y devolveme un resumen factual y conciso sobre: ${input.query}. No agregues opiniones, solo datos verificables.`
+          : `Resumí lo que sepas de forma factual y concisa sobre: ${input.query}. Contexto: mercado de autos usados en Argentina. Si no tenés datos verificables, decilo.`
       }]
     });
     const txt = sub.content
@@ -195,15 +212,15 @@ export async function interpretarBusqueda({ query, ciudad, provincia }) {
 
   if (process.env.DEV_SKIP_LLM === 'true') {
     const precioMax = nlFilters.precioMax || 20000000;
-    return {
+    return enrichBriefWithTramite({
       nombre_busqueda: nlFilters.precioMax ? `Búsqueda · hasta $${(precioMax / 1e6).toFixed(0)}M` : 'Búsqueda de autos',
       query_original: q,
       explicacion:
         'Para ciudad y presupuesto acotado, conviene un hatch chico con mecánica simple: bajo consumo, fácil de estacionar y repuestos accesibles. Priorizamos modelos con distribución a cadena y buena reventa en Argentina.',
       modelos_recomendados: [
-        { marca: 'Volkswagen', modelo: 'Polo', motivo: 'Cadena, bajo consumo, reventa firme' },
-        { marca: 'Ford', modelo: 'Ka', motivo: 'Urbano, económico, repuestos baratos' },
-        { marca: 'Renault', modelo: 'Sandero', motivo: 'Espacioso para el precio, mantenimiento accesible' }
+        { marca: 'Volkswagen', modelo: 'Polo', generacion: 'Polo VI Track', anio_desde: 2020, anio_hasta: 2024, version_destacada: 'Track MSI', motivo: 'Cadena, reventa firme' },
+        { marca: 'Fiat', modelo: 'Argo', generacion: 'Argo nacional', anio_desde: 2017, anio_hasta: 2025, version_destacada: 'Drive', motivo: 'Urbano y económico' },
+        { marca: 'Renault', modelo: 'Sandero', generacion: 'Sandero II', anio_desde: 2016, anio_hasta: 2024, version_destacada: 'Expression', motivo: 'Espacioso por el precio' }
       ],
       criterios: ['bajo consumo', 'distribución a cadena', 'fácil estacionar', 'buena reventa'],
       evitar: ['correa bañada en aceite', 'turbo sin service documentado'],
@@ -215,13 +232,14 @@ export async function interpretarBusqueda({ query, ciudad, provincia }) {
         provincia: provincia || nlFilters.provincia,
         query: q
       })
-    };
+    });
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error('Falta ANTHROPIC_API_KEY en el entorno.');
+  if (!hasLlmKey()) {
+    throw new Error(llmKeyError());
   }
 
+  const client = await getLlmClient();
   const ubicacion = [ciudad, provincia].filter(Boolean).join(', ') || 'Argentina';
   const prompt = `Sos un experto del mercado de autos usados de Argentina. El usuario busca: "${q}".
 Ubicación: ${ubicacion}.
@@ -230,9 +248,14 @@ Interpretá la intención y devolvé SOLO un JSON válido (sin markdown), con es
 {
   "nombre_busqueda": "título corto para guardar la búsqueda (max 80 chars)",
   "explicacion": "2-4 oraciones en español rioplatense explicando qué modelos convienen y por qué para ESTE caso",
-  "modelos_recomendados": [{"marca": "Ford", "modelo": "Ka", "motivo": "una línea concreta"}],
+  "modelos_recomendados": [{
+    "marca": "Volkswagen", "modelo": "Polo", "generacion": "Polo VI Track",
+    "anio_desde": 2020, "anio_hasta": 2024, "version_destacada": "Track MSI",
+    "motivo": "cadena, reventa"
+  }],
   "criterios": ["bajo consumo", "cadena de distribución", "..."],
   "evitar": ["problemas concretos en AR a evitar, ej correa bañada en aceite"],
+  "guia_compra": null,
   "filtros": {
     "precioMax": number or null,
     "precioMin": number or null,
@@ -247,12 +270,15 @@ Interpretá la intención y devolvé SOLO un JSON válido (sin markdown), con es
 
 Reglas:
 - Recomendá 2-4 modelos concretos del mercado argentino cuando el usuario no pide uno específico.
+- Cada modelo debe incluir **generación**, **version_destacada** y rango **anio_desde/anio_hasta** (equipamiento cambia por año, ej. ESP desde 2022).
+- NO recomendés publicaciones concretas: el usuario elige unidades del tablero.
+- Dejá guia_compra en null (el servidor agrega los pasos de boleto, pago y transferencia).
 - Los filtros deben ser razonables para scrapear portales (precio en ARS enteros; "20 millones" = 20000000).
 - Sé honesto sobre qué evitar en Argentina (CVT maltratada, correa bañada, etc.).
 - Si el usuario pide un modelo puntual, modelos_recomendados puede tener solo ese modelo.`;
 
   const resp = await client.messages.create({
-    model: MODEL,
+    model: getModel(),
     max_tokens: 1800,
     messages: [{ role: 'user', content: prompt }]
   });
@@ -268,7 +294,7 @@ Reglas:
     provincia: provincia || nlFilters.provincia,
     query: q
   });
-  return {
+  return enrichBriefWithTramite({
     nombre_busqueda: String(parsed.nombre_busqueda || q).slice(0, 120),
     query_original: q,
     explicacion: String(parsed.explicacion || ''),
@@ -276,7 +302,7 @@ Reglas:
     criterios: Array.isArray(parsed.criterios) ? parsed.criterios : [],
     evitar: Array.isArray(parsed.evitar) ? parsed.evitar : [],
     filtros: mergedFilters
-  };
+  });
 }
 
 /**
@@ -285,12 +311,16 @@ Reglas:
  * @param {{ marca?: string, modelo: string }} args
  */
 export async function generarConocimientoModelo({ marca, modelo }) {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error('Falta ANTHROPIC_API_KEY para generar la ficha del modelo.');
+  if (!hasLlmKey()) {
+    throw new Error(llmKeyError());
   }
+  const client = await getLlmClient();
   const nombre = `${marca || ''} ${modelo}`.trim();
+  const webHint = supportsNativeWebSearch()
+    ? 'Usá web_search para anclar datos actuales (versiones vigentes en AR, problemas reportados, precios 0km de referencia).'
+    : 'Basate en conocimiento verificable del mercado argentino; no inventes datos.';
   const prompt = `Sos un experto del mercado de autos usados de Argentina. Armá una ficha del modelo "${nombre}" para alguien que está por comprarlo usado.
-Usá web_search para anclar datos actuales (versiones vigentes en AR, problemas reportados, precios 0km de referencia).
+${webHint}
 Devolvé SOLO un objeto JSON válido (sin texto antes ni después), con esta forma exacta:
 {
   "resumen": "1-2 frases sobre el auto y para quién es",
@@ -305,15 +335,170 @@ Devolvé SOLO un objeto JSON válido (sin texto antes ni después), con esta for
 Sé concreto y honesto sobre problemas conocidos en Argentina. No inventes datos que no puedas sostener; si dudás de un dato puntual, omitilo.`;
 
   const resp = await client.messages.create({
-    model: MODEL,
+    model: getModel(),
     max_tokens: 1600,
-    tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+    ...(supportsNativeWebSearch()
+      ? { tools: [{ type: 'web_search_20250305', name: 'web_search' }] }
+      : {}),
     messages: [{ role: 'user', content: prompt }]
   });
 
   const txt = resp.content.filter(c => c.type === 'text').map(c => c.text).join('\n');
   const match = txt.match(/\{[\s\S]*\}/);
   if (!match) throw new Error('No se pudo parsear la ficha generada.');
+  return JSON.parse(match[0]);
+}
+
+/**
+ * Ficha rica por modelo: generaciones, versiones con motor/HP/seguridad (mercado AR).
+ * Se persiste en SQLite vía lib/model-profiles.js para no regenerar.
+ * @param {{ marca?: string, modelo: string, anio_desde?: number, anio_hasta?: number, contexto?: string, precioMax?: number }} args
+ */
+export async function generarPerfilModelo({ marca, modelo, anio_desde, anio_hasta, contexto, precioMax }) {
+  if (!hasLlmKey()) {
+    throw new Error(llmKeyError());
+  }
+  const client = await getLlmClient();
+  const nombre = `${marca || ''} ${modelo}`.trim();
+  const rango =
+    anio_desde || anio_hasta
+      ? `Enfocate en generaciones/años relevantes para usados en AR (${anio_desde || '…'}–${anio_hasta || '…'}).`
+      : 'Incluí las generaciones que más se ven en usados en Argentina hoy.';
+  const presupuesto = precioMax
+    ? `El usuario busca en torno a $${precioMax.toLocaleString('es-AR')} ARS — priorizá versiones que entren en ese rango usado.`
+    : '';
+  const webHint = supportsNativeWebSearch()
+    ? 'Usá web_search para versiones oficiales vendidas en Argentina y datos de seguridad NCAP.'
+    : 'Solo datos que puedas sostener del mercado argentino.';
+
+  const prompt = `Sos experto en autos usados de Argentina. Armá la guía del modelo "${nombre}" para ayudar a elegir versión.
+Contexto de búsqueda: ${contexto || 'compra usada general'}.
+${rango}
+${presupuesto}
+${webHint}
+
+Devolvé SOLO JSON válido (sin markdown) con jerarquía marca → modelo → generación (años) → versión:
+{
+  "marca": "${marca || ''}",
+  "modelo": "${modelo}",
+  "resumen": "2 frases en criollo",
+  "distribucion_resumen": "ej: cadena en 1.6 MSI",
+  "generaciones": [
+    {
+      "nombre": "Polo VI · Track",
+      "anio_desde": 2020,
+      "anio_hasta": 2024,
+      "notas": "opcional, una línea",
+      "versiones": [
+        {
+          "version": "Track MSI",
+          "anio_desde": 2020,
+          "anio_hasta": 2024,
+          "motor": "1.6 MSI nafta",
+          "potencia_cv": 110,
+          "distribucion": "Cadena",
+          "transmision": "Manual / I-Motion",
+          "airbags": "4",
+          "esp": true,
+          "ncap": "5 estrellas Latin NCAP",
+          "destacado": "por qué conviene esta versión en AR",
+          "por_anio": [
+            {
+              "anio_desde": 2020,
+              "anio_hasta": 2021,
+              "esp": false,
+              "airbags": "2",
+              "nota": "opcional: si ESP/airbags cambian por año, usá por_anio"
+            },
+            {
+              "anio_desde": 2022,
+              "anio_hasta": 2024,
+              "esp": true,
+              "airbags": "4"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "evitar_si": ["..."],
+  "precio_orientativo_usado": "rango ARS usado"
+}
+
+Reglas:
+- Cada **versión** es un trim comercial real (Argo Drive/Precision, Polo Track/Comfortline).
+- **generaciones** agrupan años/plataforma; puede haber varias por modelo.
+- Si ESP, airbags u otro dato cambia por año (ej. Ford Ka 2021 sin ESP, 2022 con ESP), usá **por_anio** dentro de la versión con rangos anio_desde/anio_hasta y esp booleano.
+- potencia_cv numérico. No inventes trims que no existieron en Argentina.`;
+
+  const resp = await client.messages.create({
+    model: getModel(),
+    max_tokens: 2200,
+    ...(supportsNativeWebSearch()
+      ? { tools: [{ type: 'web_search_20250305', name: 'web_search' }] }
+      : {}),
+    messages: [{ role: 'user', content: prompt }]
+  });
+
+  const txt = resp.content.filter(c => c.type === 'text').map(c => c.text).join('\n');
+  const match = txt.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('No se pudo parsear el perfil del modelo.');
+  return JSON.parse(match[0]);
+}
+
+/**
+ * Gap-fill: solo slices faltantes para años/generación, sin regenerar todo el catálogo.
+ * @param {{ marca?: string, modelo: string, existingCatalog?: object, gaps?: Array<object>, contexto?: string, precioMax?: number }} args
+ */
+export async function generarPerfilModeloGap({
+  marca,
+  modelo,
+  existingCatalog,
+  gaps = [],
+  contexto,
+  precioMax
+}) {
+  if (!hasLlmKey()) {
+    throw new Error(llmKeyError());
+  }
+  if (!gaps.length) return existingCatalog || null;
+
+  const client = await getLlmClient();
+  const nombre = `${marca || ''} ${modelo}`.trim();
+  const presupuesto = precioMax
+    ? `Presupuesto usado ~$${precioMax.toLocaleString('es-AR')} ARS.`
+    : '';
+  const webHint = supportsNativeWebSearch()
+    ? 'Usá web_search para datos oficiales AR.'
+    : 'Solo datos del mercado argentino.';
+
+  const prompt = `Sos experto en autos usados de Argentina. Completá SOLO los huecos del catálogo de "${nombre}".
+Contexto: ${contexto || 'compra usada'}.
+${presupuesto}
+${webHint}
+
+Catálogo existente (NO lo reemplaces, solo agregá lo faltante):
+${JSON.stringify(existingCatalog || {}, null, 0)}
+
+Huecos a completar (generá por_anio con esp/motor/airbags reales en AR):
+${JSON.stringify(gaps, null, 2)}
+
+Devolvé SOLO JSON válido con la misma estructura (marca, modelo, generaciones) pero ÚNICAMENTE las generaciones/versiones/por_anio necesarios para cubrir esos huecos.
+Cada slice en por_anio debe incluir meta: { "source": "ai", "confidence": 0.75 }.
+Si ESP cambia por año, usá por_anio con esp booleano.`;
+
+  const resp = await client.messages.create({
+    model: getModel(),
+    max_tokens: 1600,
+    ...(supportsNativeWebSearch()
+      ? { tools: [{ type: 'web_search_20250305', name: 'web_search' }] }
+      : {}),
+    messages: [{ role: 'user', content: prompt }]
+  });
+
+  const txt = resp.content.filter(c => c.type === 'text').map(c => c.text).join('\n');
+  const match = txt.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('No se pudo parsear gap-fill del modelo.');
   return JSON.parse(match[0]);
 }
 
@@ -327,28 +512,58 @@ export async function chat({ messages, contexto }) {
     logger.warn('[llm] DEV_SKIP_LLM activo — sin llamada a Claude');
     return {
       texto:
-        '[Modo dev] Respuesta mock. Poné `DEV_SKIP_LLM=false` o borrá la variable del `.env` para usar la API de Anthropic.',
+        '[Modo dev] Respuesta mock. Poné `DEV_SKIP_LLM=false` o borrá la variable del `.env` para usar el LLM (Cursor o Anthropic).',
       cards: []
     };
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error('Falta ANTHROPIC_API_KEY en el entorno.');
+  if (!hasLlmKey()) {
+    throw new Error(llmKeyError());
   }
 
+  const client = await getLlmClient();
   let systemFinal = SYSTEM;
-  if (contexto && Object.keys(contexto).some(k => contexto[k])) {
-    systemFinal += `\n\n# Contexto del usuario (del formulario de arriba)\n${JSON.stringify(contexto, null, 2)}\n\nUsá esta info como dato de base; no la repreguntes salvo que el usuario la contradiga.`;
+  const { analisisTablero, listings: _listings, ...ctxRest } = contexto || {};
+  if (ctxRest && Object.keys(ctxRest).some(k => ctxRest[k])) {
+    systemFinal += `\n\n# Contexto del usuario\n${JSON.stringify(ctxRest, null, 2)}\n\nUsá esta info como dato de base; no la repreguntes salvo que el usuario la contradiga.`;
+  }
+  if (analisisTablero) {
+    const catalogMode = analisisTablero.mode !== 'listings';
+    systemFinal += catalogMode
+      ? `\n\n# Recomendación por MODELO (no por publicación)
+El usuario evalúa cada unidad por su cuenta (notas, checklist). Vos recomendás **marca → modelo → generación → versión → años y equipamiento**.
+- **modelosDestacados**: versiones/años con motor, ESP, distribución, NCAP y \`motivo\`.
+- **filtros**: criterios de búsqueda si aplican.
+
+Reglas:
+1. NO recomiendes publicaciones concretas ni pidas elegir un aviso del tablero.
+2. Explicá qué versión y rango de años conviene y por qué (cadena/correa, ESP, airbags).
+3. Si preguntan "cuál conviene", compará **modelos/versiones** del análisis.
+4. Cards JSON: tipo \`modelo\`, sin \`link\`; título = marca+modelo+versión, \`año\` = rango, \`score\` si hay.
+5. Para cerrar la compra, usá \`guia_compra\` del brief (boleto, pago seguro, transferencia) o sugerí marcar el aviso como Contactado para el seguimiento.
+
+${JSON.stringify(analisisTablero, null, 2)}`
+      : `\n\n# Análisis del tablero (filtros / precio de mercado)
+Modo listados: el usuario pidió filtrar u ordenar publicaciones visibles.
+- **destacados** / **caros** / **baratos**: publicaciones con \`mercado\` vs similares del tablero.
+- **filtros**: precioMax, kmMax, sort, ESP, etc.
+
+Reglas:
+1. Citá publicaciones concretas solo en este modo (título + precio + caro/barato).
+2. No reemplaces la guía de modelos: la valoración de la unidad la hace el usuario.
+3. Cards JSON con \`link\` solo para \`destacados\`/\`caros\`/\`baratos\`.
+
+${JSON.stringify(analisisTablero, null, 2)}`;
   }
 
   let apiMessages = messages.map(m => ({ role: m.role, content: m.content }));
 
   for (let i = 0; i < 6; i++) {
     const resp = await client.messages.create({
-      model: MODEL,
+      model: getModel(),
       max_tokens: 4096,
       system: systemFinal,
-      tools: TOOLS,
+      tools: chatTools(),
       messages: apiMessages
     });
 

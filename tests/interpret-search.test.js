@@ -26,5 +26,6 @@ describe('interpretarBusqueda (DEV_SKIP_LLM)', () => {
     assert.ok(brief.modelos_recomendados.length >= 2);
     assert.ok(brief.filtros.precioMax >= 19000000);
     assert.equal(brief.query_original, 'Auto de ciudad para mi esposa, menos de 20 millones');
+    assert.ok(brief.guia_compra?.pasos?.some(p => /boleto/i.test(p.titulo)));
   });
 });

@@ -8,6 +8,7 @@ import { scraperCacheGet, scraperCacheSet, getRecipe, saveRecipe, getAsyncJob, s
 import { buildSearchPhrase, matchesFilters, slugify, inferAttributes, listingFingerprint } from './lib/search-filters.js';
 import { applyRecipe } from './lib/extract.js';
 import { aprenderRecetaExtraccion } from './lib/llm-extract.js';
+import { hasLlmKey } from './lib/llm-client.js';
 import { searchMercadoLibreApi, mlConnected } from './lib/mercadolibre-api.js';
 
 const BASE = 'https://autos.mercadolibre.com.ar';
@@ -573,7 +574,7 @@ async function parseHtmlCascade(html, { portal, filtros, url, parser }) {
     }
   }
 
-  if (!parsed.length && process.env.ANTHROPIC_API_KEY) {
+  if (!parsed.length && hasLlmKey()) {
     try {
       const recipe = await aprenderRecetaExtraccion(html, { url });
       const r = applyRecipe(html, recipe, ctx);

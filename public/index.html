@@ -26,6 +26,8 @@
     --t-xs: 11px; --t-sm: 13px; --t-md: 15px; --t-lg: 18px; --t-xl: 22px; --t-2xl: 28px;
     --sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    --nav-bottom-h: 56px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
@@ -198,24 +200,141 @@
   .advisor-brief .ab-query { margin: 0; color: var(--muted); font-size: var(--t-sm); font-style: italic; }
   .advisor-brief .ab-text { margin: 0; font-size: var(--t-md); line-height: 1.5; }
   .ab-section h4 { margin: 0 0 var(--s2); font-size: var(--t-xs); text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
-  .ab-models { display: grid; gap: var(--s2); }
-  .ab-model { border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--panel); padding: var(--s3); }
-  .ab-model strong { display: block; font-size: var(--t-sm); }
-  .ab-model span { color: var(--muted); font-size: var(--t-sm); }
+  .ab-models { display: grid; gap: var(--s3); }
+  .ab-pick {
+    display: grid; grid-template-columns: 72px 1fr auto; gap: var(--s3); align-items: center;
+    border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel);
+    padding: var(--s3); text-decoration: none; color: inherit;
+    box-shadow: 0 2px 10px rgba(30,24,16,0.04); transition: border-color .15s, box-shadow .15s, transform .12s;
+  }
+  .ab-pick:hover { border-color: var(--blue); box-shadow: 0 6px 20px rgba(37,92,153,0.14); transform: translateY(-1px); }
+  .ab-pick:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .ab-pick-ghost { grid-template-columns: 1fr; cursor: default; opacity: 0.92; }
+  .ab-pick-ghost:hover { transform: none; border-color: var(--line); box-shadow: 0 2px 10px rgba(30,24,16,0.04); }
+  .ab-pick img, .ab-pick-ph { width: 72px; height: 54px; border-radius: var(--r-sm); object-fit: cover; background: #e3ddd0; display: block; }
+  .ab-pick-ph { display: grid; place-items: center; font-size: var(--t-lg); }
+  .ab-pick-body { display: grid; gap: 2px; min-width: 0; }
+  .ab-pick-tag { font-size: 10px; font-weight: 850; text-transform: uppercase; letter-spacing: 0.04em; color: var(--blue); }
+  .ab-pick-body strong { font-size: var(--t-sm); line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ab-pick-price { font-size: var(--t-md); font-weight: 900; color: var(--brand-dark); }
+  .ab-pick-sub { color: var(--muted); font-size: var(--t-xs); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .ab-pick-empty { color: var(--subtle); font-size: var(--t-xs); font-style: italic; }
+  .ab-pick-go { font-size: var(--t-xs); font-weight: 850; color: var(--blue); white-space: nowrap; padding: 6px 10px; border-radius: 999px; background: rgba(37,92,153,0.1); }
+  .ab-pick:hover .ab-pick-go { background: var(--blue); color: #fff; }
   .ab-warn { display: flex; flex-wrap: wrap; gap: var(--s2); }
   .ab-warn span { background: rgba(226,61,43,0.1); color: var(--brand-dark); border-radius: 999px; padding: 4px 10px; font-size: var(--t-xs); font-weight: 800; }
+  .mg-grid { display: grid; gap: var(--s4); }
+  .mg-card { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); overflow: hidden; }
+  .mg-head { padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line); background: linear-gradient(180deg, #fff 0%, var(--panel-soft) 100%); }
+  .mg-breadcrumb { margin: 0 0 4px; font-size: var(--t-xs); font-weight: 850; text-transform: uppercase; letter-spacing: 0.04em; color: var(--subtle); }
+  .mg-breadcrumb strong { color: var(--ink); }
+  .mg-head h5 { margin: 0 0 4px; font-size: var(--t-lg); letter-spacing: -0.01em; }
+  .mg-meta { margin: 0; color: var(--muted); font-size: var(--t-sm); line-height: 1.4; }
+  .mg-motivo { margin: var(--s2) 0 0; font-size: var(--t-sm); color: var(--brand-dark); font-weight: 700; }
+  .mg-dist { margin: var(--s1) 0 0; font-size: var(--t-xs); color: var(--good); font-weight: 750; }
+  .mg-gens { display: grid; gap: var(--s3); padding: var(--s3) var(--s4) var(--s4); }
+  .mg-gen { border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; }
+  .mg-gen-head { padding: var(--s2) var(--s3); background: var(--panel-soft); border-bottom: 1px solid var(--line); }
+  .mg-gen-head b { font-size: var(--t-sm); }
+  .mg-gen-head span { color: var(--muted); font-size: var(--t-xs); font-weight: 700; margin-left: var(--s2); }
+  .mg-gen-note { margin: var(--s1) 0 0; font-size: var(--t-xs); color: var(--muted); }
+  .mg-vers { display: grid; gap: var(--s2); padding: var(--s2); }
+  .mg-ver { border: 1px solid var(--line); border-radius: var(--r-sm); padding: var(--s3); background: #fff; }
+  .mg-ver-hd { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s2); margin-bottom: var(--s2); }
+  .mg-ver-hd b { font-size: var(--t-sm); }
+  .mg-ver-tag { font-size: 9px; font-weight: 850; text-transform: uppercase; letter-spacing: 0.04em; color: var(--blue); background: rgba(37,92,153,0.1); padding: 2px 7px; border-radius: 999px; }
+  .mg-specs { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--s2); font-size: var(--t-xs); }
+  .mg-specs div { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+  .mg-specs dt { margin: 0; color: var(--subtle); font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; font-size: 9px; }
+  .mg-specs dd { margin: 2px 0 0; color: var(--ink); font-weight: 650; }
+  .mg-ver p { margin: var(--s2) 0 0; font-size: var(--t-xs); color: var(--muted); line-height: 1.35; }
+  .mg-foot { padding: 0 var(--s4) var(--s3); font-size: var(--t-xs); color: var(--subtle); }
+  .mg-cache { font-size: 10px; color: var(--subtle); font-weight: 700; }
   .mkt.rec { background: rgba(37,92,153,0.12); color: var(--blue); }
+  .card.recommended { border-color: var(--blue); box-shadow: 0 4px 18px rgba(37,92,153,0.12); }
+  .card.recommended .title a { color: var(--ink); }
+  .card.recommended .title a:hover { color: var(--blue); }
+  .title-link { color: inherit; text-decoration: none; }
+  .title-link:hover { color: var(--brand-dark); text-decoration: underline; text-underline-offset: 2px; }
+  .adv-picks { display: grid; gap: var(--s2); margin-top: var(--s2); }
+  .adv-pick {
+    display: grid; grid-template-columns: 56px 1fr auto; gap: var(--s2); align-items: center;
+    border: 1px solid var(--line); border-radius: var(--r-sm); background: #fff;
+    padding: var(--s2) var(--s3); text-decoration: none; color: inherit; font-size: var(--t-sm);
+    transition: border-color .15s, background .15s;
+  }
+  .adv-pick:hover { border-color: var(--brand); background: #fff8f6; }
+  .adv-pick.no-link { cursor: default; opacity: 0.85; }
+  .adv-pick.no-link:hover { border-color: var(--line); background: #fff; }
+  .adv-pick img, .adv-pick-ph { width: 56px; height: 42px; border-radius: 6px; object-fit: cover; background: #e3ddd0; }
+  .adv-pick-ph { display: grid; place-items: center; font-size: var(--t-md); }
+  .adv-pick-body { display: grid; gap: 1px; min-width: 0; }
+  .adv-pick-type { font-size: 9px; font-weight: 850; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  .adv-pick-body strong { font-size: var(--t-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .adv-pick-meta { color: var(--muted); font-size: var(--t-xs); }
+  .adv-pick-go { font-size: 10px; font-weight: 850; color: var(--brand-dark); }
+  .card.flash { animation: cardFlash .9s ease; }
+  @keyframes cardFlash { 0%,100% { box-shadow: 0 4px 18px rgba(37,92,153,0.12); } 50% { box-shadow: 0 0 0 3px rgba(37,92,153,0.35); } }
+  .advisor-filter-bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2);
+    border: 1px solid rgba(37,92,153,0.25); border-radius: var(--r-md);
+    background: rgba(37,92,153,0.08); padding: var(--s2) var(--s3); margin-bottom: var(--s3);
+    font-size: var(--t-sm); color: var(--ink);
+  }
+  .advisor-filter-bar button { border: 1px solid var(--line-strong); background: var(--panel); border-radius: 999px; padding: 4px 10px; font-size: var(--t-xs); font-weight: 800; color: var(--muted); margin-left: auto; }
 
   /* ---------- Checklist por publicación ---------- */
-  .checklist-toggle { justify-self: start; border: 0; background: transparent; color: var(--blue); font-size: var(--t-xs); font-weight: 800; padding: 2px 0; text-align: left; }
-  .checklist-toggle:hover { text-decoration: underline; }
-  .checklist-box { display: grid; gap: var(--s2); border-top: 1px solid var(--line); padding-top: var(--s2); margin-top: var(--s1); }
-  .checklist-progress { color: var(--muted); font-size: var(--t-xs); font-weight: 800; }
-  .check-row { display: grid; grid-template-columns: 1fr auto; gap: var(--s2); align-items: center; font-size: var(--t-sm); }
+  .card-actions { display: flex; gap: var(--s2); flex-wrap: wrap; }
+  .card-actions .btn { flex: 1; min-width: 100px; text-align: center; text-decoration: none; }
+  .card-actions .btn.ghost { background: var(--panel-soft); border: 1px solid var(--line-strong); color: var(--blue); }
+  .ia-toggle { border: 0; background: transparent; cursor: pointer; font: inherit; }
+  .tx-guide { margin-bottom: var(--s4); border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--panel); overflow: hidden; }
+  .tx-guide summary { cursor: pointer; font-weight: 850; padding: var(--s3) var(--s4); list-style: none; display: flex; align-items: center; gap: var(--s2); }
+  .tx-guide summary::-webkit-details-marker { display: none; }
+  .tx-guide summary::before { content: '📋'; }
+  .tx-guide-body { padding: 0 var(--s4) var(--s4); display: grid; gap: var(--s3); border-top: 1px solid var(--line); }
+  .tx-guide-aviso { margin: var(--s3) 0 0; font-size: var(--t-sm); color: var(--muted); }
+  .tx-section h4 { margin: 0 0 var(--s1); font-size: var(--t-sm); }
+  .tx-section ul { margin: 0; padding-left: 1.1rem; font-size: var(--t-sm); color: var(--muted); display: grid; gap: 4px; }
+  .ab-tramite { display: grid; gap: var(--s3); }
+  .ab-paso { border: 1px solid var(--line); border-radius: var(--r-sm); padding: var(--s3); background: var(--panel-soft); }
+  .ab-paso h5 { margin: 0 0 var(--s1); font-size: var(--t-sm); }
+  .ab-paso p { margin: 0 0 var(--s1); font-size: var(--t-xs); color: var(--muted); }
+  .ab-paso ul { margin: 0; padding-left: 1rem; font-size: var(--t-xs); color: var(--muted); display: grid; gap: 3px; }
+  .followup { border-top: 1px solid var(--line); margin-top: var(--s2); padding-top: var(--s2); display: grid; gap: var(--s2); }
+  .followup summary { cursor: pointer; font-weight: 850; font-size: var(--t-xs); color: var(--blue); list-style: none; }
+  .followup summary::-webkit-details-marker { display: none; }
+  .followup-body { display: grid; gap: var(--s2); font-size: var(--t-xs); }
+  .followup-steps { display: grid; gap: var(--s2); }
+  .followup-step { border-left: 3px solid var(--blue); padding-left: var(--s2); }
+  .followup-step b { display: block; margin-bottom: 4px; }
+  .followup-step ul { margin: 0; padding-left: 1rem; color: var(--muted); }
+  .check-row { display: grid; grid-template-columns: 1fr auto; gap: var(--s2); align-items: center; }
   .check-btns { display: inline-flex; gap: 4px; }
   .check-btns button { border: 1px solid var(--line-strong); background: var(--panel-soft); border-radius: var(--r-sm); padding: 4px 8px; font-size: 10px; font-weight: 850; color: var(--muted); min-width: 36px; }
   .check-btns button.on-yes { border-color: var(--good); color: var(--good); background: var(--good-soft); }
   .check-btns button.on-no { border-color: var(--brand-dark); color: var(--brand-dark); background: rgba(226,61,43,0.1); }
+  .card.contacted-open { border-color: var(--blue); }
+  .ia-toggle:hover { text-decoration: underline; }
+  .ia-detail { display: grid; gap: var(--s2); border-top: 1px solid var(--line); padding-top: var(--s2); margin-top: var(--s1); font-size: var(--t-xs); }
+  .ia-score-row { display: flex; align-items: center; gap: var(--s2); }
+  .ia-score-badge { font-size: var(--t-lg); font-weight: 900; color: var(--brand-dark); min-width: 2.5rem; }
+  .ia-score-label { color: var(--muted); font-weight: 700; }
+  .ia-bars { display: grid; gap: 6px; }
+  .ia-bar { display: grid; grid-template-columns: 88px 1fr 28px; gap: 6px; align-items: center; }
+  .ia-bar dt { color: var(--muted); font-weight: 700; margin: 0; }
+  .ia-bar dd { margin: 0; height: 6px; background: var(--line); border-radius: 999px; overflow: hidden; }
+  .ia-bar dd span { display: block; height: 100%; background: var(--blue); border-radius: 999px; }
+  .ia-bar .val { text-align: right; font-weight: 800; color: var(--muted); }
+  .ia-stars { letter-spacing: 1px; color: #f5a623; font-weight: 900; }
+  .ia-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+  .ia-specs div { display: flex; gap: 4px; }
+  .ia-specs dt { color: var(--muted); font-weight: 700; margin: 0; }
+  .ia-specs dd { margin: 0; font-weight: 700; }
+  .ia-warn { color: var(--brand-dark); font-weight: 700; }
+  .ia-footnote { color: var(--muted); font-style: italic; font-size: var(--t-xs); }
+  .score-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 22px; padding: 0 6px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 10px; font-weight: 900; }
+  .adv-pick.no-link { cursor: default; }
 
   .notes { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); padding: var(--s4); margin-bottom: var(--s4); display: grid; gap: var(--s2); }
   .notes label { font-size: var(--t-xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; color: var(--muted); }
@@ -247,6 +366,7 @@
   .msg { max-width: 88%; padding: 10px 12px; border-radius: var(--r-md); font-size: var(--t-sm); line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
   .msg.user { justify-self: end; background: var(--brand); color: #fff; border-bottom-right-radius: 3px; }
   .msg.assistant { justify-self: start; background: var(--panel-soft); border: 1px solid var(--line); border-bottom-left-radius: 3px; }
+  .msg.assistant .adv-picks { white-space: normal; }
   .msg.thinking { color: var(--muted); font-style: italic; }
   .sugg { display: flex; flex-wrap: wrap; gap: var(--s2); }
   .sugg button { border: 1px solid var(--line-strong); background: var(--panel); border-radius: 999px; padding: 6px 10px; font-size: var(--t-xs); font-weight: 750; color: var(--muted); }
@@ -257,14 +377,103 @@
   .compose textarea { border: 1px solid var(--line-strong); border-radius: var(--r-sm); padding: 10px 11px; resize: none; max-height: 140px; outline: none; }
   .compose textarea:focus { border-color: var(--brand); }
 
-  .toast { position: fixed; right: var(--s5); bottom: var(--s5); z-index: 50; max-width: 340px; border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--panel); box-shadow: 0 14px 34px rgba(30,24,16,0.16); padding: var(--s4); display: none; }
+  .toast { position: fixed; right: var(--s5); z-index: 50; max-width: 340px; border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--panel); box-shadow: 0 14px 34px rgba(30,24,16,0.16); padding: var(--s4); display: none; }
   .toast.active { display: block; }
 
-  @media (max-width: 860px) {
-    .app { grid-template-columns: 1fr; }
-    .rail { position: static; height: auto; grid-template-rows: none; }
-    .alerts { max-height: 180px; }
+  /* ---------- Bottom nav (mobile / tablet) ---------- */
+  .bottom-nav {
+    display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    grid-template-columns: repeat(4, 1fr); height: calc(var(--nav-bottom-h) + var(--safe-bottom));
+    padding-bottom: var(--safe-bottom); border-top: 1px solid var(--line);
+    background: var(--panel); box-shadow: 0 -6px 24px rgba(30,24,16,0.08);
+  }
+  .bn-item {
+    display: grid; place-items: center; gap: 2px; border: 0; background: transparent;
+    color: var(--muted); font-size: 10px; font-weight: 800; min-height: var(--nav-bottom-h); padding: 6px 4px;
+  }
+  .bn-item .bn-ico { font-size: 18px; line-height: 1; }
+  .bn-item.active { color: var(--brand-dark); }
+  .bn-item.active .bn-ico { transform: scale(1.05); }
+  .bn-badge {
+    position: absolute; margin-top: -22px; margin-left: 14px;
+    background: var(--brand); color: #fff; border-radius: 999px; font-size: 9px; font-weight: 900; padding: 1px 5px;
+  }
+  .bn-item { position: relative; }
+
+  /* ---------- Boards sheet ---------- */
+  .boards-sheet-overlay {
+    position: fixed; inset: 0; z-index: 45; background: rgba(24,23,15,0.32);
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .boards-sheet-overlay.open { opacity: 1; pointer-events: auto; }
+  .boards-sheet {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 46;
+    max-height: min(72vh, 520px); background: var(--panel);
+    border-radius: var(--r-lg) var(--r-lg) 0 0; border-top: 1px solid var(--line-strong);
+    box-shadow: 0 -12px 40px rgba(30,24,16,0.18);
+    transform: translateY(100%); transition: transform .24s;
+    display: grid; grid-template-rows: auto 1fr; padding-bottom: var(--safe-bottom);
+  }
+  .boards-sheet.open { transform: translateY(0); }
+  .boards-sheet-head { display: flex; align-items: center; justify-content: space-between; padding: var(--s4); border-bottom: 1px solid var(--line); }
+  .boards-sheet-head h3 { margin: 0; font-size: var(--t-md); }
+  .boards-sheet-list { list-style: none; margin: 0; padding: var(--s2); overflow-y: auto; display: grid; gap: 2px; }
+
+  /* ---------- Tablero: capas colapsables ---------- */
+  .panel-collapse { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); margin-bottom: var(--s4); overflow: hidden; }
+  .panel-collapse > summary {
+    cursor: pointer; list-style: none; font-weight: 850; font-size: var(--t-sm);
+    padding: var(--s3) var(--s4); background: var(--panel-soft); border-bottom: 1px solid transparent;
+    user-select: none; min-height: 44px; display: flex; align-items: center; gap: var(--s2);
+  }
+  .panel-collapse > summary::-webkit-details-marker { display: none; }
+  .panel-collapse > summary::before { content: '▸'; color: var(--brand); font-weight: 900; }
+  .panel-collapse[open] > summary { border-bottom-color: var(--line); }
+  .panel-collapse[open] > summary::before { content: '▾'; }
+  .panel-collapse .panel-inner { padding: var(--s4); }
+  .panel-collapse .advisor-brief { margin-bottom: 0; border-left-width: 3px; }
+  .panel-collapse .knowledge, .panel-collapse .notes, .panel-collapse .report { margin-bottom: var(--s3); }
+  .panel-collapse .report:last-child { margin-bottom: 0; }
+  .board-chips { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s3); }
+  .filter-chip {
+    display: inline-flex; align-items: center; gap: 6px; min-height: 36px;
+    border: 1px solid var(--line); border-radius: 999px; background: var(--panel-soft);
+    padding: 6px 12px; font-size: var(--t-xs); font-weight: 750; color: var(--muted);
+  }
+  .filter-chip:has(input:checked) { border-color: var(--blue); color: var(--blue); background: rgba(37,92,153,0.08); }
+  .filter-chip input { accent-color: var(--blue); }
+  .advisor-filter-bar.sticky { position: sticky; top: 0; z-index: 5; margin-bottom: var(--s3); }
+
+  @media (max-width: 639px) {
+    .grid { grid-template-columns: 1fr; }
     .main { padding: var(--s4); }
+    .hero { padding: var(--s4); }
+    .head h2 { font-size: var(--t-xl); }
+    .toast { left: var(--s4); right: var(--s4); bottom: calc(var(--nav-bottom-h) + var(--safe-bottom) + var(--s4)); }
+  }
+
+  @media (max-width: 1023px) {
+    .app { grid-template-columns: 1fr; }
+    .rail { display: none; }
+    .bottom-nav { display: grid; }
+    .main { padding-bottom: calc(var(--nav-bottom-h) + var(--safe-bottom) + var(--s4)); }
+    .dock {
+      top: auto; bottom: 0; left: 0; right: 0; width: 100%; height: min(92vh, 100dvh);
+      border-left: 0; border-top: 1px solid var(--line-strong); border-radius: var(--r-lg) var(--r-lg) 0 0;
+      box-shadow: 0 -18px 44px rgba(30,24,16,0.18); transform: translateY(100%);
+    }
+    .dock.open { transform: translateY(0); }
+    .rail-foot .btn#openAdvisor { display: none; }
+  }
+
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .main { padding: var(--s5) var(--s5); }
+  }
+
+  @media (min-width: 1024px) {
+    .bottom-nav, .boards-sheet, .boards-sheet-overlay { display: none !important; }
+    .panel-brief { /* abierto por defecto vía JS */ }
+    .toast { bottom: var(--s5); }
   }
 </style>
 </head>
@@ -379,30 +588,50 @@
 
     <!-- BOARD (detalle de búsqueda guardada) -->
     <section class="view" id="view-board">
-      <div class="head">
-        <div><h2 id="boardTitle">Búsqueda</h2><p id="boardSub"></p></div>
+      <div class="head board-head">
+        <div>
+          <h2 id="boardTitle">Búsqueda</h2>
+          <p id="boardSub"></p>
+          <div class="board-chips">
+            <label class="filter-chip"><input type="checkbox" id="showShortlisted" /> Solo guardadas</label>
+            <label class="filter-chip" id="discardWrap"><input type="checkbox" id="showDiscarded" /> Ver descartados</label>
+          </div>
+        </div>
         <div class="head-actions">
           <button class="btn ghost" id="backInicioBtn" type="button">← Volver</button>
-          <label class="pchoice"><input type="checkbox" id="showShortlisted" /> Solo guardadas</label>
-          <label class="pchoice" id="discardWrap"><input type="checkbox" id="showDiscarded" /> Ver descartados</label>
           <button class="btn primary" id="refreshBoardBtn" type="button">Revisar novedades</button>
         </div>
       </div>
-      <div class="advisor-brief" id="advisorBrief" hidden></div>
-      <div class="knowledge" id="knowledgeBox" hidden>
-        <div class="kn-head">
-          <h3>Conocimiento del modelo <span id="knModel"></span></h3>
-          <button class="btn" id="genKnowledgeBtn" type="button">Generar ficha</button>
-        </div>
-        <div id="knowledgeBody"></div>
-      </div>
-      <div class="notes">
-        <label for="boardNotes">Notas de esta búsqueda</label>
-        <textarea id="boardNotes" rows="2" placeholder="Ej: la caja THP tiene problemas, no comprar · ojo con la cadena de distribución · evitar versión 1.6 8v"></textarea>
-        <div class="notes-actions"><button class="btn" id="saveNotesBtn" type="button">Guardar nota</button><span class="notes-hint" id="notesSaved"></span></div>
-      </div>
-      <div class="report" id="boardReport"></div>
+      <div class="advisor-filter-bar" id="advisorFilterBar" hidden></div>
       <div class="grid" id="boardGrid"></div>
+      <details class="panel-collapse panel-brief" id="panelBrief">
+        <summary>Recomendación del asesor</summary>
+        <div class="panel-inner">
+          <div class="advisor-brief" id="advisorBrief" hidden></div>
+        </div>
+      </details>
+      <details class="panel-collapse panel-tramite" id="panelTramite">
+        <summary>Cómo cerrar la compra</summary>
+        <div class="panel-inner" id="transactionGuideWrap"></div>
+      </details>
+      <details class="panel-collapse panel-tools" id="panelTools">
+        <summary>Más sobre esta búsqueda</summary>
+        <div class="panel-inner">
+          <div class="knowledge" id="knowledgeBox" hidden>
+            <div class="kn-head">
+              <h3>Conocimiento del modelo <span id="knModel"></span></h3>
+              <button class="btn" id="genKnowledgeBtn" type="button">Generar ficha</button>
+            </div>
+            <div id="knowledgeBody"></div>
+          </div>
+          <div class="notes">
+            <label for="boardNotes">Notas de esta búsqueda</label>
+            <textarea id="boardNotes" rows="2" placeholder="Ej: la caja THP tiene problemas, no comprar · ojo con la cadena de distribución · evitar versión 1.6 8v"></textarea>
+            <div class="notes-actions"><button class="btn" id="saveNotesBtn" type="button">Guardar nota</button><span class="notes-hint" id="notesSaved"></span></div>
+          </div>
+          <div class="report" id="boardReport"></div>
+        </div>
+      </details>
     </section>
 
   </main>
@@ -425,6 +654,22 @@
 
 <div class="toast" id="toast"></div>
 
+<nav class="bottom-nav" id="bottomNav" aria-label="Navegación principal">
+  <button type="button" class="bn-item" id="bnBuscar" aria-label="Buscar"><span class="bn-ico">⌕</span><span>Buscar</span></button>
+  <button type="button" class="bn-item" id="bnHoy" aria-label="Novedades"><span class="bn-ico">◆</span><span>Novedades</span></button>
+  <button type="button" class="bn-item" id="bnBoards" aria-label="Búsquedas"><span class="bn-ico">☰</span><span>Búsquedas</span></button>
+  <button type="button" class="bn-item" id="bnAdvisor" aria-label="Asesor"><span class="bn-ico">✦</span><span>Asesor</span></button>
+</nav>
+
+<div class="boards-sheet-overlay" id="boardsSheetOverlay" hidden></div>
+<aside class="boards-sheet" id="boardsSheet" aria-label="Tus búsquedas" hidden>
+  <div class="boards-sheet-head">
+    <h3>Tus búsquedas</h3>
+    <button type="button" class="dock-x" id="closeBoardsSheet" aria-label="Cerrar">×</button>
+  </div>
+  <ul class="boards-sheet-list alerts" id="boardsSheetList"></ul>
+</aside>
+
 <script>
   const $ = id => document.getElementById(id);
 
@@ -442,7 +687,8 @@
     showDiscarded: false,
     showShortlisted: false,
     lastSearch: null,
-    advisor: { open: false, messages: [], sending: false, sessionId: '' }
+    advisor: { open: false, messages: [], sending: false, sessionId: '' },
+    advisorGridFilter: null
   };
 
   /* ---------- helpers ---------- */
@@ -485,15 +731,6 @@
   function setStatus(t) { $('status').textContent = t; }
   function showToast(t) { const el = $('toast'); el.textContent = t; el.classList.add('active'); clearTimeout(showToast.t); showToast.t = setTimeout(() => el.classList.remove('active'), 2800); }
 
-  const CHECKLIST_KEYS = ['vtv_ok', 'service_al_dia', 'dueno_unico', 'precio_negociable', 'titular_ok', 'sin_siniestros'];
-  const CHECKLIST_LABELS = {
-    vtv_ok: 'VTV al día',
-    service_al_dia: 'Service documentado',
-    dueno_unico: 'Dueño único',
-    precio_negociable: 'Precio negociable',
-    titular_ok: 'Titular / papeles ok',
-    sin_siniestros: 'Sin siniestros declarados'
-  };
   function normTxt(v) { return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
   function listingIsRecommended(car, modelos) {
     if (!modelos?.length) return false;
@@ -505,29 +742,408 @@
       return Boolean(mo || b);
     });
   }
-  function checklistProgress(cl) {
-    let done = 0;
-    for (const k of CHECKLIST_KEYS) if (cl?.[k] === true || cl?.[k] === false) done++;
-    return { done, total: CHECKLIST_KEYS.length };
+  function findListingForModel(modelo, listings) {
+    if (!modelo) return null;
+    const matches = (listings || []).filter(l => listingIsRecommended(l, [modelo]));
+    if (!matches.length) return null;
+    return matches.sort((a, b) => {
+      const pa = Number(a.precio || a.price) || 1e15;
+      const pb = Number(b.precio || b.price) || 1e15;
+      return pa - pb;
+    })[0];
   }
-  function buildChecklistHtml(car) {
+  function listingDomId(car) {
+    const id = car.id || car.link;
+    return id ? `listing-${String(id).replace(/[^a-zA-Z0-9_-]/g, '_')}` : '';
+  }
+  function flashListingCard(id) {
+    if (!id) return;
+    const el = document.getElementById(listingDomId({ id }));
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.remove('flash');
+    void el.offsetWidth;
+    el.classList.add('flash');
+    setTimeout(() => el.classList.remove('flash'), 1000);
+  }
+  function fmtYearRange(desde, hasta) {
+    if (desde && hasta) return `${desde}–${hasta}`;
+    if (desde) return `desde ${desde}`;
+    if (hasta) return `hasta ${hasta}`;
+    return '';
+  }
+  function buildVersionSliceHtml(v, name, highlight) {
+    const yrs = fmtYearRange(v.anio_desde, v.anio_hasta);
+    const specs = [
+      v.motor ? ['Motor', v.motor] : null,
+      v.potencia_cv ? ['Potencia', `${v.potencia_cv} CV`] : null,
+      v.distribucion ? ['Distribución', v.distribucion] : null,
+      v.transmision ? ['Caja', v.transmision] : null,
+      v.airbags ? ['Airbags', v.airbags] : null,
+      v.esp != null ? ['ESP', v.esp ? 'Sí' : 'No'] : null,
+      v.ncap ? ['NCAP', v.ncap] : null
+    ].filter(Boolean);
+    const note = v.nota || v.destacado;
+    return `<article class="mg-ver${v.por_anio_band ? ' mg-ver-slice' : ''}">
+      <div class="mg-ver-hd">
+        <b>${escapeHtml(name)}</b>
+        ${yrs ? `<span style="font-size:var(--t-xs);color:var(--muted);font-weight:700">${escapeHtml(yrs)}</span>` : ''}
+        ${highlight ? '<span class="mg-ver-tag">Recomendada</span>' : ''}
+      </div>
+      <dl class="mg-specs">${specs.map(([k,val]) => `<div><dt>${escapeHtml(k)}</dt><dd>${escapeHtml(val)}</dd></div>`).join('')}</dl>
+      ${note ? `<p style="margin:var(--s2) 0 0;font-size:var(--t-xs);color:var(--muted)">${escapeHtml(note)}</p>` : ''}
+    </article>`;
+  }
+  function buildVersionHtml(v, highlight) {
+    const name = v.version || v.nombre;
+    if (Array.isArray(v.por_anio) && v.por_anio.length) {
+      return v.por_anio.map(slice => buildVersionSliceHtml(
+        { ...v, ...slice, por_anio_band: true, destacado: slice.nota || slice.destacado || v.destacado },
+        name,
+        highlight
+      )).join('');
+    }
+    return buildVersionSliceHtml(v, name, highlight);
+  }
+  function buildGeneracionHtml(gen, versionDestacada) {
+    const yrs = fmtYearRange(gen.anio_desde, gen.anio_hasta);
+    const vers = (gen.versiones || []).map(v => {
+      const vn = v.version || v.nombre;
+      const hi = versionDestacada && vn && vn.toLowerCase().includes(String(versionDestacada).toLowerCase());
+      return buildVersionHtml(v, hi);
+    }).join('');
+    return `<section class="mg-gen">
+      <div class="mg-gen-head">
+        <b>${escapeHtml(gen.nombre)}</b>${yrs ? `<span>${escapeHtml(yrs)}</span>` : ''}
+        ${gen.notas ? `<p class="mg-gen-note">${escapeHtml(gen.notas)}</p>` : ''}
+      </div>
+      <div class="mg-vers">${vers}</div>
+    </section>`;
+  }
+  function buildModelGuideHtml(m) {
+    const cat = m.catalog || m.ficha;
+    const marca = cat?.marca || m.marca || '';
+    const modelo = cat?.modelo || m.modelo || '';
+    const cache = m.ficha_cached ? ' · caché' : m.ficha_source === 'curated' ? ' · base' : m.ficha_source === 'ai' ? ' · IA' : '';
+    const verHi = m.version_destacada || m.version;
+    const gens = cat?.generaciones || [];
+    if (!gens.length) {
+      return `<div class="mg-card"><div class="mg-head">
+        <p class="mg-breadcrumb"><strong>${escapeHtml(marca)}</strong> · ${escapeHtml(modelo)}</p>
+        <p class="mg-motivo">${escapeHtml(m.motivo || '')}</p>
+      </div></div>`;
+    }
+    return `<article class="mg-card">
+      <div class="mg-head">
+        <p class="mg-breadcrumb"><strong>${escapeHtml(marca)}</strong> · ${escapeHtml(modelo)}${m.generacion ? ` · ${escapeHtml(m.generacion)}` : ''}${fmtYearRange(m.anio_desde, m.anio_hasta) ? ` · ${escapeHtml(fmtYearRange(m.anio_desde, m.anio_hasta))}` : ''}</p>
+        <h5>${escapeHtml(modelo)}</h5>
+        ${cat.resumen ? `<p class="mg-meta">${escapeHtml(cat.resumen)}</p>` : ''}
+        ${m.motivo ? `<p class="mg-motivo">${escapeHtml(m.motivo)}</p>` : ''}
+        ${cat.distribucion_resumen ? `<p class="mg-dist">${escapeHtml(cat.distribucion_resumen)}</p>` : ''}
+      </div>
+      <div class="mg-gens">${gens.map(g => buildGeneracionHtml(g, verHi)).join('')}</div>
+      ${cat.precio_orientativo_usado ? `<div class="mg-foot">💰 ${escapeHtml(cat.precio_orientativo_usado)}<span class="mg-cache">${escapeHtml(cache)}</span></div>` : ''}
+    </article>`;
+  }
+  function buildBriefPickHtml(modelo, listing) {
+    const label = [modelo.marca, modelo.modelo].filter(Boolean).join(' ');
+    const motivo = modelo.motivo || '';
+    if (!listing?.link) {
+      return `<div class="ab-pick ab-pick-ghost">
+        <div class="ab-pick-body">
+          <span class="ab-pick-tag">Modelo sugerido</span>
+          <strong>${escapeHtml(label)}</strong>
+          ${motivo ? `<span class="ab-pick-sub">${escapeHtml(motivo)}</span>` : ''}
+          <span class="ab-pick-empty">Todavía no hay publicación de este modelo en el tablero</span>
+        </div>
+      </div>`;
+    }
+    const thumb = listing.imagen
+      ? `<img src="${escapeHtml(listing.imagen)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;ab-pick-ph&quot;>🚗</div>'" />`
+      : '<div class="ab-pick-ph">🚗</div>';
+    const price = (listing.precio || listing.price)
+      ? fmtPrice(listing.precio || listing.price, listing.moneda || listing.currency || 'ARS')
+      : 'Ver precio en portal';
+    const meta = [listing.año || listing.year, (listing.kilometros || listing.km) ? `${Number(listing.kilometros || listing.km).toLocaleString('es-AR')} km` : null].filter(Boolean).join(' · ');
+    return `<a class="ab-pick" href="${escapeHtml(listing.link)}" target="_blank" rel="noopener" data-flash-listing="${escapeHtml(listing.id || '')}">
+      ${thumb}
+      <div class="ab-pick-body">
+        <span class="ab-pick-tag">Recomendado · ${escapeHtml(label)}</span>
+        <strong>${escapeHtml(listing.titulo || listing.title || label)}</strong>
+        <span class="ab-pick-price">${escapeHtml(price)}</span>
+        ${meta ? `<span class="ab-pick-sub">${escapeHtml(meta)}</span>` : ''}
+        ${motivo ? `<span class="ab-pick-sub">${escapeHtml(motivo)}</span>` : ''}
+      </div>
+      <span class="ab-pick-go">Ver publicación</span>
+    </a>`;
+  }
+  function matchesAdvisorFiltersLocal(car, f) {
+    if (!f) return true;
+    const p = Number(car.precio || car.price);
+    if (f.precioMin && p && p < f.precioMin) return false;
+    if (f.precioMax && p && p > f.precioMax) return false;
+    const km = Number(car.kilometros ?? car.km);
+    if (f.kmMax && Number.isFinite(km) && km > f.kmMax) return false;
+    if (f.kmMin && Number.isFinite(km) && km < f.kmMin) return false;
+    const hay = normTxt([car.titulo, car.title, car.marca, car.modelo].filter(Boolean).join(' '));
+    if (f.marca && !hay.includes(normTxt(f.marca))) return false;
+    if (f.modelo && !hay.includes(normTxt(f.modelo))) return false;
+    if (f.combustible && !hay.includes(normTxt(f.combustible))) return false;
+    if (f.esp === true && car.catalog_esp !== true) return false;
+    if (f.esp === false && car.catalog_esp === true) return false;
+    if (f.distribucion) {
+      const d = normTxt(car.catalog_distribucion || '');
+      if (!d.includes(normTxt(f.distribucion))) return false;
+    }
+    return true;
+  }
+  function describeAdvisorFilter(f) {
+    if (!f) return '';
+    const bits = [];
+    if (f.precioMax) bits.push(`hasta $${(f.precioMax / 1e6).toFixed(0)}M`);
+    if (f.precioMin) bits.push(`desde $${(f.precioMin / 1e6).toFixed(0)}M`);
+    if (f.kmMax) bits.push(`≤ ${Number(f.kmMax).toLocaleString('es-AR')} km`);
+    if (f.kmMin) bits.push(`≥ ${Number(f.kmMin).toLocaleString('es-AR')} km`);
+    if (f.sort === 'potencia') bits.push('orden: más potente');
+    if (f.sort === 'mercado_caro') bits.push('solo caros vs mercado');
+    if (f.sort === 'mercado_barato') bits.push('solo baratos vs mercado');
+    if (f.marca) bits.push(f.marca);
+    if (f.modelo) bits.push(f.modelo);
+    if (f.esp === true) bits.push('con ESP');
+    if (f.esp === false) bits.push('sin ESP');
+    if (f.distribucion) bits.push(`distribución ${f.distribucion}`);
+    return bits.join(' · ') || 'filtro del asesor';
+  }
+  function renderAdvisorFilterBar() {
+    const bar = $('advisorFilterBar');
+    const f = state.advisorGridFilter;
+    if (!f || state.view !== 'board') { bar.hidden = true; bar.classList.remove('sticky'); bar.innerHTML = ''; return; }
+    bar.hidden = false;
+    bar.classList.add('sticky');
+    bar.innerHTML = `<span><strong>Filtro del asesor:</strong> ${escapeHtml(describeAdvisorFilter(f))}</span>
+      <button type="button" id="clearAdvisorFilter">Quitar filtro</button>`;
+  }
+  function isDesktopNav() {
+    return window.matchMedia('(min-width: 1024px)').matches;
+  }
+  function syncBoardPanels() {
+    if (state.view !== 'board') return;
+    const pb = $('panelBrief');
+    const pt = $('panelTramite');
+    const ptools = $('panelTools');
+    const desktop = isDesktopNav();
+    if (pb && !pb.hidden) pb.open = desktop;
+    if (pt && !desktop) pt.open = false;
+    if (ptools && !desktop) ptools.open = false;
+  }
+  function renderBoardsSheetList() {
+    const list = $('boardsSheetList');
+    if (!list) return;
+    list.innerHTML = state.boards.length
+      ? state.boards.map(b => `
+        <li><button class="alert-item ${b.id===state.viewBoardId?'active':''}" type="button" data-board-id="${escapeHtml(b.id)}">
+          <span class="row"><strong>${escapeHtml(b.name)}</strong>${b.new_count?`<span class="mini-badge">${b.new_count}</span>`:''}</span>
+          <span class="sub">${b.total} autos · ${b.last_checked_at ? 'revisado '+fmtAgo(b.last_checked_at) : 'sin revisar'}</span>
+        </button></li>`).join('')
+      : '<li class="alerts-empty">Todavía no tenés búsquedas guardadas.</li>';
+  }
+  function toggleBoardsSheet(open) {
+    const sheet = $('boardsSheet');
+    const overlay = $('boardsSheetOverlay');
+    if (!sheet || !overlay) return;
+    if (open) {
+      renderBoardsSheetList();
+      sheet.hidden = false;
+      overlay.hidden = false;
+      requestAnimationFrame(() => { sheet.classList.add('open'); overlay.classList.add('open'); });
+    } else {
+      sheet.classList.remove('open');
+      overlay.classList.remove('open');
+      setTimeout(() => { sheet.hidden = true; overlay.hidden = true; }, 240);
+    }
+  }
+  function renderBottomNav() {
+    const todayN = state.today.counts.nuevos + state.today.counts.bajaron;
+    const bnHoy = $('bnHoy');
+    if (!bnHoy) return;
+    let badge = bnHoy.querySelector('.bn-badge');
+    if (todayN) {
+      if (!badge) { badge = document.createElement('span'); badge.className = 'bn-badge'; bnHoy.appendChild(badge); }
+      badge.textContent = String(todayN);
+    } else if (badge) badge.remove();
+    $('bnBuscar')?.classList.toggle('active', state.view === 'inicio' || state.view === 'board');
+    $('bnHoy')?.classList.toggle('active', state.view === 'hoy');
+    $('bnBoards')?.classList.toggle('active', false);
+    $('bnAdvisor')?.classList.toggle('active', state.advisor.open);
+  }
+  function iaBar(label, score) {
+    const s = Number(score) || 0;
+    return `<div class="ia-bar"><dt>${escapeHtml(label)}</dt><dd><span style="width:${s}%"></span></dd><span class="val">${s}</span></div>`;
+  }
+  function iaStars(n) {
+    const max = 5;
+    const filled = Math.max(0, Math.min(max, Number(n) || 0));
+    return '★'.repeat(filled) + '☆'.repeat(max - filled);
+  }
+  function buildListingAnalysisHtml(car) {
+    const a = car.listing_analysis;
+    if (!a) return '<p class="ia-footnote">Sin datos de catálogo para este aviso. Revisá título y año en el portal.</p>';
+    if (a.sin_match) {
+      return '<p class="ia-footnote">No matcheamos marca/modelo/año al catálogo. Validá la unidad en persona y con la guía de trámite arriba.</p>';
+    }
+    const d = a.dimensiones || {};
+    const f = a.ficha || {};
+    const yrs = f.anio_desde && f.anio_hasta ? `${f.anio_desde}–${f.anio_hasta}` : '';
+    const specs = [
+      f.motor ? ['Motor', f.motor] : null,
+      f.potencia_cv ? ['Potencia', `${f.potencia_cv} CV`] : null,
+      f.distribucion ? ['Distribución', f.distribucion] : null,
+      f.esp != null ? ['ESP', f.esp ? 'Sí' : 'No'] : null,
+      f.airbags ? ['Airbags', f.airbags] : null,
+      f.ncap ? ['NCAP', f.ncap] : null
+    ].filter(Boolean);
+    const evitar = (a.evitar_si || []).map(x => `<li>${escapeHtml(x)}</li>`).join('');
+    const chequear = (a.que_chequear || []).map(x => `<li>${escapeHtml(x)}</li>`).join('');
+    return `<div class="ia-score-row">
+        <span class="ia-score-badge">${a.score ?? '—'}</span>
+        <div>
+          <div class="ia-score-label">Score de referencia (catálogo + tu búsqueda)</div>
+          <div class="ia-stars" title="Seguridad">${iaStars(d.seguridad?.estrellas)}</div>
+        </div>
+      </div>
+      <dl class="ia-bars">
+        ${iaBar('Seguridad', d.seguridad?.score)}
+        ${iaBar('Confiabilidad', d.confiabilidad?.score)}
+        ${iaBar('Valor', d.valor?.score)}
+        ${iaBar('Tu búsqueda', d.criterios_busqueda?.score)}
+      </dl>
+      <p class="ia-score-label">${escapeHtml([f.marca, f.modelo, f.version, yrs].filter(Boolean).join(' · '))}</p>
+      <dl class="ia-specs">${specs.map(([k,v]) => `<div><dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd></div>`).join('')}</dl>
+      ${f.destacado ? `<p>${escapeHtml(f.destacado)}</p>` : ''}
+      ${d.confiabilidad?.label ? `<p>Confiabilidad estimada: <strong>${escapeHtml(d.confiabilidad.label)}</strong></p>` : ''}
+      ${evitar ? `<div class="ia-warn"><b>Ojo en AR</b><ul>${evitar}</ul></div>` : ''}
+      ${chequear ? `<div><b>Qué chequear en esta unidad</b><ul>${chequear}</ul></div>` : ''}
+      <p class="ia-footnote">Score orientativo por modelo/año — la unidad concreta la evaluás vos al verla.</p>`;
+  }
+  function buildAdvPickHtml(card) {
+    const tipo = card.tipo === 'modelo' ? 'Modelo recomendado'
+      : card.tipo === 'tasacion' ? 'Tasación'
+      : card.tipo === 'alternativa' ? 'Alternativa'
+      : card.tipo === 'publicacion' ? 'Publicación'
+      : 'Recomendación';
+    const price = card.precio ? fmtPrice(card.precio, card.moneda || 'ARS') : null;
+    const meta = [price, card.año, card.kilometros ? `${Number(card.kilometros).toLocaleString('es-AR')} km` : null, card.fuente].filter(Boolean).join(' · ');
+    const thumb = card.imagen
+      ? `<img src="${escapeHtml(card.imagen)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;adv-pick-ph&quot;>🚗</div>'" />`
+      : '<div class="adv-pick-ph">🚗</div>';
+    const body = `<div class="adv-pick-body">
+      <span class="adv-pick-type">${escapeHtml(tipo)}${card.score != null ? ` · ${card.score}/100` : ''}</span>
+      <strong>${escapeHtml(card.titulo || 'Auto sugerido')}</strong>
+      ${meta ? `<span class="adv-pick-meta">${escapeHtml(meta)}</span>` : ''}
+      ${card.justificacion ? `<span class="adv-pick-meta">${escapeHtml(card.justificacion)}</span>` : ''}
+    </div>`;
+    if (!card.link) return `<div class="adv-pick no-link">${thumb}${body}</div>`;
+    return `<a class="adv-pick" href="${escapeHtml(card.link)}" target="_blank" rel="noopener">${thumb}${body}<span class="adv-pick-go">Ver →</span></a>`;
+  }
+  let transactionGuideCache = null;
+  let pendingFollowUpId = null;
+  const FALLBACK_CHECKLIST = {
+    keys: ['vtv_ok','service_al_dia','dueno_unico','precio_negociable','titular_ok','sin_siniestros'],
+    labels: {
+      vtv_ok: 'VTV al día', service_al_dia: 'Service documentado', dueno_unico: 'Dueño único',
+      precio_negociable: 'Precio negociable', titular_ok: 'Titular / papeles ok', sin_siniestros: 'Sin siniestros declarados'
+    }
+  };
+  function checklistMeta() {
+    return transactionGuideCache?.checklist_unidad || FALLBACK_CHECKLIST;
+  }
+  function checklistProgress(cl) {
+    const keys = checklistMeta().keys;
+    let done = 0;
+    for (const k of keys) if (cl?.[k] === true || cl?.[k] === false) done++;
+    return { done, total: keys.length };
+  }
+  async function loadTransactionGuide() {
+    if (transactionGuideCache) return transactionGuideCache;
+    const data = await api('/api/transaction-guide');
+    transactionGuideCache = data.guide;
+    return transactionGuideCache;
+  }
+  function guiaCompraFromBrief(brief) {
+    return brief?.guia_compra || transactionGuideCache?.guia_compra || null;
+  }
+  function buildGuiaCompraBriefHtml(guia) {
+    if (!guia?.pasos?.length) return '';
+    const pasos = guia.pasos.map(p => `
+      <article class="ab-paso">
+        <h5>${escapeHtml(p.titulo)}</h5>
+        ${p.destacado ? `<p><strong>${escapeHtml(p.destacado)}</strong></p>` : ''}
+        <ul>${(p.items || []).map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>
+      </article>`).join('');
+    return `<div class="ab-section ab-tramite">
+      <h4>Cómo cerrar la compra (boleto, pago y transferencia)</h4>
+      ${guia.resumen ? `<p class="ab-text">${escapeHtml(guia.resumen)}</p>` : ''}
+      ${pasos}
+    </div>`;
+  }
+  function buildFollowUpHtml(car) {
+    if ((car.status || 'saved') !== 'contacted') return '';
     const id = escapeHtml(car.id);
+    const meta = checklistMeta();
     const cl = car.checklist || {};
     const { done, total } = checklistProgress(cl);
-    const rows = CHECKLIST_KEYS.map(key => {
+    const rows = meta.keys.map(key => {
       const val = cl[key];
-      return `<div class="check-row"><span>${escapeHtml(CHECKLIST_LABELS[key])}</span><div class="check-btns">
+      const label = meta.labels[key] || key;
+      return `<div class="check-row"><span>${escapeHtml(label)}</span><div class="check-btns">
         <button type="button" class="${val===true?'on-yes':''}" data-check-key="${key}" data-check-val="true" data-listing="${id}">Sí</button>
         <button type="button" class="${val===false?'on-no':''}" data-check-key="${key}" data-check-val="false" data-listing="${id}">No</button>
         <button type="button" class="${val==null?'on-yes':''}" data-check-key="${key}" data-check-val="null" data-listing="${id}">—</button>
       </div></div>`;
     }).join('');
-    return `
-      <button class="checklist-toggle" type="button" data-checklist-toggle="${id}">Checklist de compra · ${done}/${total}</button>
-      <div class="checklist-box" data-checklist-box="${id}" hidden>
-        <span class="checklist-progress">${done} de ${total} revisados</span>
+    const guia = guiaCompraFromBrief(state.viewBoard?.advisor_brief);
+    const steps = (guia?.pasos || []).map(p => `
+      <div class="followup-step">
+        <b>${escapeHtml(p.titulo)}</b>
+        ${p.destacado ? `<p>${escapeHtml(p.destacado)}</p>` : ''}
+        <ul>${(p.items || []).slice(0, 4).map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>
+      </div>`).join('');
+    const openAttr = pendingFollowUpId === car.id ? ' open' : '';
+    return `<details class="followup"${openAttr} data-followup="${id}">
+      <summary>Seguimiento de compra · checklist ${done}/${total}</summary>
+      <div class="followup-body">
+        <div><strong>Checklist de la unidad</strong> (lo completás al ver el auto)</div>
         ${rows}
-      </div>`;
+        ${steps ? `<div class="followup-steps"><strong>Próximos pasos</strong>${steps}</div>` : ''}
+        <button type="button" class="note-toggle" data-scroll-tramite>Ver guía completa de trámite</button>
+      </div>
+    </details>`;
+  }
+  function renderTransactionGuide(guide) {
+    const wrap = $('transactionGuideWrap');
+    const panel = $('panelTramite');
+    const guia = guiaCompraFromBrief(state.viewBoard?.advisor_brief);
+    const parts = [];
+    if (guia?.pasos?.length) parts.push(buildGuiaCompraBriefHtml(guia));
+    if (guide?.secciones?.length) {
+      const body = guide.secciones.map(s => `
+        <section class="tx-section">
+          <h4>${escapeHtml(s.titulo)}</h4>
+          <ul>${(s.items || []).map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>
+        </section>`).join('');
+      parts.push(`<div class="tx-guide-body">
+        ${guide.titulo ? `<h4 style="margin:0 0 var(--s2)">${escapeHtml(guide.titulo)}</h4>` : ''}
+        ${guide.aviso ? `<p class="tx-guide-aviso">${escapeHtml(guide.aviso)}</p>` : ''}
+        ${body}
+      </div>`);
+    }
+    if (!parts.length) {
+      wrap.innerHTML = '<p class="kn-empty">Guía de trámite al contactar vendedores y cerrar la operación.</p>';
+      if (panel) panel.hidden = false;
+      return;
+    }
+    wrap.innerHTML = parts.join('');
+    if (panel) panel.hidden = false;
   }
 
   async function api(path, opts = {}) {
@@ -574,16 +1190,21 @@
         : `<button type="button" class="star ${short?'on':''}" data-shortlist="${id}" data-current="${short?1:0}">${short?'★ Guardada':'☆ Guardar'}</button>
            <button type="button" data-status="contacted" data-listing="${id}">Contactado</button>
            <button type="button" data-status="discarded" data-listing="${id}">Descartar</button>`;
+      const scoreLbl = car.listing_analysis?.score != null ? ` (${car.listing_analysis.score})` : '';
       actions = `
-        <div class="actions"><a class="btn" href="${escapeHtml(car.link)}" target="_blank" rel="noopener">Ver origen</a></div>
+        <div class="card-actions">
+          <a class="btn" href="${escapeHtml(car.link)}" target="_blank" rel="noopener">Ver aviso</a>
+          <button type="button" class="btn ghost ia-toggle" data-ia-detail-toggle="${id}">Ficha técnica${scoreLbl}</button>
+        </div>
+        <div class="ia-detail" data-ia-detail-box="${id}" hidden>${buildListingAnalysisHtml(car)}</div>
         <div class="life">${life}</div>
         ${note ? `<div class="note-preview">📝 ${escapeHtml(note)}</div>` : ''}
-        <button class="note-toggle" type="button" data-note-toggle="${id}">${note ? '✎ Editar nota' : '+ Agregar nota'}</button>
+        <button class="note-toggle" type="button" data-note-toggle="${id}">${note ? '✎ Nota' : '+ Nota'}</button>
         <div class="note-edit" data-note-box="${id}" hidden>
-          <textarea class="note-input" rows="2" placeholder="Nota de esta publicación (ej: dueño dice que está impecable, pedir VTV)">${escapeHtml(note)}</textarea>
-          <button class="btn" type="button" data-note-save="${id}">Guardar nota</button>
+          <textarea class="note-input" rows="2" placeholder="Tu observación de esta unidad">${escapeHtml(note)}</textarea>
+          <button class="btn" type="button" data-note-save="${id}">Guardar</button>
         </div>
-        ${buildChecklistHtml(car)}`;
+        ${buildFollowUpHtml(car)}`;
     } else {
       const pinned = state.pinnedLinks.has(car.link);
       actions = `<div class="actions">
@@ -592,18 +1213,25 @@
       </div>`;
     }
 
+    const domId = listingDomId(car);
+    const title = car.link
+      ? `<a class="title-link" href="${escapeHtml(car.link)}" target="_blank" rel="noopener">${escapeHtml(car.titulo||car.title)}</a>`
+      : escapeHtml(car.titulo||car.title);
     return `
-      <article class="card ${isNew?'fresh':''} ${status==='discarded'?'discarded':''} ${car.shortlisted?'starred':''} ${car.recomendado?'recommended':''}" data-car-id="${escapeHtml(car.id||car.link)}">
+      <article class="card ${isNew?'fresh':''} ${status==='discarded'?'discarded':''} ${car.shortlisted?'starred':''} ${car.recomendado?'recommended':''} ${pendingFollowUpId===car.id?'contacted-open':''}" ${domId ? `id="${escapeHtml(domId)}"` : ''} data-car-id="${escapeHtml(car.id||car.link)}">
         ${isNew ? '<span class="ribbon">Nuevo</span>' : ''}
         ${car.recomendado ? '<span class="ribbon" style="left:auto;right:10px;background:var(--blue)">Recomendado</span>' : ''}
         ${media}
         <div class="body">
-          <h4 class="title">${escapeHtml(car.titulo||car.title)}</h4>
+          <h4 class="title">${title}</h4>
           <div class="price">${escapeHtml(fmtPrice(car.precio||car.price, moneda))}${drop ? `<span class="was">${escapeHtml(fmtPrice(car.precio_anterior, moneda))}</span>` : ''}</div>
           <div class="badges">
             ${drop ? '<span class="drop">↓ Bajó de precio</span>' : ''}
             ${car.recomendado ? '<span class="mkt rec">Recomendado</span>' : ''}
             ${car._mercado === 'barato' ? '<span class="mkt good">Buen precio</span>' : car._mercado === 'caro' ? '<span class="mkt bad">Por encima del mercado</span>' : car._mercado === 'normal' ? '<span class="mkt mid">En precio</span>' : ''}
+            ${car.catalog_esp === true ? '<span class="mkt good">ESP</span>' : car.catalog_esp === false ? '<span class="mkt bad">Sin ESP</span>' : ''}
+            ${car.catalog_distribucion ? `<span class="mkt mid">${escapeHtml(car.catalog_distribucion)}</span>` : ''}
+            ${car.listing_analysis?.score != null ? `<span class="score-pill" title="Score de referencia">${car.listing_analysis.score}</span>` : ''}
           </div>
           <div class="specs">${specs}</div>
           ${car.insight ? `<div class="insight">${escapeHtml(car.insight)}</div>` : ''}
@@ -647,7 +1275,10 @@
     $('navInicio').classList.toggle('active', view === 'inicio' || view === 'board');
     $('navHoy').classList.toggle('active', view === 'hoy');
     if (view !== 'board') state.viewBoardId = '';
+    toggleBoardsSheet(false);
     renderRail();
+    renderBottomNav();
+    syncBoardPanels();
     if (state.advisor.open) updateDockCtx();
   }
 
@@ -667,6 +1298,7 @@
 
     $('boardPicker').innerHTML = '<option value="">Pinear a… (elegí búsqueda)</option>' +
       state.boards.map(b => `<option value="${escapeHtml(b.id)}">${escapeHtml(b.name)}</option>`).join('');
+    renderBottomNav();
   }
 
   /* ---------- data loads ---------- */
@@ -759,9 +1391,11 @@
         recomendado: l.recomendado ?? listingIsRecommended(l, modelos)
       }));
       renderAdvisorBrief(b.advisor_brief);
+      loadTransactionGuide().then(renderTransactionGuide).catch(() => renderTransactionGuide(null));
       renderReport('boardReport', b.runs?.[0]?.portal_results || []);
       setView('board');
       renderBoardGrid();
+      syncBoardPanels();
       loadKnowledge(b);
       setStatus(`${b.total} autos en “${b.name}”`);
       if (newCount) { try { await api(`/api/boards/${encodeURIComponent(boardId)}/seen`, { method:'POST' }); await loadBoards(); state.viewBoardId = b.id; renderRail(); } catch {} }
@@ -770,27 +1404,44 @@
   function renderBoardGrid() {
     tagMarket(state.boardFeed);
     let list = withData(state.showDiscarded ? state.boardFeed : state.boardFeed.filter(c => (c.status||'saved') !== 'discarded'));
+    if (state.advisorGridFilter) list = list.filter(c => matchesAdvisorFiltersLocal(c, state.advisorGridFilter));
     if (state.showShortlisted) list = list.filter(c => c.shortlisted);
     const emptyMsg = state.showShortlisted
       ? 'No guardaste ninguna publicación todavía. Tocá “☆ Guardar” en las que te interesen.'
       : 'Esta búsqueda no tiene autos. Tocá “Revisar novedades”.';
-    $('boardGrid').innerHTML = list.length ? list.map(c => buildCard(c, 'board')).join('') : `<div class="empty">${emptyMsg}</div>`;
+    $('boardGrid').innerHTML = list.length ? list.map(c => buildCard(c, 'board')).join('') : `<div class="empty">${state.advisorGridFilter ? 'Ningún auto del tablero cumple el filtro del asesor. Probá aflojar precio o km.' : emptyMsg}</div>`;
+    renderAdvisorFilterBar();
+    if (state.viewBoard?.advisor_brief) renderAdvisorBrief(state.viewBoard.advisor_brief);
     if (state.advisor.open) updateDockCtx();
+    if (pendingFollowUpId) {
+      const card = document.getElementById(listingDomId({ id: pendingFollowUpId }));
+      card?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      pendingFollowUpId = null;
+    }
   }
   function renderAdvisorBrief(brief) {
     const el = $('advisorBrief');
-    if (!brief) { el.hidden = true; el.innerHTML = ''; return; }
+    const panel = $('panelBrief');
+    if (!brief) {
+      el.hidden = true;
+      el.innerHTML = '';
+      if (panel) panel.hidden = true;
+      return;
+    }
     el.hidden = false;
-    const models = (brief.modelos_recomendados || []).map(m => `
-      <div class="ab-model"><strong>${escapeHtml([m.marca, m.modelo].filter(Boolean).join(' '))}</strong><span>${escapeHtml(m.motivo || '')}</span></div>`).join('');
+    if (panel) panel.hidden = false;
+    const modelos = brief.modelos_recomendados || [];
+    const guides = modelos.map(m => buildModelGuideHtml(m)).join('');
     const criterios = (brief.criterios || []).map(c => `<span class="pill">${escapeHtml(c)}</span>`).join('');
     const evitar = (brief.evitar || []).map(x => `<span>${escapeHtml(x)}</span>`).join('');
     el.innerHTML = `
       ${brief.query_original ? `<p class="ab-query">“${escapeHtml(brief.query_original)}”</p>` : ''}
       ${brief.explicacion ? `<p class="ab-text">${escapeHtml(brief.explicacion)}</p>` : ''}
-      ${models ? `<div class="ab-section"><h4>Modelos recomendados</h4><div class="ab-models">${models}</div></div>` : ''}
+      ${guides ? `<div class="ab-section"><h4>Qué modelos y versiones convienen</h4><p class="ab-text" style="margin:0 0 var(--s2);font-size:var(--t-sm);color:var(--muted)">Recomendación por equipamiento y años. En cada aviso: <strong>Ficha técnica</strong>. Si contactás al vendedor, se abre el <strong>seguimiento de compra</strong>.</p><div class="mg-grid">${guides}</div></div>` : ''}
       ${evitar ? `<div class="ab-section"><h4>Qué evitar</h4><div class="ab-warn">${evitar}</div></div>` : ''}
       ${criterios ? `<div class="ab-section"><h4>Criterios aplicados</h4><div class="specs">${criterios}</div></div>` : ''}`;
+    syncBoardPanels();
+    loadTransactionGuide().then(renderTransactionGuide).catch(() => renderTransactionGuide(null));
   }
   /* ---------- Conocimiento del modelo ---------- */
   function modelOf(board) {
@@ -912,7 +1563,15 @@
     return data;
   }
   async function setListingStatus(listingId, status) {
-    try { await patchListing(listingId, { status }); showToast(status==='contacted'?'Marcado como contactado':status==='discarded'?'Descartado':'Recuperado'); }
+    try {
+      if (status === 'contacted') pendingFollowUpId = listingId;
+      await patchListing(listingId, { status });
+      showToast(status === 'contacted' ? 'Contactado — completá el seguimiento de compra' : status === 'discarded' ? 'Descartado' : 'Recuperado');
+    } catch (err) { showToast(err.message); }
+  }
+  async function saveListingChecklist(listingId, key, rawVal) {
+    const val = rawVal === 'null' ? null : rawVal === 'true';
+    try { await patchListing(listingId, { checklist: { [key]: val } }); }
     catch (err) { showToast(err.message); }
   }
   async function toggleShortlist(listingId, current) {
@@ -922,13 +1581,6 @@
   async function saveListingNote(listingId, notes) {
     try { await patchListing(listingId, { notes }); showToast('Nota guardada'); }
     catch (err) { showToast(err.message); }
-  }
-
-  async function saveListingChecklist(listingId, key, rawVal) {
-    const val = rawVal === 'null' ? null : rawVal === 'true';
-    try {
-      await patchListing(listingId, { checklist: { [key]: val } });
-    } catch (err) { showToast(err.message); }
   }
 
   /* ---------- Búsqueda coloquial (hero) ---------- */
@@ -1073,6 +1725,7 @@
     state.advisor.open = open;
     $('dock').classList.toggle('open', open);
     $('overlay').classList.toggle('open', open);
+    renderBottomNav();
     if (open) { updateDockCtx(); renderAdvisor(); $('advisorInput').focus(); }
   }
   function updateDockCtx() {
@@ -1082,19 +1735,33 @@
       : feed.length ? `Mirando ${feed.length} autos` : 'Sin autos a la vista.';
   }
   function advisorContext() {
-    const ctx = { ciudad: 'Rosario', provincia: 'Santa Fe' };
-    const top = currentFeed().slice(0, 14);
-    const lines = top.map((c, i) => {
-      const price = (c.precio||c.price) ? fmtPrice(c.precio||c.price, c.moneda||c.currency) : 's/precio';
-      return `${i+1}. ${[c.titulo||c.title, price, c.año||c.year, (c.kilometros||c.km)?`${c.kilometros||c.km}km`:null, portalLabel(c.source)].filter(Boolean).join(' · ')}${c.is_new?' [NUEVO]':''}${c.precio_bajo?' [BAJÓ]':''}`;
-    });
-    if (lines.length) ctx.feedResumen = lines.join('\n').slice(0, 7800);
+    const feed = currentFeed();
+    const ctx = { ciudad: 'Rosario', provincia: 'Santa Fe', boardId: state.viewBoardId || null };
+    if (feed.length) {
+      ctx.listings = feed.slice(0, 80).map(c => ({
+        id: c.id,
+        titulo: c.titulo || c.title,
+        precio: c.precio || c.price || null,
+        año: c.año || c.year || null,
+        kilometros: c.kilometros ?? c.km ?? null,
+        link: c.link,
+        fuente: c.fuente || c.source || null,
+        recomendado: Boolean(c.recomendado)
+      }));
+    }
     const b = state.boards.find(x => x.id === state.viewBoardId);
-    if (b) ctx.tableroActivo = `Búsqueda "${b.name}" (${b.total} autos).${b.notes ? `\nNotas del usuario: ${b.notes}` : ''}\n${top.map((c,i)=>`${i+1}. ${c.titulo||c.title} — ${c.status||'guardado'}`).join('\n')}`.slice(0, 7800);
+    if (b) {
+      ctx.tableroActivo = `Búsqueda "${b.name}" (${b.total} autos).${b.notes ? ` Notas: ${b.notes}` : ''}`;
+      if (b.advisor_brief) ctx.advisor_brief = b.advisor_brief;
+      const catalogs = (b.advisor_brief?.modelos_recomendados || [])
+        .map(m => m.catalog || m.ficha)
+        .filter(c => c?.generaciones?.length);
+      if (catalogs.length) ctx.catalogs = catalogs;
+    }
     return ctx;
   }
   function ingestAdvisorCards(cards) {
-    const mapped = (cards||[]).filter(c => c.link).map(c => ({ id: c.link, source: 'asesor', fuente: c.fuente||'Sugerencia del asesor', titulo: c.titulo, precio: c.precio, moneda: c.moneda||'ARS', año: c.año, kilometros: c.kilometros, link: c.link, imagen: c.imagen, insight: c.justificacion }));
+    const mapped = (cards||[]).filter(c => c.link && c.tipo !== 'modelo').map(c => ({ id: c.link, source: 'asesor', fuente: c.fuente||'Sugerencia del asesor', titulo: c.titulo, precio: c.precio, moneda: c.moneda||'ARS', año: c.año, kilometros: c.kilometros, link: c.link, imagen: c.imagen, insight: c.justificacion }));
     const ex = new Set(state.explorarFeed.map(c => c.link));
     const fresh = mapped.filter(c => !ex.has(c.link));
     if (!fresh.length) return;
@@ -1103,10 +1770,20 @@
     showToast(`${fresh.length} sugerencia${fresh.length>1?'s':''} del asesor — mirá Buscar`);
   }
   function renderAdvisor(thinking) {
-    const sugg = ['¿De estos cuál conviene?', '¿Alguno está caro?', 'Analizá esta búsqueda', 'Mostrame una alternativa'];
-    let html = state.advisor.messages.map(m => `<div class="msg ${m.role}">${escapeHtml(m.content)}</div>`).join('');
+    const sugg = [
+      '¿Qué versión conviene de los recomendados?',
+      '¿Cuáles tienen ESP y cadena?',
+      '¿Cuáles están caros vs el mercado?',
+      'Menos de 50.000 km y hasta $20M'
+    ];
+    let html = state.advisor.messages.map(m => {
+      const picks = Array.isArray(m.cards) && m.cards.length
+        ? `<div class="adv-picks">${m.cards.map(buildAdvPickHtml).join('')}</div>`
+        : '';
+      return `<div class="msg ${m.role}">${escapeHtml(m.content)}${picks}</div>`;
+    }).join('');
     if (thinking || state.advisor.sending) html += '<div class="msg assistant thinking">Pensando…</div>';
-    if (!state.advisor.messages.length && !thinking) html = `<div class="dock-empty"><b>Preguntame sobre lo que ves.</b>Conozco los autos del feed y de la búsqueda abierta: los taso, te digo cuál está caro o te sugiero una alternativa.</div><div class="sugg">${sugg.map(s=>`<button type="button" data-sugg="${escapeHtml(s)}">${escapeHtml(s)}</button>`).join('')}</div>`;
+    if (!state.advisor.messages.length && !thinking) html = `<div class="dock-empty"><b>Preguntame sobre lo que ves.</b>Filtrá por precio, km o potencia; te digo cuáles están caros y por qué conviene cada modelo (cadena, correa, problemas en AR).</div><div class="sugg">${sugg.map(s=>`<button type="button" data-sugg="${escapeHtml(s)}">${escapeHtml(s)}</button>`).join('')}</div>`;
     $('stream').innerHTML = html;
     $('stream').scrollTop = $('stream').scrollHeight;
   }
@@ -1118,8 +1795,13 @@
     $('advisorInput').value = ''; renderAdvisor(true); state.advisor.sending = true;
     try {
       const data = await api('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ messages: state.advisor.messages, contexto: advisorContext(), sessionId: state.advisor.sessionId }) });
-      state.advisor.messages.push({ role:'assistant', content: data.texto || 'Listo.' });
-      if (Array.isArray(data.cards) && data.cards.length) ingestAdvisorCards(data.cards);
+      const cards = Array.isArray(data.cards) ? data.cards : [];
+      state.advisor.messages.push({ role:'assistant', content: data.texto || 'Listo.', cards });
+      if (data.analisis?.mode === 'listings' && data.filtros && Object.keys(data.filtros).length) {
+        state.advisorGridFilter = data.filtros;
+        if (state.view === 'board') renderBoardGrid();
+      }
+      if (cards.length) ingestAdvisorCards(cards);
     } catch (err) { state.advisor.messages.push({ role:'assistant', content: `Uy, se complicó: ${err.message}` }); }
     finally { state.advisor.sending = false; renderAdvisor(); }
   }
@@ -1143,17 +1825,42 @@
   $('showShortlisted').addEventListener('change', e => { state.showShortlisted = e.target.checked; renderBoardGrid(); });
 
   $('alertsList').addEventListener('click', e => { const b = e.target.closest('[data-board-id]'); if (b) openBoard(b.dataset.boardId); });
+  $('boardsSheetList').addEventListener('click', e => {
+    const b = e.target.closest('[data-board-id]');
+    if (b) { toggleBoardsSheet(false); openBoard(b.dataset.boardId); }
+  });
+  $('bnBuscar').addEventListener('click', () => showInicio());
+  $('bnHoy').addEventListener('click', async () => { await loadToday(); showHoy(); });
+  $('bnBoards').addEventListener('click', () => toggleBoardsSheet(true));
+  $('bnAdvisor').addEventListener('click', () => toggleAdvisor(true));
+  $('closeBoardsSheet').addEventListener('click', () => toggleBoardsSheet(false));
+  $('boardsSheetOverlay').addEventListener('click', () => toggleBoardsSheet(false));
+  window.addEventListener('resize', () => { if (state.view === 'board') syncBoardPanels(); });
 
   document.querySelector('.main').addEventListener('click', e => {
+    const flash = e.target.closest('[data-flash-listing]');
+    if (flash?.dataset.flashListing) {
+      flashListingCard(flash.dataset.flashListing);
+    }
     const ob = e.target.closest('[data-open-board]'); if (ob) { openBoard(ob.dataset.openBoard); return; }
     const pin = e.target.closest('[data-pin]'); if (pin) { pinCar(pin.dataset.pin); return; }
     const sl = e.target.closest('[data-shortlist]'); if (sl) { toggleShortlist(sl.dataset.shortlist, sl.dataset.current === '1'); return; }
     const nt = e.target.closest('[data-note-toggle]'); if (nt) { const box = document.querySelector(`[data-note-box="${CSS.escape(nt.dataset.noteToggle)}"]`); if (box) box.hidden = !box.hidden; return; }
-    const ct = e.target.closest('[data-checklist-toggle]'); if (ct) { const box = document.querySelector(`[data-checklist-box="${CSS.escape(ct.dataset.checklistToggle)}"]`); if (box) box.hidden = !box.hidden; return; }
+    const ia = e.target.closest('[data-ia-detail-toggle]'); if (ia) { const box = document.querySelector(`[data-ia-detail-box="${CSS.escape(ia.dataset.iaDetailToggle)}"]`); if (box) box.hidden = !box.hidden; return; }
+    const st = e.target.closest('[data-status]'); if (st?.dataset.status) { setListingStatus(st.dataset.listing, st.dataset.status); return; }
     const ck = e.target.closest('[data-check-key]'); if (ck) { saveListingChecklist(ck.dataset.listing, ck.dataset.checkKey, ck.dataset.checkVal); return; }
+    if (e.target.closest('[data-scroll-tramite]')) {
+      const panel = $('panelTramite');
+      if (panel) { panel.open = true; panel.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      return;
+    }
     const ns = e.target.closest('[data-note-save]'); if (ns) { const ta = ns.closest('.card')?.querySelector('.note-input'); saveListingNote(ns.dataset.noteSave, ta ? ta.value : ''); return; }
     if (e.target.closest('[data-kn-notes]')) { pasteKnowledgeToNotes(); return; }
-    const st = e.target.closest('[data-status]'); if (st) setListingStatus(st.dataset.listing, st.dataset.status);
+    if (e.target.id === 'clearAdvisorFilter' || e.target.closest('#clearAdvisorFilter')) {
+      state.advisorGridFilter = null;
+      renderBoardGrid();
+      return;
+    }
   });
 
   $('openAdvisor').addEventListener('click', () => toggleAdvisor(true));
