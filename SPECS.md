@@ -541,17 +541,17 @@ No agregues opiniones, solo datos verificables.
 
 ## 7. Frontend: diseño, componentes y estado
 
-> **Fuente de verdad visual:** [`docs/UX_STYLE_GUIDE.md`](docs/UX_STYLE_GUIDE.md)  
-> El layout oscuro chat-first descrito abajo está **obsoleto**. El UI actual es mobile-first, tema claro, agregador + asesor en dock.
+> **Fuente de verdad visual:** [`docs/UX_STYLE_GUIDE.md`](docs/UX_STYLE_GUIDE.md) · [`DESIGN.md`](DESIGN.md) (Renault-inspired)  
+> El layout oscuro chat-first descrito abajo está **obsoleto**.
 
 ### 7.1 Resumen técnico
 
 - **Archivo:** `public/index.html` (HTML + CSS + vanilla JS, sin build).
-- **Vistas:** `inicio` (buscar), `hoy` (novedades), `board` (tablero por búsqueda).
-- **Nav:** bottom nav &lt;1024px; rail lateral ≥1024px.
-- **Tablero:** grid de avisos primero; brief, trámite y herramientas en paneles colapsables.
+- **Vistas:** `inicio` (hero aurora + buscar), `busquedas`, `board` (workspace con tabs), `hoy`.
+- **Nav:** `shell-nav` blanco ≥1024px; topbar + bottom nav &lt;1024px.
+- **Diseño:** alto contraste blanco/negro, acento amarillo `#ffed00`, Inter Tight, cards cuadradas sin sombra.
 
-Tokens, breakpoints, componentes y anti-patrones: ver guía UX.
+Tokens, breakpoints, componentes y anti-patrones: ver guía UX y DESIGN.md.
 
 ### 7.2 Estado del frontend
 

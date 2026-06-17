@@ -4,65 +4,186 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>El Garaje · Agregador de autos usados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;600;700&display=swap" rel="stylesheet" />
 <style>
+  /* Tokens — Renault DESIGN.md (NouvelR → Inter Tight) */
   :root {
-    --canvas: #f3f1ec;
+    --primary: #ffed00;
+    --primary-deep: #e6d200;
+    --on-primary: #000000;
+    --canvas: #ffffff;
     --panel: #ffffff;
-    --panel-soft: #faf9f6;
-    --ink: #18170f;
-    --muted: #6c675d;
-    --subtle: #9a9489;
-    --line: #e6e1d6;
-    --line-strong: #d6cdbb;
-    --brand: #e23d2b;
-    --brand-dark: #9e2419;
-    --good: #157a4f;
-    --good-soft: rgba(21,122,79,0.12);
-    --blue: #255c99;
-    --r-sm: 8px;
-    --r-md: 11px;
-    --r-lg: 16px;
-    --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 28px;
-    --t-xs: 11px; --t-sm: 13px; --t-md: 15px; --t-lg: 18px; --t-xl: 22px; --t-2xl: 28px;
-    --sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-    --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-    --nav-bottom-h: 56px;
+    --panel-soft: #f7f7f7;
+    --surface-dark: #000000;
+    --surface-deep: #111111;
+    --ink: #000000;
+    --body: #222222;
+    --muted: #666666;
+    --subtle: #8a8a8a;
+    --line: #f2f2f2;
+    --line-strong: #000000;
+    --divider-dark: rgba(255,255,255,0.16);
+    --on-dark: #ffffff;
+    --on-dark-mute: rgba(255,255,255,0.72);
+    --brand: var(--primary);
+    --brand-dark: var(--primary-deep);
+    --good: #8dc572;
+    --good-soft: rgba(141,197,114,0.16);
+    --blue: #337ab7;
+    --error: #be6464;
+    --r-none: 0;
+    --r-xs: 2px;
+    --r-sm: 2px;
+    --r-md: 4px;
+    --r-lg: 0;
+    --r-pill: 46px;
+    --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s7: 32px; --s8: 40px; --section: 80px;
+    --t-xs: 10px; --t-sm: 12px; --t-md: 14px; --t-lg: 16px; --t-xl: 20px; --t-2xl: 24px; --t-display: clamp(2rem, 6vw, 3.5rem);
+    --sans: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+    --mono: "SFMono-Regular", Consolas, monospace;
+    --nav-bottom-h: 60px;
     --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --aurora: linear-gradient(128deg, #e040a0 0%, #7b2cbf 38%, #2ec4b6 72%, #ffed00 100%);
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
-  body { margin: 0; background: var(--canvas); color: var(--ink); font-family: var(--sans); line-height: 1.45; }
+  body {
+    margin: 0; background: var(--canvas); color: var(--ink);
+    font-family: var(--sans); font-size: var(--t-md); font-weight: 400; line-height: 1.4;
+  }
+  h1, h2, h3, h4, h5 { font-weight: 700; line-height: 0.95; letter-spacing: 0; }
+  .overline { font-size: var(--t-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--on-dark-mute); margin: 0 0 var(--s3); }
   button, input, select, textarea { font: inherit; color: inherit; }
   button { cursor: pointer; }
   button:disabled { cursor: not-allowed; opacity: 0.55; }
   a { color: inherit; }
 
-  .app { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
-
-  /* ---------- Rail ---------- */
-  .rail {
-    position: sticky; top: 0; align-self: start; height: 100vh;
-    display: grid; grid-template-rows: auto auto auto 1fr auto;
-    border-right: 1px solid var(--line); background: var(--panel);
-    padding: var(--s4) var(--s3);
-    gap: var(--s2);
+  /* ---------- App shell — nav-bar Renault ---------- */
+  .app-shell { display: grid; grid-template-columns: 72px 1fr; min-height: 100vh; min-height: 100dvh; }
+  .shell-nav {
+    position: sticky; top: 0; height: 100vh; height: 100dvh;
+    display: flex; flex-direction: column; align-items: stretch; gap: 2px;
+    padding: var(--s4) var(--s2); background: var(--canvas); color: var(--muted);
+    border-right: 1px solid var(--line); z-index: 30;
   }
-  .brand { display: flex; align-items: center; gap: var(--s3); padding: var(--s2) var(--s2) var(--s4); }
-  .brand-mark { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: var(--brand); color: #fff; font-weight: 900; }
-  .brand b { font-size: var(--t-md); }
-  .brand small { display: block; color: var(--muted); font-size: var(--t-xs); }
-
-  .nav { display: grid; gap: 2px; }
-  .nav button {
-    display: flex; align-items: center; gap: var(--s3); width: 100%;
-    border: 0; background: transparent; border-radius: var(--r-sm);
-    padding: 9px var(--s3); text-align: left; font-weight: 700; font-size: var(--t-sm); color: var(--muted);
+  .shell-brand {
+    display: grid; place-items: center; width: 40px; height: 40px; margin: 0 auto var(--s4);
+    border-radius: var(--r-none); background: var(--surface-dark); color: var(--primary);
+    font-weight: 700; font-size: var(--t-lg); text-decoration: none;
   }
-  .nav button .ico { width: 18px; text-align: center; opacity: 0.8; }
-  .nav button:hover { background: var(--panel-soft); color: var(--ink); }
-  .nav button.active { background: var(--ink); color: #fff; }
-  .nav .nav-badge { margin-left: auto; background: var(--brand); color: #fff; border-radius: 999px; font-size: 10px; font-weight: 850; padding: 1px 7px; }
-  .nav button.active .nav-badge { background: #fff; color: var(--brand); }
+  .shell-btn {
+    display: grid; justify-items: center; gap: 4px; border: 0; background: transparent;
+    border-radius: var(--r-xs); padding: 10px 4px; color: inherit;
+    font-size: 9px; font-weight: 700; min-height: 52px; letter-spacing: 0.01em;
+    transition: background .12s, color .12s;
+  }
+  .shell-btn span:first-child { font-size: 18px; line-height: 1; }
+  .shell-btn:hover { color: var(--ink); background: var(--panel-soft); }
+  .shell-btn.active { color: var(--ink); background: var(--panel-soft); box-shadow: inset 2px 0 0 var(--ink); }
+  .shell-btn .shell-badge {
+    position: absolute; margin-top: -2px; margin-left: 16px;
+    background: var(--primary); color: var(--on-primary); border-radius: var(--r-pill);
+    font-size: 9px; font-weight: 700; padding: 2px 6px;
+  }
+  .shell-btn { position: relative; }
+  .shell-spacer { flex: 1; }
+  .shell-foot {
+    display: grid; gap: 4px; justify-items: center; padding-top: var(--s3);
+    border-top: 1px solid var(--line); font-size: 9px; color: var(--subtle); text-align: center;
+  }
+  .shell-foot .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--good); }
+  .shell-body { min-width: 0; display: flex; flex-direction: column; background: var(--canvas); }
+  .shell-topbar {
+    display: none; align-items: center; gap: var(--s3); min-height: var(--nav-bottom-h);
+    padding: 0 var(--s4); background: var(--canvas); border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 25;
+  }
+  .shell-topbar b { font-size: var(--t-lg); font-weight: 700; display: block; line-height: 0.95; }
+  .shell-topbar small { color: var(--muted); font-size: var(--t-sm); font-weight: 400; }
+  .brand-mark {
+    width: 32px; height: 32px; border-radius: var(--r-none);
+    display: grid; place-items: center; background: var(--surface-dark); color: var(--primary); font-weight: 700;
+  }
+
+  /* ---------- Hero band — aurora + storytelling oscuro ---------- */
+  .hero-band {
+    position: relative; overflow: hidden;
+    margin: calc(-1 * var(--s6)) calc(-1 * var(--s6)) var(--s7);
+    padding: clamp(var(--s8), 10vw, var(--section)) var(--s6);
+    background: var(--surface-dark); color: var(--on-dark);
+  }
+  .hero-band::before {
+    content: ""; position: absolute; inset: 0;
+    background: var(--aurora); opacity: 0.9;
+  }
+  .hero-band::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.55) 100%);
+  }
+  .hero-band-inner { position: relative; z-index: 1; max-width: 640px; }
+  .hero-band h1 { margin: 0 0 var(--s4); font-size: var(--t-display); color: var(--on-dark); }
+  .hero-band .lead { margin: 0 0 var(--s6); color: var(--on-dark-mute); font-size: var(--t-lg); font-weight: 400; line-height: 1.3; max-width: 520px; }
+  .catalog-body { max-width: 1440px; }
+
+  /* ---------- Mis búsquedas (hub) ---------- */
+  .view-head { margin-bottom: var(--s7); max-width: 560px; padding-top: var(--s2); }
+  .view-head h2 { margin: 0 0 var(--s3); font-size: var(--t-2xl); }
+  .view-head p { margin: 0; color: var(--muted); line-height: 1.4; font-size: var(--t-md); }
+  .view-head .text-btn { margin-top: var(--s4); padding-left: 0; }
+  .board-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; border-top: 1px solid var(--line-strong); }
+  .board-row {
+    display: grid; grid-template-columns: 1fr auto; gap: var(--s4); align-items: center;
+    width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line);
+    border-radius: var(--r-none); background: var(--canvas); padding: var(--s5) var(--s2);
+    cursor: pointer; transition: background .12s;
+  }
+  .board-row:hover { background: var(--panel-soft); }
+  .board-row.active { background: var(--panel-soft); box-shadow: inset 3px 0 0 var(--primary); }
+  .board-row h3 { margin: 0 0 var(--s1); font-size: var(--t-lg); line-height: 0.95; }
+  .board-row .board-row-meta { display: flex; flex-wrap: wrap; gap: var(--s2); color: var(--muted); font-size: var(--t-sm); }
+  .board-row .board-row-chevron { font-size: var(--t-xl); color: var(--ink); line-height: 0.95; font-weight: 700; }
+
+  /* ---------- Workspace (tablero) ---------- */
+  .view-workspace { max-width: none; }
+  .workspace-header {
+    display: grid; grid-template-columns: auto 1fr auto; gap: var(--s3); align-items: center;
+    margin-bottom: var(--s4); padding-bottom: var(--s4); border-bottom: 1px solid var(--line);
+  }
+  .workspace-back {
+    width: 40px; height: 40px; border: 1px solid var(--line-strong); border-radius: var(--r-xs);
+    background: var(--canvas); font-size: var(--t-lg); color: var(--ink);
+  }
+  .workspace-eyebrow { margin: 0 0 2px; font-size: var(--t-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--subtle); }
+  .workspace-header h2 { margin: 0; font-size: var(--t-xl); }
+  .workspace-header p { margin: var(--s2) 0 0; color: var(--muted); font-size: var(--t-sm); line-height: 1.4; }
+  .workspace-tabs {
+    display: flex; gap: var(--s2); overflow-x: auto; margin-bottom: var(--s6);
+    padding-bottom: var(--s2); -webkit-overflow-scrolling: touch;
+  }
+  .workspace-tabs button {
+    flex: none; border: 1px solid var(--line-strong); background: var(--canvas);
+    border-radius: var(--r-pill); padding: 8px 16px; height: 36px;
+    font-weight: 600; font-size: var(--t-sm); color: var(--ink); letter-spacing: 0.01em;
+  }
+  .workspace-tabs button.active { background: var(--surface-dark); color: var(--on-dark); border-color: var(--surface-dark); }
+  .workspace-tabs button em {
+    font-style: normal; font-size: var(--t-xs); font-weight: 700; color: inherit;
+    background: transparent; padding: 0; margin-left: 6px; opacity: 0.72;
+  }
+  .workspace-pane { display: none; }
+  .workspace-pane.active { display: block; }
+  .workspace-split { display: grid; gap: var(--s5); }
+  .workspace-rail { display: none; }
+  .workspace-rail-card {
+    border: 1px solid var(--line-strong); border-radius: var(--r-none);
+    background: var(--panel-soft); padding: var(--s5);
+    position: sticky; top: var(--s4);
+  }
+  .workspace-rail-card h4 { margin: 0 0 var(--s2); font-size: var(--t-sm); font-weight: 800; color: var(--ink); }
+  .workspace-rail-card p { margin: 0 0 var(--s3); font-size: var(--t-sm); color: var(--muted); line-height: 1.45; }
+  .rail, .mobile-header { display: none !important; }
 
   .rail-label { display: flex; align-items: center; justify-content: space-between; padding: var(--s3) var(--s3) var(--s1); color: var(--subtle); font-size: var(--t-xs); font-weight: 850; text-transform: uppercase; letter-spacing: 0.04em; }
   .alerts { list-style: none; margin: 0; padding: 0 var(--s1); overflow-y: auto; display: grid; gap: 2px; align-content: start; }
@@ -71,7 +192,10 @@
   .alert-item.active { background: var(--panel-soft); box-shadow: inset 2px 0 0 var(--brand); }
   .alert-item .row { display: flex; align-items: center; gap: var(--s2); }
   .alert-item strong { font-size: var(--t-sm); font-weight: 750; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .alert-item .mini-badge { margin-left: auto; flex: none; background: var(--brand); color: #fff; border-radius: 999px; font-size: 10px; font-weight: 850; padding: 1px 6px; }
+  .alert-item .mini-badge, .mini-badge {
+    margin-left: auto; flex: none; background: var(--primary); color: var(--on-primary);
+    border-radius: var(--r-pill); font-size: var(--t-xs); font-weight: 700; padding: 4px 10px;
+  }
   .alert-item span.sub { color: var(--subtle); font-size: var(--t-xs); }
   .alerts-empty { padding: var(--s3); color: var(--subtle); font-size: var(--t-xs); }
 
@@ -80,7 +204,8 @@
   .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); flex: none; }
 
   /* ---------- Main ---------- */
-  .main { min-width: 0; padding: var(--s5) var(--s6); }
+  .main { min-width: 0; padding: var(--s6); max-width: 1440px; }
+  .app-shell .main { max-width: none; margin: 0 auto; width: 100%; }
   .view { display: none; }
   .view.active { display: block; }
   .head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s4); margin-bottom: var(--s5); flex-wrap: wrap; }
@@ -88,12 +213,33 @@
   .head p { margin: var(--s1) 0 0; color: var(--muted); font-size: var(--t-md); max-width: 640px; }
   .head-actions { display: flex; align-items: center; gap: var(--s2); }
 
-  .btn { border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--panel); min-height: 38px; padding: 8px 14px; font-weight: 750; font-size: var(--t-sm); }
-  .btn:hover { border-color: var(--ink); }
-  .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
-  .btn.primary:hover { background: var(--brand-dark); border-color: var(--brand-dark); }
-  .btn.ghost { background: transparent; border-color: transparent; color: var(--muted); }
-  .btn.ghost:hover { background: var(--panel-soft); border-color: var(--line); color: var(--ink); }
+  /* Botones Renault — primary amarillo · secondary negro · outline · texto */
+  .btn {
+    border: 1px solid var(--line-strong); border-radius: var(--r-xs); background: var(--canvas);
+    min-height: 48px; padding: 14px 24px; font-weight: 700; font-size: var(--t-md);
+    letter-spacing: 0.01em; transition: background .12s, border-color .12s;
+  }
+  .btn:hover { background: var(--panel-soft); }
+  .btn.primary { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+  .btn.primary:hover { background: var(--primary-deep); border-color: var(--primary-deep); }
+  .btn.secondary { background: var(--surface-dark); border-color: var(--surface-dark); color: var(--on-dark); }
+  .btn.secondary:hover { background: var(--surface-deep); border-color: var(--surface-deep); }
+  .btn.ghost, .text-btn {
+    border: 0; background: transparent; color: var(--muted); min-height: 36px;
+    padding: 6px 0; font-weight: 600; letter-spacing: 0;
+  }
+  .btn.ghost:hover, .text-btn:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  .text-btn-accent { color: var(--ink); font-weight: 700; text-decoration: underline; }
+  .action-bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3);
+    margin: var(--s6) 0; padding-top: var(--s5); border-top: 1px solid var(--line-strong);
+  }
+  .action-bar .btn.primary { flex: 1 1 auto; min-width: min(100%, 220px); }
+  .action-bar .field-select {
+    flex: 1 1 160px; min-height: 48px; border: 0; border-bottom: 1px solid var(--line-strong);
+    border-radius: var(--r-none); background: transparent; padding: 0 4px;
+    font-weight: 600; font-size: var(--t-md); color: var(--ink);
+  }
 
   /* ---------- Card grid ---------- */
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(238px, 1fr)); gap: var(--s4); align-items: start; }
@@ -102,21 +248,25 @@
   .section h3 { margin: 0; font-size: var(--t-md); }
   .section span { color: var(--muted); font-size: var(--t-sm); }
 
-  .card { position: relative; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--panel); overflow: hidden; box-shadow: 0 4px 16px rgba(30,24,16,0.05); display: flex; flex-direction: column; }
-  .card.fresh { border-color: var(--brand); box-shadow: 0 4px 18px rgba(226,61,43,0.16); }
-  .card.discarded { opacity: 0.5; }
-  .ribbon { position: absolute; top: 10px; left: 10px; background: var(--brand); color: #fff; font-size: 10px; font-weight: 850; border-radius: 999px; padding: 3px 9px; letter-spacing: 0.03em; }
+  .card { position: relative; border: 0; border-radius: var(--r-none); background: var(--canvas); overflow: hidden; display: flex; flex-direction: column; }
+  .card.fresh { outline: 2px solid var(--primary); outline-offset: -2px; }
+  .card.discarded { opacity: 0.45; }
+  .ribbon {
+    position: absolute; bottom: 10px; left: 10px; z-index: 2;
+    background: var(--primary); color: var(--on-primary); font-size: var(--t-sm); font-weight: 700;
+    border-radius: var(--r-pill); padding: 6px 14px; letter-spacing: 0.01em;
+  }
   .media { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: #e3ddd0; }
   .ph { width: 100%; aspect-ratio: 4 / 3; display: grid; place-items: center; background: linear-gradient(135deg, #e3ddd0, #f4efe7); color: var(--subtle); font-weight: 800; font-size: var(--t-sm); }
   .body { padding: var(--s3) var(--s4) var(--s4); display: grid; gap: var(--s2); flex: 1; }
   .title { margin: 0; font-size: var(--t-md); line-height: 1.25; overflow-wrap: anywhere; }
-  .price { font-size: var(--t-xl); font-weight: 900; color: var(--brand-dark); line-height: 1; display: flex; align-items: baseline; gap: var(--s2); flex-wrap: wrap; }
+  .price { font-size: var(--t-xl); font-weight: 700; color: var(--ink); line-height: 0.95; display: flex; align-items: baseline; gap: var(--s2); flex-wrap: wrap; }
   .price .was { font-size: var(--t-sm); color: var(--subtle); text-decoration: line-through; font-weight: 600; }
   .badges { display: flex; flex-wrap: wrap; gap: 6px; }
   .drop { display: inline-block; background: var(--good-soft); color: var(--good); border-radius: 999px; font-size: var(--t-xs); font-weight: 850; padding: 2px 8px; width: fit-content; }
   .mkt { display: inline-block; border-radius: 999px; font-size: var(--t-xs); font-weight: 850; padding: 2px 8px; width: fit-content; }
   .mkt.good { background: var(--good-soft); color: var(--good); }
-  .mkt.bad { background: rgba(226,61,43,0.12); color: var(--brand-dark); }
+  .mkt.bad { background: rgba(190,100,100,0.14); color: var(--error); }
   .mkt.mid { background: var(--panel-soft); color: var(--muted); border: 1px solid var(--line); }
   .specs { display: flex; flex-wrap: wrap; gap: var(--s1); }
   .pill { display: inline-flex; align-items: center; padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--panel-soft); font-family: var(--mono); font-size: var(--t-xs); }
@@ -129,11 +279,15 @@
   .trace .st.discarded { color: var(--subtle); }
   .actions { display: flex; gap: var(--s2); padding-top: var(--s1); }
   .actions a, .actions .pin { flex: 1; text-align: center; text-decoration: none; }
-  .life { display: flex; gap: var(--s2); flex-wrap: wrap; }
-  .life button { flex: 1; min-width: 72px; border: 1px solid var(--line-strong); background: var(--panel-soft); border-radius: var(--r-sm); padding: 7px 6px; font-size: var(--t-xs); font-weight: 800; color: var(--muted); min-height: 32px; }
-  .life button:hover { border-color: var(--brand); color: var(--brand-dark); }
-  .life button.star.on { border-color: var(--brand); color: var(--brand-dark); background: #fff4f0; }
-  .card.starred { border-color: var(--brand); }
+  .life { display: flex; gap: var(--s3); flex-wrap: wrap; margin-top: var(--s1); }
+  .life button {
+    flex: none; border: 0; background: transparent; border-radius: 0;
+    padding: 2px 0; font-size: var(--t-xs); font-weight: 650; color: var(--muted);
+    min-height: auto; text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--line-strong);
+  }
+  .life button:hover { color: var(--ink); text-decoration-color: var(--ink); }
+  .life button.star.on { color: var(--ink); font-weight: 700; text-decoration: none; }
+  .card.starred { outline: 2px solid var(--ink); outline-offset: -2px; }
   .note-toggle { justify-self: start; border: 0; background: transparent; color: var(--muted); font-size: var(--t-xs); font-weight: 750; padding: 2px 0; text-align: left; }
   .note-toggle:hover { color: var(--brand-dark); }
   .note-edit { display: grid; gap: 6px; }
@@ -181,19 +335,26 @@
   .kn-eq li strong { display: block; color: var(--ink); }
   .kn-eq li span { color: var(--muted); font-size: var(--t-xs); }
 
-  /* ---------- Hero búsqueda coloquial ---------- */
-  .hero { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--panel); padding: var(--s6); margin-bottom: var(--s5); box-shadow: 0 10px 32px rgba(30,24,16,0.06); }
-  .hero h2 { margin: 0 0 var(--s2); font-size: var(--t-2xl); letter-spacing: -0.02em; }
-  .hero .lead { margin: 0 0 var(--s5); color: var(--muted); font-size: var(--t-md); max-width: 640px; }
-  .hero-form { display: grid; gap: var(--s3); }
-  .hero-form textarea { border: 1px solid var(--line-strong); border-radius: var(--r-md); padding: var(--s4); min-height: 88px; resize: vertical; outline: none; font-size: var(--t-md); line-height: 1.45; }
-  .hero-form textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(226,61,43,0.12); }
-  .hero-actions { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
-  .hero-actions .btn.primary { min-height: 48px; padding: 0 var(--s6); font-size: var(--t-md); }
-  .hero-status { color: var(--muted); font-size: var(--t-sm); font-weight: 700; }
-  .chips { display: flex; flex-wrap: wrap; gap: var(--s2); }
-  .chip { border: 1px solid var(--line-strong); background: var(--panel-soft); border-radius: 999px; padding: 8px 14px; font-size: var(--t-sm); font-weight: 700; color: var(--muted); }
-  .chip:hover { border-color: var(--brand); color: var(--brand-dark); background: #fff4f0; }
+  /* ---------- Formulario hero (sobre banda oscura) ---------- */
+  .hero-form { display: grid; gap: var(--s5); }
+  .hero-form textarea {
+    border: 0; border-bottom: 1px solid var(--divider-dark); border-radius: var(--r-none);
+    padding: var(--s3) 0; min-height: 56px; resize: none; outline: none;
+    font-size: var(--t-lg); line-height: 1.3; background: transparent; color: var(--on-dark);
+  }
+  .hero-form textarea:focus { border-bottom-color: var(--on-dark); }
+  .hero-form textarea::placeholder { color: var(--on-dark-mute); }
+  .hero-actions { display: grid; gap: var(--s3); max-width: 320px; }
+  .hero-actions .btn.primary { width: 100%; }
+  .hero-status { color: var(--on-dark-mute); font-size: var(--t-sm); font-weight: 600; }
+  .chip-label { margin: 0 0 var(--s2); font-size: var(--t-xs); font-weight: 700; color: var(--on-dark-mute); text-transform: uppercase; letter-spacing: 0.04em; }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); align-items: center; }
+  .chip {
+    border: 1px solid var(--divider-dark); background: rgba(0,0,0,0.25); border-radius: var(--r-pill);
+    padding: 8px 16px; font-size: var(--t-sm); font-weight: 600; color: var(--on-dark);
+    text-decoration: none;
+  }
+  .chip:hover { border-color: var(--on-dark); background: rgba(0,0,0,0.4); color: var(--on-dark); }
 
   /* ---------- Brief del asesor en tablero ---------- */
   .advisor-brief { border: 1px solid var(--line); border-left: 4px solid var(--brand); border-radius: var(--r-md); background: #fcfbf8; padding: var(--s4); margin-bottom: var(--s4); display: grid; gap: var(--s3); }
@@ -251,7 +412,7 @@
   .mg-foot { padding: 0 var(--s4) var(--s3); font-size: var(--t-xs); color: var(--subtle); }
   .mg-cache { font-size: 10px; color: var(--subtle); font-weight: 700; }
   .mkt.rec { background: rgba(37,92,153,0.12); color: var(--blue); }
-  .card.recommended { border-color: var(--blue); box-shadow: 0 4px 18px rgba(37,92,153,0.12); }
+  .card.recommended { outline: 2px solid var(--ink); outline-offset: -2px; }
   .card.recommended .title a { color: var(--ink); }
   .card.recommended .title a:hover { color: var(--blue); }
   .title-link { color: inherit; text-decoration: none; }
@@ -364,13 +525,13 @@
   .dock-ctx { padding: var(--s2) var(--s4); border-bottom: 1px solid var(--line); background: var(--panel-soft); color: var(--muted); font-size: var(--t-xs); }
   .stream { overflow-y: auto; padding: var(--s4); display: grid; gap: var(--s3); align-content: start; }
   .msg { max-width: 88%; padding: 10px 12px; border-radius: var(--r-md); font-size: var(--t-sm); line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
-  .msg.user { justify-self: end; background: var(--brand); color: #fff; border-bottom-right-radius: 3px; }
+  .msg.user { justify-self: end; background: var(--primary); color: var(--on-primary); border-radius: var(--r-xs); }
   .msg.assistant { justify-self: start; background: var(--panel-soft); border: 1px solid var(--line); border-bottom-left-radius: 3px; }
   .msg.assistant .adv-picks { white-space: normal; }
   .msg.thinking { color: var(--muted); font-style: italic; }
   .sugg { display: flex; flex-wrap: wrap; gap: var(--s2); }
-  .sugg button { border: 1px solid var(--line-strong); background: var(--panel); border-radius: 999px; padding: 6px 10px; font-size: var(--t-xs); font-weight: 750; color: var(--muted); }
-  .sugg button:hover { border-color: var(--brand); color: var(--brand-dark); }
+  .sugg button { border: 1px solid var(--line-strong); background: var(--canvas); border-radius: var(--r-pill); padding: 8px 14px; font-size: var(--t-sm); font-weight: 600; color: var(--ink); height: 36px; }
+  .sugg button:hover { background: var(--panel-soft); }
   .dock-empty { color: var(--muted); font-size: var(--t-sm); }
   .dock-empty b { display: block; color: var(--ink); margin-bottom: var(--s2); }
   .compose { border-top: 1px solid var(--line); padding: var(--s3); display: grid; grid-template-columns: 1fr auto; gap: var(--s2); align-items: end; }
@@ -380,23 +541,25 @@
   .toast { position: fixed; right: var(--s5); z-index: 50; max-width: 340px; border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--panel); box-shadow: 0 14px 34px rgba(30,24,16,0.16); padding: var(--s4); display: none; }
   .toast.active { display: block; }
 
-  /* ---------- Bottom nav (mobile / tablet) ---------- */
+  /* ---------- Bottom nav — nav-bar 60px ---------- */
   .bottom-nav {
     display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
-    grid-template-columns: repeat(4, 1fr); height: calc(var(--nav-bottom-h) + var(--safe-bottom));
-    padding-bottom: var(--safe-bottom); border-top: 1px solid var(--line);
-    background: var(--panel); box-shadow: 0 -6px 24px rgba(30,24,16,0.08);
+    grid-template-columns: repeat(4, 1fr);
+    min-height: calc(var(--nav-bottom-h) + var(--safe-bottom));
+    padding: 0 4px var(--safe-bottom); border-top: 1px solid var(--line);
+    background: var(--canvas);
   }
   .bn-item {
     display: grid; place-items: center; gap: 2px; border: 0; background: transparent;
-    color: var(--muted); font-size: 10px; font-weight: 800; min-height: var(--nav-bottom-h); padding: 6px 4px;
+    color: var(--muted); font-size: 9px; font-weight: 700; min-height: var(--nav-bottom-h); padding: 8px 4px;
+    border-radius: var(--r-none); letter-spacing: 0.02em;
   }
   .bn-item .bn-ico { font-size: 18px; line-height: 1; }
-  .bn-item.active { color: var(--brand-dark); }
-  .bn-item.active .bn-ico { transform: scale(1.05); }
+  .bn-item.active { color: var(--ink); box-shadow: inset 0 2px 0 var(--ink); }
   .bn-badge {
-    position: absolute; margin-top: -22px; margin-left: 14px;
-    background: var(--brand); color: #fff; border-radius: 999px; font-size: 9px; font-weight: 900; padding: 1px 5px;
+    position: absolute; margin-top: -20px; margin-left: 12px;
+    background: var(--primary); color: var(--on-primary); border-radius: var(--r-pill);
+    font-size: 9px; font-weight: 700; padding: 2px 6px;
   }
   .bn-item { position: relative; }
 
@@ -419,12 +582,46 @@
   .boards-sheet-head h3 { margin: 0; font-size: var(--t-md); }
   .boards-sheet-list { list-style: none; margin: 0; padding: var(--s2); overflow-y: auto; display: grid; gap: 2px; }
 
+  /* ---------- Tablero: listado primero ---------- */
+  .board-primary { margin-bottom: var(--s5); }
+  .board-primary-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--s3);
+    padding: var(--s3) 0 var(--s4); margin-bottom: var(--s2);
+    border-bottom: 3px solid var(--brand); position: sticky; z-index: 4;
+    background: color-mix(in srgb, var(--canvas) 92%, transparent);
+    backdrop-filter: blur(6px);
+  }
+  .board-primary-bar h3 {
+    margin: 0; font-size: var(--t-lg); display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap;
+  }
+  .count-badge {
+    display: inline-grid; place-items: center; min-width: 30px; height: 30px; padding: 0 10px;
+    border-radius: var(--r-pill); background: var(--primary); color: var(--on-primary); font-size: var(--t-sm); font-weight: 700;
+  }
+  .btn-sm { min-height: 34px; padding: 6px 12px; font-size: var(--t-xs); }
+
   /* ---------- Tablero: capas colapsables ---------- */
-  .panel-collapse { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); margin-bottom: var(--s4); overflow: hidden; }
+  .board-context { display: grid; gap: var(--s3); margin-top: var(--s5); padding-top: var(--s4); border-top: 1px dashed var(--line-strong); }
+  .board-context-label {
+    margin: 0 0 var(--s1); font-size: var(--t-xs); font-weight: 850; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--subtle);
+  }
+  .panel-collapse {
+    border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel);
+    margin-bottom: 0; overflow: hidden; box-shadow: 0 3px 14px rgba(30,24,16,0.06);
+  }
   .panel-collapse > summary {
     cursor: pointer; list-style: none; font-weight: 850; font-size: var(--t-sm);
-    padding: var(--s3) var(--s4); background: var(--panel-soft); border-bottom: 1px solid transparent;
-    user-select: none; min-height: 44px; display: flex; align-items: center; gap: var(--s2);
+    padding: var(--s3) var(--s4); background: linear-gradient(180deg, #fff 0%, var(--panel-soft) 100%);
+    border-bottom: 1px solid transparent; user-select: none; min-height: 48px;
+    display: flex; align-items: center; gap: var(--s2);
+  }
+  .panel-collapse.panel-brief > summary { border-left: 4px solid var(--brand); }
+  .panel-collapse.panel-tramite > summary { border-left: 4px solid var(--good); }
+  .panel-collapse.panel-tools > summary { border-left: 4px solid var(--blue); }
+  .panel-badge {
+    margin-left: auto; flex: none; font-size: 10px; font-weight: 850; color: var(--muted);
+    background: var(--panel-soft); border: 1px solid var(--line); padding: 3px 9px; border-radius: 999px;
   }
   .panel-collapse > summary::-webkit-details-marker { display: none; }
   .panel-collapse > summary::before { content: '▸'; color: var(--brand); font-weight: 900; }
@@ -437,11 +634,11 @@
   .board-chips { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s3); }
   .filter-chip {
     display: inline-flex; align-items: center; gap: 6px; min-height: 36px;
-    border: 1px solid var(--line); border-radius: 999px; background: var(--panel-soft);
-    padding: 6px 12px; font-size: var(--t-xs); font-weight: 750; color: var(--muted);
+    border: 1px solid var(--line-strong); border-radius: var(--r-pill); background: var(--canvas);
+    padding: 8px 16px; font-size: var(--t-sm); font-weight: 600; color: var(--ink);
   }
-  .filter-chip:has(input:checked) { border-color: var(--blue); color: var(--blue); background: rgba(37,92,153,0.08); }
-  .filter-chip input { accent-color: var(--blue); }
+  .filter-chip:has(input:checked) { background: var(--surface-dark); color: var(--on-dark); border-color: var(--surface-dark); }
+  .filter-chip input { accent-color: var(--primary); }
   .advisor-filter-bar.sticky { position: sticky; top: 0; z-index: 5; margin-bottom: var(--s3); }
 
   @media (max-width: 639px) {
@@ -453,75 +650,163 @@
   }
 
   @media (max-width: 1023px) {
-    .app { grid-template-columns: 1fr; }
-    .rail { display: none; }
+    .app-shell { grid-template-columns: 1fr; }
+    .shell-nav { display: none; }
+    .shell-topbar { display: flex; }
+    .main { padding-bottom: calc(var(--nav-bottom-h) + var(--safe-bottom) + var(--s5)); }
     .bottom-nav { display: grid; }
-    .main { padding-bottom: calc(var(--nav-bottom-h) + var(--safe-bottom) + var(--s4)); }
+    .workspace-header { grid-template-columns: auto 1fr; }
+    .workspace-header .head-actions { grid-column: 1 / -1; }
+    .workspace-header .head-actions .btn { width: 100%; }
+    .hero-band { margin: calc(-1 * var(--s4)) calc(-1 * var(--s4)) var(--s6); padding: var(--s8) var(--s4); }
     .dock {
       top: auto; bottom: 0; left: 0; right: 0; width: 100%; height: min(92vh, 100dvh);
-      border-left: 0; border-top: 1px solid var(--line-strong); border-radius: var(--r-lg) var(--r-lg) 0 0;
-      box-shadow: 0 -18px 44px rgba(30,24,16,0.18); transform: translateY(100%);
+      border-left: 0; border-top: 1px solid var(--line-strong); border-radius: var(--r-none);
+      transform: translateY(100%);
     }
     .dock.open { transform: translateY(0); }
-    .rail-foot .btn#openAdvisor { display: none; }
   }
 
   @media (min-width: 640px) and (max-width: 1023px) {
     .main { padding: var(--s5) var(--s5); }
+    .workspace-header { grid-template-columns: auto 1fr auto; }
+    .workspace-header .head-actions { grid-column: auto; }
+    .workspace-header .head-actions .btn { width: auto; }
   }
 
   @media (min-width: 1024px) {
-    .bottom-nav, .boards-sheet, .boards-sheet-overlay { display: none !important; }
-    .panel-brief { /* abierto por defecto vía JS */ }
+    .shell-topbar, .bottom-nav, .boards-sheet, .boards-sheet-overlay { display: none !important; }
+    .workspace-split { grid-template-columns: 1fr 300px; align-items: start; }
+    .workspace-rail { display: block; }
     .toast { bottom: var(--s5); }
   }
+
+  /* ── DEMO BANNER ──────────────────────── */
+  .demo-banner {
+    display: none; padding: 10px var(--s5);
+    background: var(--primary); color: #000;
+    font-size: var(--t-sm); font-weight: 700; text-align: center;
+    letter-spacing: 0.01em;
+  }
+  .demo-banner.active { display: block; }
+
+  /* ── WORKSPACE STATS STRIP ──────────────── */
+  .ws-stats {
+    display: flex; flex-wrap: wrap; gap: var(--s6);
+    padding: var(--s4) 0 var(--s5);
+    border-bottom: 1px solid var(--line);
+    margin-bottom: var(--s5);
+  }
+  .ws-stat { display: grid; gap: 2px; min-width: 56px; }
+  .ws-stat b {
+    font-size: 28px; font-weight: 800; line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .ws-stat span {
+    font-size: 10px; color: var(--muted); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.07em;
+  }
+  .ws-stat.ws-new b {
+    display: inline-block; background: var(--primary);
+    color: #000; padding: 0 8px; border-radius: var(--r-pill);
+  }
+
+  /* ── BOARD ROW PROGRESS BAR ─────────────── */
+  .board-row-bar {
+    height: 3px; background: var(--line);
+    margin-top: var(--s3); width: 100%;
+  }
+  .board-row-bar-fill {
+    height: 100%; background: var(--ink);
+    transition: width .35s ease; min-width: 3px;
+  }
+  .board-new-tag {
+    display: inline-block; background: var(--primary); color: #000;
+    font-size: 10px; font-weight: 800; padding: 2px 9px;
+    border-radius: var(--r-pill); margin-left: var(--s2);
+    vertical-align: middle; letter-spacing: 0.02em;
+  }
+
+  /* ── IMPROVED MEDIA PLACEHOLDER ─────────── */
+  .ph {
+    width: 100%; aspect-ratio: 16 / 9;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 5px;
+    background: linear-gradient(145deg, #0e0e0e 0%, #1c1c1c 100%);
+  }
+  .ph-name {
+    color: rgba(255,255,255,0.3); font-size: var(--t-md);
+    font-weight: 700; line-height: 0.95; letter-spacing: 0.01em;
+  }
+  .ph-yr {
+    color: rgba(255,255,255,0.15); font-size: var(--t-xs);
+    font-weight: 600; letter-spacing: 0.12em;
+  }
+  /* card images same ratio */
+  .media { aspect-ratio: 16 / 9; }
+
+  /* ── BOARD EMPTY STATE ──────────────────── */
+  .boards-empty {
+    padding: var(--s9) var(--s4) var(--s6); text-align: center;
+    list-style: none;
+  }
+  .boards-empty h2 {
+    margin: 0 0 var(--s3); font-size: var(--t-2xl);
+    line-height: 0.92; font-weight: 800;
+  }
+  .boards-empty p { color: var(--muted); margin: 0 0 var(--s5); }
 </style>
 </head>
 <body>
-<div class="app">
-  <!-- ============ RAIL ============ -->
-  <aside class="rail">
-    <div class="brand">
+<div id="demoBanner" class="demo-banner"></div>
+<div class="app-shell">
+  <nav class="shell-nav" id="shellNav" aria-label="Navegación principal">
+    <a href="#" class="shell-brand" id="shellBrand" aria-label="El Garaje">G</a>
+    <button type="button" class="shell-btn" id="shellInicio"><span>⌕</span><span>Buscar</span></button>
+    <button type="button" class="shell-btn" id="shellBusquedas"><span>☰</span><span>Búsquedas</span></button>
+    <button type="button" class="shell-btn" id="shellHoy"><span>◆</span><span>Novedades</span></button>
+    <div class="shell-spacer"></div>
+    <button type="button" class="shell-btn" id="shellAdvisor"><span>✦</span><span>Asesor</span></button>
+    <div class="shell-foot"><span class="dot"></span><span id="status">Listo</span></div>
+  </nav>
+
+  <div class="shell-body">
+    <header class="shell-topbar" id="shellTopbar">
       <div class="brand-mark">G</div>
-      <div><b>El Garaje</b><small>Autos usados · AR</small></div>
-    </div>
+      <div>
+        <b>El Garaje</b>
+        <small id="shellTopbarSub">Autos usados · AR</small>
+      </div>
+    </header>
 
-    <nav class="nav">
-      <button id="navInicio" type="button"><span class="ico">⌕</span> Buscar</button>
-      <button id="navHoy" type="button"><span class="ico">◆</span> Novedades</button>
-    </nav>
+    <main class="main">
 
-    <div class="rail-label"><span>Tus búsquedas</span><span id="alertsCount">0</span></div>
-    <ul class="alerts" id="alertsList"></ul>
-
-    <div class="rail-foot">
-      <button class="btn" id="openAdvisor" type="button">Asesor ✦</button>
-      <div class="status"><span class="dot"></span><span id="status">Listo</span></div>
-    </div>
-  </aside>
-
-  <!-- ============ MAIN ============ -->
-  <main class="main">
-
-    <!-- INICIO (home: buscar + guardadas) -->
+    <!-- DESCUBRIR (solo búsqueda nueva) -->
     <section class="view" id="view-inicio">
-      <div class="hero">
-        <h2>¿Qué auto estás buscando?</h2>
-        <p class="lead">Contanos qué necesitás — te decimos qué modelos convienen y por qué, y te mostramos los usados publicados en todos los portales.</p>
-        <form class="hero-form" id="searchForm">
-          <textarea id="q" autocomplete="off" rows="3" placeholder="Ej: busco un auto de ciudad para mi esposa de menos de 20 millones de pesos"></textarea>
-          <div class="chips" id="exampleChips">
-            <button class="chip" type="button" data-example="Auto de ciudad para mi esposa, menos de $20M">Auto de ciudad · hasta $20M</button>
-            <button class="chip" type="button" data-example="Pickup 4x4 diesel para campo, hasta $35M">Pickup 4x4 diesel · campo</button>
-            <button class="chip" type="button" data-example="Algo parecido a un Gol pero más nuevo, hasta $18M">Como un Gol pero más nuevo</button>
-          </div>
-          <div class="hero-actions">
-            <button class="btn primary" id="discoverBtn" type="submit">Encontrar mi auto</button>
-            <span class="hero-status" id="heroStatus" hidden></span>
-          </div>
-        </form>
+      <div class="hero-band">
+        <div class="hero-band-inner">
+          <p class="overline">Asesor de compra · Argentina</p>
+          <h1>¿Qué auto estás buscando?</h1>
+          <p class="lead">Contanos en tus palabras. Te recomendamos modelos y te mostramos los usados publicados en todos los portales.</p>
+          <form class="hero-form" id="searchForm">
+            <textarea id="q" autocomplete="off" rows="2" placeholder="Ej: auto de ciudad para mi esposa, menos de $20 millones"></textarea>
+            <div>
+              <p class="chip-label">Ejemplos</p>
+              <div class="chips" id="exampleChips">
+                <button class="chip" type="button" data-example="Auto de ciudad para mi esposa, menos de $20M">Ciudad hasta $20M</button>
+                <button class="chip" type="button" data-example="Pickup 4x4 diesel para campo, hasta $35M">Pickup 4x4 campo</button>
+                <button class="chip" type="button" data-example="Algo parecido a un Gol pero más nuevo, hasta $18M">Como un Gol</button>
+              </div>
+            </div>
+            <div class="hero-actions">
+              <button class="btn primary" id="discoverBtn" type="submit">Buscar</button>
+              <span class="hero-status" id="heroStatus" hidden></span>
+            </div>
+          </form>
+        </div>
       </div>
 
+      <div class="catalog-body">
       <div class="ml-banner" id="mlBanner" hidden></div>
 
       <details class="adv" id="advFilters">
@@ -559,10 +844,10 @@
         </div>
       </details>
 
-      <div class="head-actions" id="searchActions" hidden>
-        <button class="btn primary" id="saveWatchBtn" type="button">Guardar como búsqueda</button>
-        <select class="btn" id="boardPicker" style="font-weight:700"></select>
-        <button class="btn ghost" id="clearSearchBtn" type="button">Limpiar</button>
+      <div class="action-bar" id="searchActions" hidden>
+        <button class="btn primary" id="saveWatchBtn" type="button">Guardar búsqueda</button>
+        <select class="field-select" id="boardPicker" aria-label="Pinear a búsqueda existente"></select>
+        <button class="text-btn" id="clearSearchBtn" type="button">Limpiar resultados</button>
       </div>
 
       <div class="report" id="portalReport"></div>
@@ -571,11 +856,17 @@
         <div class="section"><h3 id="resultsTitle">Resultados</h3><span id="resultsCount"></span></div>
         <div class="grid" id="inicioGrid"></div>
       </div>
-
-      <div id="savedWrap">
-        <div class="section"><h3>Tus búsquedas guardadas</h3><span id="savedCount"></span></div>
-        <div class="grid" id="savedGrid"></div>
       </div>
+    </section>
+
+    <!-- MIS BÚSQUEDAS (hub) -->
+    <section class="view" id="view-busquedas">
+      <div class="view-head">
+        <h2>Mis búsquedas</h2>
+        <p>Tableros guardados con avisos, recomendación del asesor y guía de compra.</p>
+        <button class="text-btn" id="newSearchFromBusquedas" type="button">Nueva búsqueda</button>
+      </div>
+      <ul class="board-list" id="busquedasList"></ul>
     </section>
 
     <!-- NOVEDADES -->
@@ -586,55 +877,79 @@
       <div class="grid" id="hoyGrid"></div>
     </section>
 
-    <!-- BOARD (detalle de búsqueda guardada) -->
-    <section class="view" id="view-board">
-      <div class="head board-head">
+    <!-- WORKSPACE (tablero de búsqueda guardada) -->
+    <section class="view view-workspace" id="view-board">
+      <div class="workspace-header">
+        <button class="workspace-back" id="backBusquedasBtn" type="button" aria-label="Volver a mis búsquedas">←</button>
         <div>
+          <p class="workspace-eyebrow">Tu espacio de compra</p>
           <h2 id="boardTitle">Búsqueda</h2>
           <p id="boardSub"></p>
-          <div class="board-chips">
-            <label class="filter-chip"><input type="checkbox" id="showShortlisted" /> Solo guardadas</label>
-            <label class="filter-chip" id="discardWrap"><input type="checkbox" id="showDiscarded" /> Ver descartados</label>
-          </div>
         </div>
         <div class="head-actions">
-          <button class="btn ghost" id="backInicioBtn" type="button">← Volver</button>
-          <button class="btn primary" id="refreshBoardBtn" type="button">Revisar novedades</button>
+          <button class="btn secondary" id="refreshBoardBtn" type="button">Actualizar avisos</button>
         </div>
       </div>
-      <div class="advisor-filter-bar" id="advisorFilterBar" hidden></div>
-      <div class="grid" id="boardGrid"></div>
-      <details class="panel-collapse panel-brief" id="panelBrief">
-        <summary>Recomendación del asesor</summary>
-        <div class="panel-inner">
-          <div class="advisor-brief" id="advisorBrief" hidden></div>
-        </div>
-      </details>
-      <details class="panel-collapse panel-tramite" id="panelTramite">
-        <summary>Cómo cerrar la compra</summary>
-        <div class="panel-inner" id="transactionGuideWrap"></div>
-      </details>
-      <details class="panel-collapse panel-tools" id="panelTools">
-        <summary>Más sobre esta búsqueda</summary>
-        <div class="panel-inner">
-          <div class="knowledge" id="knowledgeBox" hidden>
-            <div class="kn-head">
-              <h3>Conocimiento del modelo <span id="knModel"></span></h3>
-              <button class="btn" id="genKnowledgeBtn" type="button">Generar ficha</button>
+
+      <div class="ws-stats" id="wsStats">
+        <div class="ws-stat"><b id="wsTotal">0</b><span>Avisos</span></div>
+        <div class="ws-stat ws-new" id="wsNewStat" style="display:none"><b id="wsNew">0</b><span>Nuevos</span></div>
+        <div class="ws-stat"><b id="wsShortlisted">0</b><span>Guardados</span></div>
+        <div class="ws-stat"><b id="wsContacted">0</b><span>Contactados</span></div>
+      </div>
+
+      <div class="workspace-tabs" role="tablist" aria-label="Secciones del tablero">
+        <button type="button" class="active" data-btab="listings" role="tab">Avisos <em id="tabListingsCount">0</em></button>
+        <button type="button" data-btab="brief" role="tab">Modelos <em id="tabBriefBadge" hidden>0</em></button>
+        <button type="button" data-btab="guide" role="tab">Compra</button>
+        <button type="button" data-btab="notes" role="tab">Notas</button>
+      </div>
+
+      <div class="workspace-split">
+        <div class="workspace-main">
+          <div class="workspace-pane active" id="pane-listings" role="tabpanel">
+            <div class="board-chips">
+              <label class="filter-chip"><input type="checkbox" id="showShortlisted" /> Solo guardadas</label>
+              <label class="filter-chip" id="discardWrap"><input type="checkbox" id="showDiscarded" /> Ver descartados</label>
             </div>
-            <div id="knowledgeBody"></div>
+            <div class="advisor-filter-bar" id="advisorFilterBar" hidden></div>
+            <div class="grid" id="boardGrid"></div>
           </div>
-          <div class="notes">
-            <label for="boardNotes">Notas de esta búsqueda</label>
-            <textarea id="boardNotes" rows="2" placeholder="Ej: la caja THP tiene problemas, no comprar · ojo con la cadena de distribución · evitar versión 1.6 8v"></textarea>
-            <div class="notes-actions"><button class="btn" id="saveNotesBtn" type="button">Guardar nota</button><span class="notes-hint" id="notesSaved"></span></div>
+          <div class="workspace-pane" id="pane-brief" role="tabpanel">
+            <div class="advisor-brief" id="advisorBrief" hidden></div>
+            <div class="empty" id="briefEmpty" hidden><b>Sin recomendación todavía</b>Guardá esta búsqueda desde Descubrir o pedile al asesor que te ayude a elegir modelos.</div>
           </div>
-          <div class="report" id="boardReport"></div>
+          <div class="workspace-pane" id="pane-guide" role="tabpanel">
+            <div id="transactionGuideWrap"></div>
+          </div>
+          <div class="workspace-pane" id="pane-notes" role="tabpanel">
+            <div class="knowledge" id="knowledgeBox" hidden>
+              <div class="kn-head">
+                <h3>Conocimiento del modelo <span id="knModel"></span></h3>
+                <button class="btn secondary" id="genKnowledgeBtn" type="button">Generar ficha</button>
+              </div>
+              <div id="knowledgeBody"></div>
+            </div>
+            <div class="notes">
+              <label for="boardNotes">Notas de esta búsqueda</label>
+              <textarea id="boardNotes" rows="3" placeholder="Ej: la caja THP tiene problemas, no comprar · ojo con la cadena de distribución · evitar versión 1.6 8v"></textarea>
+              <div class="notes-actions"><button class="btn secondary" id="saveNotesBtn" type="button">Guardar nota</button><span class="notes-hint" id="notesSaved"></span></div>
+            </div>
+            <div class="report" id="boardReport"></div>
+          </div>
         </div>
-      </details>
+        <aside class="workspace-rail" id="workspaceRail">
+          <div class="workspace-rail-card">
+            <h4>Asesor</h4>
+            <p id="workspaceRailText">Conoce los avisos que estás viendo y te ayuda a comparar opciones.</p>
+            <button class="text-btn text-btn-accent" id="workspaceOpenAdvisor" type="button">Preguntale al asesor</button>
+          </div>
+        </aside>
+      </div>
     </section>
 
-  </main>
+    </main>
+  </div>
 </div>
 
 <!-- Asesor -->
@@ -661,17 +976,252 @@
   <button type="button" class="bn-item" id="bnAdvisor" aria-label="Asesor"><span class="bn-ico">✦</span><span>Asesor</span></button>
 </nav>
 
-<div class="boards-sheet-overlay" id="boardsSheetOverlay" hidden></div>
-<aside class="boards-sheet" id="boardsSheet" aria-label="Tus búsquedas" hidden>
-  <div class="boards-sheet-head">
-    <h3>Tus búsquedas</h3>
-    <button type="button" class="dock-x" id="closeBoardsSheet" aria-label="Cerrar">×</button>
-  </div>
-  <ul class="boards-sheet-list alerts" id="boardsSheetList"></ul>
-</aside>
-
 <script>
   const $ = id => document.getElementById(id);
+
+  /* ═══════════════════════════════════════════════════════════════
+     MOCK DATA  —  datos de ejemplo para la fase de desarrollo
+     El app cae a mock automáticamente si el backend no responde.
+     ═══════════════════════════════════════════════════════════════ */
+  let MOCK_MODE = false;
+
+  const MOCK = (() => {
+    const NOW = Date.now();
+    const hr = n => NOW - n * 3600000;
+    const dy = n => NOW - n * 86400000;
+
+    const KA_BRIEF = {
+      query_original: 'auto de ciudad para mi esposa, menos de $18 millones',
+      explicacion: 'Para ciudad y presupuesto de $18M, el Ford Ka SE 2021-2023 es la opción más equilibrada: ESP de serie, bajo consumo y buena red de talleres Ford en toda Argentina. El Fiat Argo Drive 2021+ es alternativa sólida con más espacio interior y 6 airbags de serie. Evitá los Ka con motor 1.0 8v (sin ESP) y los modelos anteriores a 2021 donde el ESP era opcional y pocas unidades lo tienen.',
+      modelos_recomendados: [
+        {
+          marca: 'Ford', modelo: 'Ka', version: 'SE', version_destacada: 'SE',
+          anio_desde: 2021, anio_hasta: 2023,
+          motivo: 'ESP de serie, bajo consumo, buena red de servicio',
+          catalog: {
+            marca: 'Ford', modelo: 'Ka',
+            resumen: 'Hatchback urbano referente. Bajo costo de mantenimiento, distribución por cadena y excelente reventa.',
+            generaciones: [{
+              nombre: 'Tercera generación (2016–2023)',
+              anio_desde: 2016, anio_hasta: 2023,
+              notas: 'La versión SE 2021+ incluye ESP de serie en todas las unidades. Evitar versiones 1.0 Sigma.',
+              versiones: [
+                { version: 'SE 1.5 (2021–2023)', anio_desde: 2021, anio_hasta: 2023, motor: '1.5 Ti-VCT', potencia_cv: 107, transmision: 'Manual 5v', esp: true, airbags: 2, distribucion: 'Cadena', nota: 'ESP de serie. La versión a buscar.' },
+                { version: 'SE 1.5 (2019–2020)', anio_desde: 2019, anio_hasta: 2020, motor: '1.5 Ti-VCT', potencia_cv: 107, transmision: 'Manual 5v', esp: false, airbags: 2, distribucion: 'Cadena', nota: 'Sin ESP (era opcional, pocas unidades lo incluyen). Pedí confirmación al vendedor.' },
+                { version: '1.0 Fly (Sigma)', anio_desde: 2016, anio_hasta: 2020, motor: '1.0 Sigma', potencia_cv: 80, transmision: 'Manual 5v', esp: false, airbags: 2, nota: 'Sin ESP. Motor poco potente para autopista. No recomendado.' }
+              ]
+            }]
+          }
+        },
+        {
+          marca: 'Fiat', modelo: 'Argo', version: 'Drive', version_destacada: 'Drive',
+          anio_desde: 2020, anio_hasta: 2024,
+          motivo: 'Más espacio interior, 6 airbags de serie, motor eficiente',
+          catalog: {
+            marca: 'Fiat', modelo: 'Argo',
+            resumen: 'Hatchback moderno con habitabilidad superior al Ka. Motor Firefly eficiente y bajo costo de service.',
+            generaciones: [{
+              nombre: 'Primera generación (2017–2024)',
+              anio_desde: 2017, anio_hasta: 2024,
+              versiones: [
+                { version: 'Drive 1.3', anio_desde: 2017, anio_hasta: 2024, motor: '1.3 Firefly', potencia_cv: 101, transmision: 'Manual 5v', esp: true, airbags: 6, nota: 'ESP y 6 airbags de serie. Mejor seguridad pasiva que el Ka.' }
+              ]
+            }]
+          }
+        }
+      ],
+      guia_compra: {
+        resumen: 'Al cerrar la compra de un auto usado en Argentina, seguí estos pasos para protegerte.',
+        pasos: [
+          { titulo: '1. Antes de ir a verlo', items: ['Verificá el dominio en dnrpa.gov.ar', 'Consultá si tiene prendas o inhibiciones activas', 'Chequeá deuda de patentes y multas viales', 'Pedí el número de chasis (VIN) al vendedor'] },
+          { titulo: '2. Revisión mecánica', destacado: 'Una inspección profesional puede ahorrarte millones en reparaciones.', items: ['Llevá un mecánico de confianza o pagá una revisión en taller independiente (≈ $20k-40k)', 'Verificá que el VIN en el chasis y motor coincidan con el título del auto', 'Pedí el libro de service con todos los kilometrajes registrados', 'Hacé una prueba de ruta mínimo 20 minutos (autopista y ciudad)'] },
+          { titulo: '3. Boleto y pago', items: ['El boleto de compraventa debe firmarse ante escribano o en el Registro del Automotor', 'Pagá con transferencia bancaria y conservá el comprobante', 'No entregues el dinero antes de tener el auto físicamente en tu poder'] },
+          { titulo: '4. Transferencia de dominio', items: ['La transferencia debe hacerse dentro de los 30 días de la posesión', 'Necesitás documentación del Registro del Automotor de tu zona', 'El impuesto de transferencia es a cargo del vendedor (salvo pacto en contrario)', 'Contratá el seguro obligatorio antes de retirar el auto'] }
+        ]
+      },
+      evitar: ['Ford Ka 1.0 8v / Sigma (sin ESP)', 'Más de 80.000 km sin revisión de cadena', 'Años 2016-2020 sin confirmación de ESP en documentación'],
+      criterios: ['Hasta $18M', 'Ciudad', 'Consumo bajo', 'ESP de serie', 'Buena reventa']
+    };
+
+    const POLO_BRIEF = {
+      query_original: 'volkswagen polo hatchback 2019 en adelante',
+      explicacion: 'El Polo Trendline y Comfortline 2019-2023 son opciones sólidas y seguras. El motor 1.6 MSI es robusto con mantenimiento accesible y buena red de servicio VW. Prestá especial atención al historial de service oficial. Evitá los Polo con caja DSG importados de 2018 que tuvieron problemas de aprovisionamiento de repuestos en Argentina.',
+      modelos_recomendados: [
+        {
+          marca: 'Volkswagen', modelo: 'Polo', version: 'Trendline', version_destacada: 'Trendline',
+          anio_desde: 2019, anio_hasta: 2023,
+          motivo: 'Motor confiable, mantenimiento accesible, terminación premium',
+          catalog: {
+            marca: 'Volkswagen', modelo: 'Polo',
+            resumen: 'Hatchback premium con mejor terminación que el Ka y excelente dinamismo de manejo.',
+            generaciones: [{
+              nombre: 'Sexta generación MQB (2018–2023)',
+              anio_desde: 2018, anio_hasta: 2023,
+              versiones: [
+                { version: 'Trendline', anio_desde: 2018, anio_hasta: 2023, motor: '1.6 MSI', potencia_cv: 110, transmision: 'Manual 5v', esp: true, airbags: 6 },
+                { version: 'Comfortline', anio_desde: 2018, anio_hasta: 2023, motor: '1.6 MSI', potencia_cv: 110, transmision: 'Manual 5v / AT6', esp: true, airbags: 6, nota: 'Pantalla táctil, sensores de estacionamiento, aire automático. +25% sobre Trendline.' }
+              ]
+            }]
+          }
+        }
+      ],
+      evitar: ['Polo TSI 1.0 turbo (repuestos difíciles en AR)', 'DSG importados 2018 (problemas mecánicos documentados en Argentina)', 'Más de 70.000 km sin service oficial VW'],
+      criterios: ['2019 en adelante', 'Hatchback', 'Hasta $25M', 'Motor confiable', 'Red de servicio amplia']
+    };
+
+    const PICKUP_BRIEF = {
+      query_original: 'pickup 4x4 diesel para campo, hasta $55 millones',
+      explicacion: 'La Toyota Hilux SR 4x4 diesel 2020+ es la referencia del mercado rural argentino: distribución por cadena, altísima disponibilidad de repuestos en todo el país y reventa insuperable. La Ford Ranger XLS 2020+ es alternativa con más confort interior. Ambas probadas con motores diesel 2.8/2.0T robustos.',
+      modelos_recomendados: [
+        {
+          marca: 'Toyota', modelo: 'Hilux', version: 'SR 4x4', version_destacada: 'SR 4x4',
+          anio_desde: 2020, anio_hasta: 2024,
+          motivo: 'Rey de repuestos en Argentina, distribución cadena, reventa altísima',
+          catalog: {
+            marca: 'Toyota', modelo: 'Hilux',
+            resumen: 'La pickup más vendida de Argentina. Distribución por cadena, repuestos en todo el país sin excepción.',
+            generaciones: [{
+              nombre: 'Octava generación (2016–2024)',
+              anio_desde: 2016, anio_hasta: 2024,
+              versiones: [
+                { version: 'SR 4x4 MT', anio_desde: 2016, anio_hasta: 2024, motor: '2.8 GD6 Diesel', potencia_cv: 204, transmision: 'Manual 6v', esp: true, airbags: 2, distribucion: 'Cadena', nota: 'Versión de trabajo. Robusta y económica de mantener.' },
+                { version: 'SRV 4x4 AT', anio_desde: 2016, anio_hasta: 2024, motor: '2.8 GD6 Diesel', potencia_cv: 204, transmision: 'Automática 6v', esp: true, airbags: 6, distribucion: 'Cadena' }
+              ]
+            }]
+          }
+        }
+      ],
+      evitar: ['Hilux con distribución por correa (anteriores a 2005)', 'Más de 150.000 km sin revisión de inyectores', 'Unidades con humo azul o negro al arrancar'],
+      criterios: ['4x4 diesel', 'Cabina doble', 'Hasta $55M', 'Repuestos accesibles en todo el país']
+    };
+
+    /* Listings — 5 Ford Ka 2021 para activar el análisis de mercado */
+    const KA_LISTINGS = [
+      { id: 'ka-01', titulo: 'Ford Ka SE 1.5 2021 · 45.000 km · único dueño', marca: 'Ford', modelo: 'Ka', año: 2021, kilometros: 45000, precio: 17200000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'Rosario, Santa Fe', link: '#demo-ka-01', fuente: 'MercadoLibre', is_new: true, status: 'saved', recomendado: true, first_seen_at: hr(1), catalog_esp: true, listing_analysis: { score: 84, dimensiones: { seguridad: { score: 72, estrellas: 3 }, confiabilidad: { score: 88, label: 'Alta' }, valor: { score: 80 }, criterios_busqueda: { score: 90 } }, ficha: { marca: 'Ford', modelo: 'Ka', version: 'SE', anio_desde: 2021, anio_hasta: 2023, motor: '1.5 Ti-VCT', potencia_cv: 107, esp: true, airbags: 2, distribucion: 'Cadena', destacado: 'ESP de serie desde 2021. Cadena de distribución.' }, evitar_si: ['km > 80k sin revisión de cadena', 'versión 1.0 Sigma sin ESP'], que_chequear: ['Estado de la cadena de distribución', 'Funcionamiento del ESP', 'Historial de service', 'Sellos de motor y caja'] } },
+      { id: 'ka-02', titulo: 'Ford Ka SE 2021 · 52.000 km · buen estado · titular', marca: 'Ford', modelo: 'Ka', año: 2021, kilometros: 52000, precio: 16900000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'CABA', link: '#demo-ka-02', fuente: 'MercadoLibre', status: 'contacted', recomendado: true, shortlisted: true, first_seen_at: hr(48), catalog_esp: true, checklist: { vtv_ok: true, servicio_ok: null, dueno_unico: true, precio_negociable: true, titular_ok: null, sin_siniestros: null }, notes: 'Dueño copado, acepta permuta. Cita el sábado para verlo con mecánico.' },
+      { id: 'ka-03', titulo: 'FORD KA SE 2021 38.000KM IMPECABLE · permuto', marca: 'Ford', modelo: 'Ka', año: 2021, kilometros: 38000, precio: 18500000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'Mar del Plata, Bs.As.', link: '#demo-ka-03', fuente: 'OLX', status: 'saved', first_seen_at: dy(2), catalog_esp: true },
+      { id: 'ka-04', titulo: 'Ford Ka SE 2021 · 29.000 km · titular directo', marca: 'Ford', modelo: 'Ka', año: 2021, kilometros: 29000, precio: 15800000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'Mendoza', link: '#demo-ka-04', fuente: 'MercadoLibre', is_new: true, status: 'saved', recomendado: true, first_seen_at: hr(3), catalog_esp: true },
+      { id: 'ka-11', titulo: 'Ford Ka SE 1.5 2021 · 61.000 km · service al día', marca: 'Ford', modelo: 'Ka', año: 2021, kilometros: 61000, precio: 14500000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'Buenos Aires', link: '#demo-ka-11', fuente: 'MercadoLibre', status: 'saved', first_seen_at: dy(6), catalog_esp: true },
+      { id: 'ka-05', titulo: 'Ford Ka SE 1.5 2022 · 22.000 km · sin detalles', marca: 'Ford', modelo: 'Ka', año: 2022, kilometros: 22000, precio: 19800000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'Córdoba', link: '#demo-ka-05', fuente: 'MercadoLibre', is_new: true, status: 'saved', recomendado: true, first_seen_at: hr(2), catalog_esp: true },
+      { id: 'ka-06', titulo: 'Ford Ka SE 2019 · 74.000 km · permuto por mayor', marca: 'Ford', modelo: 'Ka', año: 2019, kilometros: 74000, precio: 14200000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'La Plata, Bs.As.', link: '#demo-ka-06', fuente: 'DeMotores', status: 'saved', first_seen_at: dy(3), catalog_esp: false },
+      { id: 'ka-07', titulo: 'Ford Ka Fly 2018 · 89.000 km · dueño directo', marca: 'Ford', modelo: 'Ka', año: 2018, kilometros: 89000, precio: 10900000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'Tucumán', link: '#demo-ka-07', fuente: 'MercadoLibre', status: 'discarded', first_seen_at: dy(5), catalog_esp: false },
+      { id: 'ka-08', titulo: 'Fiat Argo Drive 1.3 2021 · 44.000 km · impecable', marca: 'Fiat', modelo: 'Argo', año: 2021, kilometros: 44000, precio: 16400000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'Rosario, Santa Fe', link: '#demo-ka-08', fuente: 'MercadoLibre', status: 'saved', recomendado: true, first_seen_at: dy(1), catalog_esp: true },
+      { id: 'ka-09', titulo: 'Fiat Argo Drive 2022 · 35.000 km · titular', marca: 'Fiat', modelo: 'Argo', año: 2022, kilometros: 35000, precio: 17900000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'CABA', link: '#demo-ka-09', fuente: 'OLX', is_new: true, status: 'saved', recomendado: true, first_seen_at: hr(4), catalog_esp: true },
+      { id: 'ka-10', titulo: 'VW Gol Trend Trendline 2020 · 55.000 km · service', marca: 'Volkswagen', modelo: 'Gol', año: 2020, kilometros: 55000, precio: 14500000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'CABA', link: '#demo-ka-10', fuente: 'DeMotores', status: 'saved', first_seen_at: dy(4), catalog_esp: true }
+    ];
+
+    const POLO_LISTINGS = [
+      { id: 'po-01', titulo: 'VW Polo Trendline 1.6 2020 · 48.000 km · service VW', marca: 'Volkswagen', modelo: 'Polo', año: 2020, kilometros: 48000, precio: 20800000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'CABA', link: '#demo-po-01', fuente: 'MercadoLibre', is_new: true, status: 'saved', recomendado: true, first_seen_at: hr(5), catalog_esp: true },
+      { id: 'po-02', titulo: 'VW Polo Comfortline 2021 · 33.000 km · titular', marca: 'Volkswagen', modelo: 'Polo', año: 2021, kilometros: 33000, precio: 24500000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'Córdoba', link: '#demo-po-02', fuente: 'MercadoLibre', status: 'saved', recomendado: true, first_seen_at: dy(1), catalog_esp: true },
+      { id: 'po-03', titulo: 'Volkswagen Polo 2019 · 67.000 km · permuto', marca: 'Volkswagen', modelo: 'Polo', año: 2019, kilometros: 67000, precio: 18900000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'Rosario, Santa Fe', link: '#demo-po-03', fuente: 'OLX', status: 'contacted', shortlisted: true, first_seen_at: dy(3), catalog_esp: true, checklist: { vtv_ok: true, servicio_ok: true, dueno_unico: null, precio_negociable: false, titular_ok: null, sin_siniestros: null } },
+      { id: 'po-04', titulo: 'VW Polo Trendline 2022 · 18.000 km · como nuevo', marca: 'Volkswagen', modelo: 'Polo', año: 2022, kilometros: 18000, precio: 26800000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'Mendoza', link: '#demo-po-04', fuente: 'MercadoLibre', status: 'saved', recomendado: true, first_seen_at: dy(2), catalog_esp: true },
+      { id: 'po-05', titulo: 'VW Polo 2019 · 81.000 km · único dueño', marca: 'Volkswagen', modelo: 'Polo', año: 2019, kilometros: 81000, precio: 17500000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'Tucumán', link: '#demo-po-05', fuente: 'DeMotores', status: 'discarded', first_seen_at: dy(5), catalog_esp: true },
+      { id: 'po-06', titulo: 'Volkswagen Polo Trendline 2020 · 59.000 km', marca: 'Volkswagen', modelo: 'Polo', año: 2020, kilometros: 59000, precio: 19900000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'CABA', link: '#demo-po-06', fuente: 'MercadoLibre', status: 'saved', first_seen_at: dy(4), catalog_esp: true },
+      { id: 'po-07', titulo: 'VW Polo 2021 · 41.000 km · service oficial completo', marca: 'Volkswagen', modelo: 'Polo', año: 2021, kilometros: 41000, precio: 22300000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'San Isidro, Bs.As.', link: '#demo-po-07', fuente: 'MercadoLibre', status: 'saved', recomendado: true, first_seen_at: dy(2), catalog_esp: true },
+      { id: 'po-08', titulo: 'VW Polo Trendline 2020 · 52.000 km · liquido urgente', marca: 'Volkswagen', modelo: 'Polo', año: 2020, kilometros: 52000, precio: 19200000, moneda: 'ARS', combustible: 'nafta', transmision: 'manual', tipo: 'hatchback', ubicacion: 'Mar del Plata, Bs.As.', link: '#demo-po-08', fuente: 'OLX', status: 'saved', first_seen_at: dy(6), catalog_esp: true }
+    ];
+
+    const PICKUP_LISTINGS = [
+      { id: 'pk-01', titulo: 'Toyota Hilux SR 4x4 2021 · 68.000 km · titular', marca: 'Toyota', modelo: 'Hilux', año: 2021, kilometros: 68000, precio: 52000000, moneda: 'ARS', combustible: 'diesel', transmision: 'manual', tipo: 'pickup', traccion: '4x4', ubicacion: 'Buenos Aires', link: '#demo-pk-01', fuente: 'MercadoLibre', status: 'saved', recomendado: true, first_seen_at: dy(2), catalog_esp: true },
+      { id: 'pk-02', titulo: 'Toyota Hilux SRV 4x4 AT 2020 · 87.000 km', marca: 'Toyota', modelo: 'Hilux', año: 2020, kilometros: 87000, precio: 49500000, moneda: 'ARS', combustible: 'diesel', transmision: 'automatico', tipo: 'pickup', traccion: '4x4', ubicacion: 'Córdoba', link: '#demo-pk-02', fuente: 'MercadoLibre', status: 'saved', recomendado: true, first_seen_at: dy(5), catalog_esp: true },
+      { id: 'pk-03', titulo: 'Ford Ranger XLS 4x4 2021 · 71.000 km · impecable', marca: 'Ford', modelo: 'Ranger', año: 2021, kilometros: 71000, precio: 47800000, moneda: 'ARS', combustible: 'diesel', transmision: 'manual', tipo: 'pickup', traccion: '4x4', ubicacion: 'Rosario, Santa Fe', link: '#demo-pk-03', fuente: 'OLX', status: 'saved', first_seen_at: dy(3), catalog_esp: true },
+      { id: 'pk-04', titulo: 'Toyota Hilux SR 4x4 2022 · 45.000 km · service oficial', marca: 'Toyota', modelo: 'Hilux', año: 2022, kilometros: 45000, precio: 58000000, moneda: 'ARS', combustible: 'diesel', transmision: 'manual', tipo: 'pickup', traccion: '4x4', ubicacion: 'Mendoza', link: '#demo-pk-04', fuente: 'MercadoLibre', status: 'saved', recomendado: true, first_seen_at: dy(1), catalog_esp: true },
+      { id: 'pk-05', titulo: 'Chevrolet S10 LTZ 4x4 2020 · 94.000 km · titular', marca: 'Chevrolet', modelo: 'S10', año: 2020, kilometros: 94000, precio: 43200000, moneda: 'ARS', combustible: 'diesel', transmision: 'manual', tipo: 'pickup', traccion: '4x4', ubicacion: 'Santa Fe', link: '#demo-pk-05', fuente: 'DeMotores', status: 'saved', first_seen_at: dy(4) },
+      { id: 'pk-06', titulo: 'Toyota Hilux SR 2019 4x4 · 125.000 km · titular', marca: 'Toyota', modelo: 'Hilux', año: 2019, kilometros: 125000, precio: 41000000, moneda: 'ARS', combustible: 'diesel', transmision: 'manual', tipo: 'pickup', traccion: '4x4', ubicacion: 'Tucumán', link: '#demo-pk-06', fuente: 'MercadoLibre', status: 'saved', first_seen_at: dy(7), catalog_esp: true }
+    ];
+
+    const BOARDS_LIST = [
+      { id: 'b-ka',     name: 'Ford Ka · Ciudad · hasta $18M',  total: 11, contacted: 1, new_count: 3, last_checked_at: hr(2),  portals: ['ml','olx'],         notes: 'Prefiero 2021+ con ESP. Evitar versión 1.0 8v.' },
+      { id: 'b-polo',   name: 'VW Polo · Hatchback · 2019+',    total: 8,  contacted: 1, new_count: 1, last_checked_at: dy(1),  portals: ['ml','demotores'],    notes: '' },
+      { id: 'b-pickup', name: 'Pickup 4×4 diesel · campo',       total: 6,  contacted: 0, new_count: 0, last_checked_at: dy(3),  portals: ['ml'],               notes: 'Solo cabina doble. Prefiero Hilux por repuestos.' }
+    ];
+
+    const BOARD_DETAIL = {
+      'b-ka':     { ...BOARDS_LIST[0], advisor_brief: KA_BRIEF,     listings: KA_LISTINGS,     runs: [{ portal_results: [{ portal:'ml', portal_label:'MercadoLibre', total:8, status:'ok', url:'#' },{ portal:'olx', portal_label:'OLX Autos', total:3, status:'ok', url:'#' }] }] },
+      'b-polo':   { ...BOARDS_LIST[1], advisor_brief: POLO_BRIEF,   listings: POLO_LISTINGS,   runs: [{ portal_results: [{ portal:'ml', portal_label:'MercadoLibre', total:6, status:'ok', url:'#' },{ portal:'demotores', portal_label:'DeMotores', total:3, status:'partial', url:'#' }] }] },
+      'b-pickup': { ...BOARDS_LIST[2], advisor_brief: PICKUP_BRIEF, listings: PICKUP_LISTINGS, runs: [{ portal_results: [{ portal:'ml', portal_label:'MercadoLibre', total:6, status:'ok', url:'#' }] }] }
+    };
+
+    const TODAY_NUEVOS = [
+      { ...KA_LISTINGS[0], board_id: 'b-ka',   board_name: 'Ford Ka · Ciudad' },
+      { ...KA_LISTINGS[3], board_id: 'b-ka',   board_name: 'Ford Ka · Ciudad' },
+      { ...POLO_LISTINGS[0], board_id: 'b-polo', board_name: 'VW Polo · Hatchback' }
+    ];
+    const TODAY_BAJARON = [
+      { ...KA_LISTINGS[1], board_id: 'b-ka', board_name: 'Ford Ka · Ciudad', precio_bajo: true, precio_anterior: 17800000 }
+    ];
+
+    const TRANSACTION_GUIDE = {
+      titulo: 'Guía de compra de auto usado en Argentina',
+      aviso: 'Esta guía es orientativa. Consultá con un escribano o gestor habilitado de tu provincia para el trámite oficial.',
+      checklist_unidad: {
+        keys: ['vtv_ok','servicio_ok','dueno_unico','precio_negociable','titular_ok','sin_siniestros'],
+        labels: { vtv_ok:'VTV al día', servicio_ok:'Service documentado', dueno_unico:'Dueño único', precio_negociable:'Precio negociable', titular_ok:'Titular / papeles ok', sin_siniestros:'Sin siniestros declarados' }
+      },
+      secciones: [
+        { titulo: 'Verificación previa (antes de ir)', items: ['Verificá el dominio en dnrpa.gov.ar (Registro Nacional del Automotor)', 'Consultá prendas e inhibiciones activas del vehículo', 'Chequeá deuda de patentes, multas y VTV', 'Pedí el VIN (número de chasis) al vendedor de antemano'] },
+        { titulo: 'Revisión del vehículo (al verlo)', items: ['Verificá que el VIN en el chasis y motor coincidan con el título', 'Pedí el libro de service con todos los kilometrajes registrados', 'Hacé una prueba de ruta mínimo 20 minutos (autopista y ciudad)', 'Considerá una revisión mecánica profesional independiente (≈ $20k-40k)'] },
+        { titulo: 'Boleto y pago (al cerrar)', items: ['El boleto debe firmarse ante escribano o en el Registro del Automotor', 'Pagá con transferencia bancaria y guardá el comprobante siempre', 'No entregues el dinero antes de tener el auto en tu poder', 'Verificá que el vendedor sea el titular del dominio del auto'] },
+        { titulo: 'Transferencia de dominio (post-compra)', items: ['Hacela dentro de los 30 días de la posesión efectiva', 'Necesitás documentación del Registro del Automotor de tu zona', 'El impuesto de transferencia es a cargo del vendedor (salvo pacto en contrario)', 'Contratá el seguro obligatorio antes de retirar el auto'] }
+      ]
+    };
+
+    return {
+      portals: [
+        { id: 'ml',        label: 'MercadoLibre', canScrape: true },
+        { id: 'olx',       label: 'OLX Autos',    canScrape: true },
+        { id: 'demotores', label: 'DeMotores',     canScrape: true }
+      ],
+      boards: BOARDS_LIST,
+      board_detail: BOARD_DETAIL,
+      today: { nuevos: TODAY_NUEVOS, bajaron: TODAY_BAJARON, counts: { nuevos: TODAY_NUEVOS.length, bajaron: TODAY_BAJARON.length } },
+      transaction_guide: TRANSACTION_GUIDE
+    };
+  })();
+
+  function getMockResponse(path, opts = {}) {
+    const method = (opts.method || 'GET').toUpperCase();
+    if (path === '/api/portals')                           return { ok: true, portals: MOCK.portals };
+    if (path === '/api/boards' && method === 'GET')        return { ok: true, boards: MOCK.boards };
+    if (path === '/api/today')                             return { ok: true, ...MOCK.today };
+    if (path === '/api/ml/status')                         return { ok: true, configured: false, connected: false };
+    if (path === '/api/transaction-guide')                 return { ok: true, guide: MOCK.transaction_guide };
+    if (path.startsWith('/api/knowledge'))                 return { ok: true, knowledge: null, source: null };
+    if (path === '/api/search')                            return { ok: true, results: [], portal_results: [] };
+
+    const bMatch = path.match(/^\/api\/boards\/([^/]+)$/);
+    if (bMatch) {
+      const id = decodeURIComponent(bMatch[1]);
+      if (method === 'GET') { const b = MOCK.board_detail[id]; if (b) return { ok: true, board: b }; }
+      if (method === 'PATCH') return { ok: true };
+    }
+    if (path.match(/\/seen$/) && method === 'POST') return { ok: true };
+
+    const refMatch = path.match(/^\/api\/boards\/([^/]+)\/refresh$/);
+    if (refMatch && method === 'POST') {
+      const id = decodeURIComponent(refMatch[1]);
+      const b = MOCK.board_detail[id];
+      if (b) return { ok: true, board: b, new_count: 0, portal_results: b.runs?.[0]?.portal_results || [] };
+    }
+
+    const lMatch = path.match(/^\/api\/boards\/([^/]+)\/listings\/([^/]+)$/);
+    if (lMatch && method === 'PATCH') {
+      const bId = decodeURIComponent(lMatch[1]);
+      const lId = decodeURIComponent(lMatch[2]);
+      const board = MOCK.board_detail[bId];
+      if (board) {
+        const payload = JSON.parse(opts.body || '{}');
+        const listing = board.listings.find(l => l.id === lId);
+        if (listing) Object.assign(listing, payload);
+        return { ok: true, board };
+      }
+    }
+
+    if (path === '/api/boards' && method === 'POST') {
+      return { ok: true, board: { id: 'b-new-' + Date.now(), name: 'Nueva búsqueda', total: 0, contacted: 0, new_count: 0 } };
+    }
+    return undefined;
+  }
 
   const state = {
     portals: [],
@@ -688,7 +1238,8 @@
     showShortlisted: false,
     lastSearch: null,
     advisor: { open: false, messages: [], sending: false, sessionId: '' },
-    advisorGridFilter: null
+    advisorGridFilter: null,
+    boardTab: 'listings'
   };
 
   /* ---------- helpers ---------- */
@@ -923,44 +1474,126 @@
     bar.innerHTML = `<span><strong>Filtro del asesor:</strong> ${escapeHtml(describeAdvisorFilter(f))}</span>
       <button type="button" id="clearAdvisorFilter">Quitar filtro</button>`;
   }
-  function isDesktopNav() {
-    return window.matchMedia('(min-width: 1024px)').matches;
+  function setBoardTab(tab) {
+    state.boardTab = tab;
+    document.querySelectorAll('.workspace-tabs [data-btab]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.btab === tab);
+    });
+    ['listings', 'brief', 'guide', 'notes'].forEach(t => {
+      $('pane-' + t)?.classList.toggle('active', t === tab);
+    });
   }
-  function syncBoardPanels() {
-    if (state.view !== 'board') return;
-    const pb = $('panelBrief');
-    const pt = $('panelTramite');
-    const ptools = $('panelTools');
-    const desktop = isDesktopNav();
-    if (pb && !pb.hidden) pb.open = desktop;
-    if (pt && !desktop) pt.open = false;
-    if (ptools && !desktop) ptools.open = false;
-  }
-  function renderBoardsSheetList() {
-    const list = $('boardsSheetList');
+  function renderBusquedasList() {
+    const list = $('busquedasList');
     if (!list) return;
-    list.innerHTML = state.boards.length
-      ? state.boards.map(b => `
-        <li><button class="alert-item ${b.id===state.viewBoardId?'active':''}" type="button" data-board-id="${escapeHtml(b.id)}">
-          <span class="row"><strong>${escapeHtml(b.name)}</strong>${b.new_count?`<span class="mini-badge">${b.new_count}</span>`:''}</span>
-          <span class="sub">${b.total} autos · ${b.last_checked_at ? 'revisado '+fmtAgo(b.last_checked_at) : 'sin revisar'}</span>
-        </button></li>`).join('')
-      : '<li class="alerts-empty">Todavía no tenés búsquedas guardadas.</li>';
-  }
-  function toggleBoardsSheet(open) {
-    const sheet = $('boardsSheet');
-    const overlay = $('boardsSheetOverlay');
-    if (!sheet || !overlay) return;
-    if (open) {
-      renderBoardsSheetList();
-      sheet.hidden = false;
-      overlay.hidden = false;
-      requestAnimationFrame(() => { sheet.classList.add('open'); overlay.classList.add('open'); });
+
+    if (!state.boards.length) {
+      list.innerHTML = `<li class="boards-empty">
+        <h2>Nada guardado aún</h2>
+        <p>Buscá un auto en Descubrir y guardá tu primera búsqueda como tablero.</p>
+        <button class="btn primary" onclick="showInicio()" type="button">Ir a Buscar</button>
+      </li>`;
     } else {
-      sheet.classList.remove('open');
-      overlay.classList.remove('open');
-      setTimeout(() => { sheet.hidden = true; overlay.hidden = true; }, 240);
+      list.innerHTML = state.boards.map(b => {
+        const pct = b.total > 0 ? Math.round(((b.contacted || 0) / b.total) * 100) : 0;
+        const shortStr = b.new_count
+          ? `<span class="board-new-tag">${b.new_count} nuevo${b.new_count > 1 ? 's' : ''}</span>`
+          : '';
+        return `<li><button class="board-row ${b.id === state.viewBoardId ? 'active' : ''}" type="button" data-board-id="${escapeHtml(b.id)}">
+          <div>
+            <h3>${escapeHtml(b.name)}${shortStr}</h3>
+            <div class="board-row-meta">
+              <span>${b.total} aviso${b.total === 1 ? '' : 's'}</span>
+              ${(b.contacted || 0) > 0 ? `<span>${b.contacted} contactado${b.contacted > 1 ? 's' : ''}</span>` : ''}
+              <span>${b.last_checked_at ? 'revisado ' + fmtAgo(b.last_checked_at) : 'sin revisar'}</span>
+            </div>
+            ${b.notes ? `<div style="margin-top:var(--s2);font-size:var(--t-xs);color:var(--muted)">📝 ${escapeHtml(b.notes)}</div>` : ''}
+            ${b.total > 0 ? `<div class="board-row-bar"><div class="board-row-bar-fill" style="width:${pct}%"></div></div>` : ''}
+          </div>
+          <span class="board-row-chevron" aria-hidden="true">›</span>
+        </button></li>`;
+      }).join('');
     }
+
+    $('boardPicker').innerHTML = '<option value="">Pinear a… (elegí búsqueda)</option>' +
+      state.boards.map(b => `<option value="${escapeHtml(b.id)}">${escapeHtml(b.name)}</option>`).join('');
+  }
+  function renderShellNav() {
+    const todayN = state.today.counts.nuevos + state.today.counts.bajaron;
+    const boardsN = state.boards.reduce((s, b) => s + (b.new_count || 0), 0);
+    for (const [id, n] of [['shellHoy', todayN], ['shellBusquedas', boardsN]]) {
+      const btn = $(id);
+      if (!btn) continue;
+      let badge = btn.querySelector('.shell-badge');
+      if (n) {
+        if (!badge) { badge = document.createElement('span'); badge.className = 'shell-badge'; btn.appendChild(badge); }
+        badge.textContent = String(n);
+      } else if (badge) badge.remove();
+    }
+    renderBottomNav();
+  }
+  function updateShellTopbar() {
+    const sub = $('shellTopbarSub');
+    if (!sub) return;
+    if (state.view === 'board' && state.viewBoard) {
+      sub.textContent = state.viewBoard.name || 'Tu búsqueda';
+    } else if (state.view === 'busquedas') {
+      const n = state.boards.length;
+      sub.textContent = n ? `${n} búsqueda${n===1?'':'s'} guardada${n===1?'':'s'}` : 'Sin búsquedas guardadas';
+    } else if (state.view === 'hoy') {
+      const n = state.today.counts.nuevos + state.today.counts.bajaron;
+      sub.textContent = n ? `${n} cambio${n > 1 ? 's' : ''} reciente${n > 1 ? 's' : ''}` : 'Sin novedades por ahora';
+    } else {
+      sub.textContent = 'Contanos qué auto buscás';
+    }
+  }
+  function updateRefreshBtn() {
+    const btn = $('refreshBoardBtn');
+    if (!btn || !state.viewBoard) return;
+    const newCount = (state.viewBoard.listings || []).filter(l => l.is_new).length;
+    if (newCount > 0) {
+      btn.className = 'btn primary';
+      btn.textContent = `Ver ${newCount} novedad${newCount > 1 ? 'es' : ''}`;
+    } else {
+      btn.className = 'btn secondary';
+      btn.textContent = 'Actualizar avisos';
+    }
+  }
+  function updateWorkspaceRail() {
+    const text = $('workspaceRailText');
+    if (!text) return;
+    const n = state.boardFeed?.length || 0;
+    const modelos = state.viewBoard?.advisor_brief?.modelos_recomendados?.length || 0;
+    text.textContent = modelos
+      ? `${modelos} modelo${modelos>1?'s':''} recomendado${modelos>1?'s':''} · ${n} avisos en este tablero.`
+      : `${n} avisos en este tablero. Preguntale al asesor qué conviene.`;
+  }
+  function setText(id, t) { const el = $(id); if (el) el.textContent = t; }
+
+  function updateBoardChrome(listCount) {
+    const countEl = $('tabListingsCount');
+    if (countEl) countEl.textContent = String(listCount);
+    const modelos = state.viewBoard?.advisor_brief?.modelos_recomendados?.length || 0;
+    const briefBadge = $('tabBriefBadge');
+    if (briefBadge) {
+      if (modelos) { briefBadge.hidden = false; briefBadge.textContent = String(modelos); }
+      else briefBadge.hidden = true;
+    }
+    // Workspace stats strip
+    const board = state.viewBoard;
+    if (board) {
+      const feed = state.boardFeed || [];
+      const shortlisted = feed.filter(l => l.shortlisted).length;
+      const contacted  = feed.filter(l => (l.status || 'saved') === 'contacted').length;
+      const newItems   = feed.filter(l => l.is_new).length;
+      setText('wsTotal',      String(board.total || 0));
+      setText('wsNew',        String(newItems));
+      setText('wsShortlisted', String(shortlisted));
+      setText('wsContacted',  String(contacted));
+      const ns = $('wsNewStat');
+      if (ns) ns.style.display = newItems > 0 ? '' : 'none';
+    }
+    updateWorkspaceRail();
   }
   function renderBottomNav() {
     const todayN = state.today.counts.nuevos + state.today.counts.bajaron;
@@ -971,9 +1604,9 @@
       if (!badge) { badge = document.createElement('span'); badge.className = 'bn-badge'; bnHoy.appendChild(badge); }
       badge.textContent = String(todayN);
     } else if (badge) badge.remove();
-    $('bnBuscar')?.classList.toggle('active', state.view === 'inicio' || state.view === 'board');
+    $('bnBuscar')?.classList.toggle('active', state.view === 'inicio');
     $('bnHoy')?.classList.toggle('active', state.view === 'hoy');
-    $('bnBoards')?.classList.toggle('active', false);
+    $('bnBoards')?.classList.toggle('active', state.view === 'busquedas' || state.view === 'board');
     $('bnAdvisor')?.classList.toggle('active', state.advisor.open);
   }
   function iaBar(label, score) {
@@ -1121,7 +1754,6 @@
   }
   function renderTransactionGuide(guide) {
     const wrap = $('transactionGuideWrap');
-    const panel = $('panelTramite');
     const guia = guiaCompraFromBrief(state.viewBoard?.advisor_brief);
     const parts = [];
     if (guia?.pasos?.length) parts.push(buildGuiaCompraBriefHtml(guia));
@@ -1139,17 +1771,33 @@
     }
     if (!parts.length) {
       wrap.innerHTML = '<p class="kn-empty">Guía de trámite al contactar vendedores y cerrar la operación.</p>';
-      if (panel) panel.hidden = false;
       return;
     }
     wrap.innerHTML = parts.join('');
-    if (panel) panel.hidden = false;
   }
 
   async function api(path, opts = {}) {
-    const res = await fetch(path, opts);
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data.ok) throw new Error(data.error || `Error HTTP ${res.status}`);
+    if (MOCK_MODE) {
+      const mock = getMockResponse(path, opts);
+      if (mock !== undefined) {
+        await new Promise(r => setTimeout(r, 60 + Math.random() * 90));
+        return mock;
+      }
+    }
+    let res, data;
+    try {
+      res = await fetch(path, opts);
+      data = await res.json().catch(() => ({}));
+    } catch {
+      const mock = getMockResponse(path, opts);
+      if (mock !== undefined) { MOCK_MODE = true; return mock; }
+      throw new Error('Sin conexión al servidor');
+    }
+    if (!res.ok || !data.ok) {
+      const mock = getMockResponse(path, opts);
+      if (mock !== undefined) { MOCK_MODE = true; return mock; }
+      throw new Error(data.error || `Error HTTP ${res.status}`);
+    }
     return data;
   }
 
@@ -1172,9 +1820,11 @@
       car.ubicacion || car.location
     ].filter(Boolean).map(s => `<span class="pill">${escapeHtml(s)}</span>`).join('');
 
-    const media = (car.imagen || car.image)
-      ? `<img class="media" src="${escapeHtml(car.imagen||car.image)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;ph&quot;>Sin foto</div>'" />`
-      : '<div class="ph">Sin foto</div>';
+    const phName = [car.marca, car.modelo].filter(Boolean).join(' ') || 'Auto';
+    const phYr   = String(car.año || car.year || '');
+    const media  = (car.imagen || car.image)
+      ? `<img class="media" src="${escapeHtml(car.imagen||car.image)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;ph&quot;><span class=&quot;ph-name&quot;>${escapeHtml(phName)}</span><span class=&quot;ph-yr&quot;>${escapeHtml(phYr)}</span></div>'" />`
+      : `<div class="ph"><span class="ph-name">${escapeHtml(phName)}</span><span class="ph-yr">${escapeHtml(phYr)}</span></div>`;
 
     const since = fmtAgo(car.first_seen_at);
     const st = status === 'contacted' ? '<span class="st contacted">Contactado</span>'
@@ -1193,8 +1843,8 @@
       const scoreLbl = car.listing_analysis?.score != null ? ` (${car.listing_analysis.score})` : '';
       actions = `
         <div class="card-actions">
-          <a class="btn" href="${escapeHtml(car.link)}" target="_blank" rel="noopener">Ver aviso</a>
-          <button type="button" class="btn ghost ia-toggle" data-ia-detail-toggle="${id}">Ficha técnica${scoreLbl}</button>
+          <a class="btn secondary" href="${escapeHtml(car.link)}" target="_blank" rel="noopener">Ver aviso</a>
+          <button type="button" class="text-btn ia-toggle" data-ia-detail-toggle="${id}">Ficha técnica${scoreLbl}</button>
         </div>
         <div class="ia-detail" data-ia-detail-box="${id}" hidden>${buildListingAnalysisHtml(car)}</div>
         <div class="life">${life}</div>
@@ -1208,8 +1858,8 @@
     } else {
       const pinned = state.pinnedLinks.has(car.link);
       actions = `<div class="actions">
-        <a class="btn" href="${escapeHtml(car.link)}" target="_blank" rel="noopener">Ver origen</a>
-        <button class="btn primary pin" type="button" data-pin="${escapeHtml(car.id||car.link)}">${pinned ? 'Pineado' : 'Pinear'}</button>
+        <a class="btn secondary" href="${escapeHtml(car.link)}" target="_blank" rel="noopener">Ver aviso</a>
+        <button class="btn ghost pin" type="button" data-pin="${escapeHtml(car.id||car.link)}">${pinned ? 'Guardado' : 'Guardar'}</button>
       </div>`;
     }
 
@@ -1220,7 +1870,7 @@
     return `
       <article class="card ${isNew?'fresh':''} ${status==='discarded'?'discarded':''} ${car.shortlisted?'starred':''} ${car.recomendado?'recommended':''} ${pendingFollowUpId===car.id?'contacted-open':''}" ${domId ? `id="${escapeHtml(domId)}"` : ''} data-car-id="${escapeHtml(car.id||car.link)}">
         ${isNew ? '<span class="ribbon">Nuevo</span>' : ''}
-        ${car.recomendado ? '<span class="ribbon" style="left:auto;right:10px;background:var(--blue)">Recomendado</span>' : ''}
+        ${car.recomendado ? '<span class="ribbon" style="left:auto;right:10px;top:auto;bottom:10px;background:var(--surface-dark);color:var(--on-dark)">Recomendado</span>' : ''}
         ${media}
         <div class="body">
           <h4 class="title">${title}</h4>
@@ -1268,37 +1918,24 @@
     }).join('');
   }
 
-  /* ---------- rail / nav ---------- */
+  /* ---------- shell / nav ---------- */
   function setView(view) {
     state.view = view;
-    ['inicio','hoy','board'].forEach(v => $('view-' + v).classList.toggle('active', v === view));
-    $('navInicio').classList.toggle('active', view === 'inicio' || view === 'board');
-    $('navHoy').classList.toggle('active', view === 'hoy');
+    ['inicio','busquedas','hoy','board'].forEach(v => $('view-' + v).classList.toggle('active', v === view));
+    $('shellInicio')?.classList.toggle('active', view === 'inicio');
+    $('shellBusquedas')?.classList.toggle('active', view === 'busquedas' || view === 'board');
+    $('shellHoy')?.classList.toggle('active', view === 'hoy');
+    $('shellAdvisor')?.classList.toggle('active', state.advisor.open);
     if (view !== 'board') state.viewBoardId = '';
-    toggleBoardsSheet(false);
-    renderRail();
-    renderBottomNav();
-    syncBoardPanels();
+    renderShellNav();
+    renderBusquedasList();
+    updateShellTopbar();
     if (state.advisor.open) updateDockCtx();
   }
 
-  function renderRail() {
-    $('alertsCount').textContent = String(state.boards.length);
-    const todayN = state.today.counts.nuevos + state.today.counts.bajaron;
-    $('navInicio').innerHTML = `<span class="ico">⌕</span> Buscar`;
-    $('navHoy').innerHTML = `<span class="ico">◆</span> Novedades${todayN ? `<span class="nav-badge">${todayN}</span>` : ''}`;
-
-    $('alertsList').innerHTML = state.boards.length
-      ? state.boards.map(b => `
-        <li><button class="alert-item ${b.id===state.viewBoardId?'active':''}" type="button" data-board-id="${escapeHtml(b.id)}">
-          <span class="row"><strong>${escapeHtml(b.name)}</strong>${b.new_count?`<span class="mini-badge">${b.new_count}</span>`:''}</span>
-          <span class="sub">${b.total} autos · ${b.last_checked_at ? 'revisado '+fmtAgo(b.last_checked_at) : 'sin revisar'}</span>
-        </button></li>`).join('')
-      : '<li class="alerts-empty">Todavía no tenés búsquedas. Andá a Explorar y guardá una búsqueda.</li>';
-
-    $('boardPicker').innerHTML = '<option value="">Pinear a… (elegí búsqueda)</option>' +
-      state.boards.map(b => `<option value="${escapeHtml(b.id)}">${escapeHtml(b.name)}</option>`).join('');
-    renderBottomNav();
+  function showBusquedas() {
+    setView('busquedas');
+    renderBusquedasList();
   }
 
   /* ---------- data loads ---------- */
@@ -1315,12 +1952,13 @@
       try { const d = await api(`/api/boards/${encodeURIComponent(b.id)}`); for (const l of d.board.listings||[]) links.add(l.link); } catch {}
     }
     state.pinnedLinks = links;
-    renderRail();
+    renderShellNav();
+    renderBusquedasList();
   }
   async function loadToday() {
     try { const d = await api('/api/today'); state.today = { nuevos: d.nuevos||[], bajaron: d.bajaron||[], counts: d.counts||{nuevos:0,bajaron:0} }; }
     catch { state.today = { nuevos: [], bajaron: [], counts: {nuevos:0,bajaron:0} }; }
-    renderRail();
+    renderShellNav();
   }
 
   /* ---------- HOY ---------- */
@@ -1338,36 +1976,15 @@
     if (nuevos.length) html += sec('Autos nuevos', nuevos.length) + nuevos.map(c => buildCard(c, 'hoy')).join('');
     if (bajaron.length) html += sec('Bajaron de precio', bajaron.length) + bajaron.map(c => buildCard(c, 'hoy')).join('');
     if (!total) html = state.boards.length
-      ? '<div class="empty"><b>Nada nuevo por ahora</b>Abrí una búsqueda y tocá “Revisar novedades”, o creá una nueva desde Explorar.</div>'
-      : '<div class="empty"><b>Empecemos</b>Andá a Explorar, buscá un modelo (Ford Ka, Polo, Sandero…) y guardalo como búsqueda. Te aviso acá cuando aparezca algo nuevo o baje de precio.</div>';
+      ? '<div class="empty"><b>Nada nuevo por ahora</b>Abrí una búsqueda y tocá “Revisar novedades”, o creá una nueva desde Buscar.</div>'
+      : '<div class="empty"><b>Empecemos</b>Andá a Buscar, contanos qué auto necesitás y guardalo como tablero. Te aviso acá cuando aparezca algo nuevo o baje de precio.</div>';
     $('hoyGrid').innerHTML = html;
   }
 
-  /* ---------- INICIO (home) ---------- */
+  /* ---------- INICIO (descubrir) ---------- */
   function showInicio() {
     setView('inicio');
-    renderSaved();
-    // Si no hay búsqueda activa, mostramos solo las guardadas.
     if (!state.explorarFeed.length) { $('resultsWrap').hidden = true; $('searchActions').hidden = true; }
-  }
-  function renderSaved() {
-    $('savedCount').textContent = state.boards.length ? `${state.boards.length}` : '';
-    $('savedGrid').innerHTML = state.boards.length
-      ? state.boards.map(b => `
-        <article class="card saved" data-open-board="${escapeHtml(b.id)}" style="cursor:pointer">
-          <div class="body">
-            <h4 class="title">${escapeHtml(b.name)} ${b.new_count?`<span class="mini-badge">${b.new_count} nuevo${b.new_count>1?'s':''}</span>`:''}</h4>
-            <div class="specs">
-              <span class="pill">${b.total} autos</span>
-              <span class="pill">${b.contacted} contactados</span>
-              ${(b.portals||[]).length?`<span class="pill">${b.portals.length} portales</span>`:''}
-            </div>
-            ${b.notes ? `<div class="note-preview">📝 ${escapeHtml(b.notes)}</div>` : ''}
-            <div class="trace">${b.last_checked_at ? 'revisado '+fmtAgo(b.last_checked_at) : 'sin revisar todavía'}</div>
-            <div class="actions"><button class="btn primary" type="button" data-open-board="${escapeHtml(b.id)}">Abrir</button></div>
-          </div>
-        </article>`).join('')
-      : '<div class="empty"><b>Todavía no guardaste ninguna búsqueda</b>Escribí arriba qué auto buscás y tocá “Encontrar mi auto”. Te armamos un tablero con la explicación del asesor y los usados publicados.</div>';
   }
 
   /* ---------- BOARD (búsqueda) ---------- */
@@ -1394,11 +2011,19 @@
       loadTransactionGuide().then(renderTransactionGuide).catch(() => renderTransactionGuide(null));
       renderReport('boardReport', b.runs?.[0]?.portal_results || []);
       setView('board');
+      setBoardTab('listings');
+      updateRefreshBtn();
       renderBoardGrid();
-      syncBoardPanels();
       loadKnowledge(b);
       setStatus(`${b.total} autos en “${b.name}”`);
-      if (newCount) { try { await api(`/api/boards/${encodeURIComponent(boardId)}/seen`, { method:'POST' }); await loadBoards(); state.viewBoardId = b.id; renderRail(); } catch {} }
+      if (newCount) {
+        try {
+          await api(`/api/boards/${encodeURIComponent(boardId)}/seen`, { method:'POST' });
+          (state.viewBoard?.listings || []).forEach(l => { l.is_new = false; });
+          updateRefreshBtn();
+          await loadBoards(); state.viewBoardId = b.id; renderBusquedasList();
+        } catch {}
+      }
     } catch (err) { showToast(err.message); setStatus(err.message); }
   }
   function renderBoardGrid() {
@@ -1410,6 +2035,7 @@
       ? 'No guardaste ninguna publicación todavía. Tocá “☆ Guardar” en las que te interesen.'
       : 'Esta búsqueda no tiene autos. Tocá “Revisar novedades”.';
     $('boardGrid').innerHTML = list.length ? list.map(c => buildCard(c, 'board')).join('') : `<div class="empty">${state.advisorGridFilter ? 'Ningún auto del tablero cumple el filtro del asesor. Probá aflojar precio o km.' : emptyMsg}</div>`;
+    updateBoardChrome(list.length);
     renderAdvisorFilterBar();
     if (state.viewBoard?.advisor_brief) renderAdvisorBrief(state.viewBoard.advisor_brief);
     if (state.advisor.open) updateDockCtx();
@@ -1421,15 +2047,15 @@
   }
   function renderAdvisorBrief(brief) {
     const el = $('advisorBrief');
-    const panel = $('panelBrief');
+    const empty = $('briefEmpty');
     if (!brief) {
       el.hidden = true;
       el.innerHTML = '';
-      if (panel) panel.hidden = true;
+      if (empty) empty.hidden = false;
       return;
     }
     el.hidden = false;
-    if (panel) panel.hidden = false;
+    if (empty) empty.hidden = true;
     const modelos = brief.modelos_recomendados || [];
     const guides = modelos.map(m => buildModelGuideHtml(m)).join('');
     const criterios = (brief.criterios || []).map(c => `<span class="pill">${escapeHtml(c)}</span>`).join('');
@@ -1440,7 +2066,7 @@
       ${guides ? `<div class="ab-section"><h4>Qué modelos y versiones convienen</h4><p class="ab-text" style="margin:0 0 var(--s2);font-size:var(--t-sm);color:var(--muted)">Recomendación por equipamiento y años. En cada aviso: <strong>Ficha técnica</strong>. Si contactás al vendedor, se abre el <strong>seguimiento de compra</strong>.</p><div class="mg-grid">${guides}</div></div>` : ''}
       ${evitar ? `<div class="ab-section"><h4>Qué evitar</h4><div class="ab-warn">${evitar}</div></div>` : ''}
       ${criterios ? `<div class="ab-section"><h4>Criterios aplicados</h4><div class="specs">${criterios}</div></div>` : ''}`;
-    syncBoardPanels();
+    updateBoardChrome(state.boardFeed?.length || 0);
     loadTransactionGuide().then(renderTransactionGuide).catch(() => renderTransactionGuide(null));
   }
   /* ---------- Conocimiento del modelo ---------- */
@@ -1521,7 +2147,7 @@
     try {
       await api(`/api/boards/${encodeURIComponent(state.viewBoardId)}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ notes: $('boardNotes').value }) });
       $('notesSaved').textContent = 'Guardado ✓';
-      await loadBoards(); state.viewBoardId = state.viewBoardId; renderRail();
+      await loadBoards(); state.viewBoardId = state.viewBoardId; renderBusquedasList();
     } catch (err) { showToast(err.message); }
   }
   async function refreshBoard() {
@@ -1531,17 +2157,19 @@
     try {
       const data = await api(`/api/boards/${encodeURIComponent(id)}/refresh`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ limit: 60 }) });
       const modelos = state.viewBoard?.advisor_brief?.modelos_recomendados || [];
+      state.viewBoard = data.board;
       state.boardFeed = (data.board.listings || []).map(l => ({
         ...l,
         recomendado: l.recomendado ?? listingIsRecommended(l, modelos)
       }));
       $('boardSub').textContent = data.new_count ? `¡${data.new_count} auto${data.new_count>1?'s':''} nuevo${data.new_count>1?'s':''}!` : 'Sin novedades desde la última revisión.';
+      updateRefreshBtn();
       renderReport('boardReport', data.portal_results);
       renderBoardGrid();
       showToast(data.new_count ? `${data.new_count} novedad${data.new_count>1?'es':''}` : 'Sin novedades por ahora');
       setStatus(`${data.board.total} autos · ${data.new_count} nuevos`);
       if (data.new_count) { await api(`/api/boards/${encodeURIComponent(id)}/seen`, { method:'POST' }); }
-      await loadBoards(); await loadToday(); state.viewBoardId = id; renderRail();
+      await loadBoards(); await loadToday(); state.viewBoardId = id; renderBusquedasList();
     } catch (err) { showToast(err.message); setStatus(err.message); }
     finally { $('refreshBoardBtn').disabled = false; }
   }
@@ -1559,7 +2187,7 @@
       renderBoardGrid();
     }
     else if (state.view === 'hoy') { await loadToday(); showHoy(); }
-    await loadBoards(); if (state.view === 'board') state.viewBoardId = boardId; renderRail();
+    await loadBoards(); if (state.view === 'board') state.viewBoardId = boardId; renderBusquedasList();
     return data;
   }
   async function setListingStatus(listingId, status) {
@@ -1703,7 +2331,7 @@
       const data = await api('/api/pins', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ boardId: boardId||undefined, boardName: boardId?undefined:boardName, listing: car }) });
       state.pinnedLinks.add(car.link);
       await loadBoards();
-      renderResultsGrid(); renderSaved();
+      renderResultsGrid(); renderBusquedasList();
       showToast(`Pineado en “${data.board.name}”`);
     } catch (err) { showToast(err.message); }
   }
@@ -1725,6 +2353,7 @@
     state.advisor.open = open;
     $('dock').classList.toggle('open', open);
     $('overlay').classList.toggle('open', open);
+    $('shellAdvisor')?.classList.toggle('active', open);
     renderBottomNav();
     if (open) { updateDockCtx(); renderAdvisor(); $('advisorInput').focus(); }
   }
@@ -1807,8 +2436,11 @@
   }
 
   /* ---------- events ---------- */
-  $('navInicio').addEventListener('click', () => showInicio());
-  $('navHoy').addEventListener('click', async () => { await loadToday(); showHoy(); });
+  $('shellBrand').addEventListener('click', e => { e.preventDefault(); showInicio(); });
+  $('shellInicio').addEventListener('click', () => showInicio());
+  $('shellBusquedas').addEventListener('click', () => showBusquedas());
+  $('shellHoy').addEventListener('click', async () => { await loadToday(); showHoy(); });
+  $('shellAdvisor').addEventListener('click', () => toggleAdvisor(true));
   $('searchForm').addEventListener('submit', recommendSearch);
   $('exampleChips').addEventListener('click', e => {
     const chip = e.target.closest('[data-example]');
@@ -1820,22 +2452,21 @@
   $('saveNotesBtn').addEventListener('click', saveNotes);
   $('genKnowledgeBtn').addEventListener('click', generateKnowledge);
   $('boardNotes').addEventListener('input', () => { $('notesSaved').textContent = ''; });
-  $('backInicioBtn').addEventListener('click', () => showInicio());
+  $('backBusquedasBtn').addEventListener('click', () => showBusquedas());
+  $('newSearchFromBusquedas').addEventListener('click', () => showInicio());
   $('showDiscarded').addEventListener('change', e => { state.showDiscarded = e.target.checked; renderBoardGrid(); });
   $('showShortlisted').addEventListener('change', e => { state.showShortlisted = e.target.checked; renderBoardGrid(); });
 
-  $('alertsList').addEventListener('click', e => { const b = e.target.closest('[data-board-id]'); if (b) openBoard(b.dataset.boardId); });
-  $('boardsSheetList').addEventListener('click', e => {
-    const b = e.target.closest('[data-board-id]');
-    if (b) { toggleBoardsSheet(false); openBoard(b.dataset.boardId); }
+  $('busquedasList').addEventListener('click', e => { const b = e.target.closest('[data-board-id]'); if (b) openBoard(b.dataset.boardId); });
+  document.querySelector('.workspace-tabs')?.addEventListener('click', e => {
+    const tab = e.target.closest('[data-btab]');
+    if (tab) setBoardTab(tab.dataset.btab);
   });
   $('bnBuscar').addEventListener('click', () => showInicio());
   $('bnHoy').addEventListener('click', async () => { await loadToday(); showHoy(); });
-  $('bnBoards').addEventListener('click', () => toggleBoardsSheet(true));
+  $('bnBoards').addEventListener('click', () => showBusquedas());
   $('bnAdvisor').addEventListener('click', () => toggleAdvisor(true));
-  $('closeBoardsSheet').addEventListener('click', () => toggleBoardsSheet(false));
-  $('boardsSheetOverlay').addEventListener('click', () => toggleBoardsSheet(false));
-  window.addEventListener('resize', () => { if (state.view === 'board') syncBoardPanels(); });
+  $('workspaceOpenAdvisor').addEventListener('click', () => toggleAdvisor(true));
 
   document.querySelector('.main').addEventListener('click', e => {
     const flash = e.target.closest('[data-flash-listing]');
@@ -1850,8 +2481,7 @@
     const st = e.target.closest('[data-status]'); if (st?.dataset.status) { setListingStatus(st.dataset.listing, st.dataset.status); return; }
     const ck = e.target.closest('[data-check-key]'); if (ck) { saveListingChecklist(ck.dataset.listing, ck.dataset.checkKey, ck.dataset.checkVal); return; }
     if (e.target.closest('[data-scroll-tramite]')) {
-      const panel = $('panelTramite');
-      if (panel) { panel.open = true; panel.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      setBoardTab('guide');
       return;
     }
     const ns = e.target.closest('[data-note-save]'); if (ns) { const ta = ns.closest('.card')?.querySelector('.note-input'); saveListingNote(ns.dataset.noteSave, ta ? ta.value : ''); return; }
@@ -1863,7 +2493,6 @@
     }
   });
 
-  $('openAdvisor').addEventListener('click', () => toggleAdvisor(true));
   $('closeAdvisor').addEventListener('click', () => toggleAdvisor(false));
   $('overlay').addEventListener('click', () => toggleAdvisor(false));
   $('advisorForm').addEventListener('submit', e => { e.preventDefault(); sendAdvisor($('advisorInput').value); });
@@ -1889,8 +2518,26 @@
       showToast('MercadoLibre conectado ✓');
       history.replaceState({}, '', location.pathname);
     }
-    try { await loadPortals(); await loadBoards(); await loadToday(); showInicio(); checkMl(); setStatus('Listo'); }
-    catch (err) { setStatus(err.message); showInicio(); }
+    try { await loadPortals(); await loadBoards(); await loadToday(); }
+    catch (err) { setStatus(err.message); }
+
+    if (MOCK_MODE) {
+      const b = $('demoBanner');
+      if (b) {
+        b.innerHTML = '⚡ <strong>Modo demo</strong> — datos de ejemplo · conectá el backend para datos reales';
+        b.classList.add('active');
+      }
+    }
+
+    // Mostrar búsquedas guardadas si existen, Descubrir si no
+    if (state.boards.length > 0) {
+      showBusquedas();
+    } else {
+      showInicio();
+    }
+
+    checkMl();
+    setStatus('Listo');
   })();
 </script>
 </body>
