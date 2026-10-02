@@ -1,0 +1,1338 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+<title>El Garaje · Mapa de producto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: showroom Renault del repo (DESIGN.md) — blanco/negro, un solo acento amarillo, geometría cuadrada.
+   Página = tabs: Producto · Casos de uso · Prototipo (mapa navegable + teléfono + panel de CU activos). */
+:root{
+  --canvas:#ffffff; --soft:#f6f6f4; --ink:#000000; --body:#222222; --mute:#626262; --line:#e9e9e6; --line-strong:#000000;
+  --primary:#ffed00; --on-primary:#000000; --dark:#000000; --on-dark:#ffffff; --on-dark-mute:rgba(255,255,255,.7);
+  --ok:#2f8a3b; --warn:#b26b00; --bad:#b03a3a; --info:#2a62a8; --plan:#7a5bb5;
+  --ok-bg:#e7f3e8; --warn-bg:#fbf0dc; --bad-bg:#f8e6e6; --info-bg:#e5eef8; --plan-bg:#efe9f8;
+  --phone:#ffffff; --phone-edge:#111111;
+  --display:"Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --canvas:#0d0d0c; --soft:#171716; --ink:#ffffff; --body:#e6e6e3; --mute:#a3a39e; --line:#2a2a28; --line-strong:#ffffff;
+  --dark:#000000; --ok:#6cc277; --warn:#e6a64a; --bad:#e07c7c; --info:#7eaee8; --plan:#b49be0;
+  --ok-bg:#16301a; --warn-bg:#3a2a10; --bad-bg:#3a1a1a; --info-bg:#14263c; --plan-bg:#2a2140;
+  --phone:#121211; --phone-edge:#3a3a38; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --canvas:#0d0d0c; --soft:#171716; --ink:#ffffff; --body:#e6e6e3; --mute:#a3a39e; --line:#2a2a28; --line-strong:#ffffff;
+  --dark:#000000; --ok:#6cc277; --warn:#e6a64a; --bad:#e07c7c; --info:#7eaee8; --plan:#b49be0;
+  --ok-bg:#16301a; --warn-bg:#3a2a10; --bad-bg:#3a1a1a; --info-bg:#14263c; --plan-bg:#2a2140;
+  --phone:#121211; --phone-edge:#3a3a38; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--canvas);color:var(--body);font-family:var(--display);font-size:15px;line-height:1.5;margin:0}
+h1,h2,h3,h4{font-family:var(--display);color:var(--ink);font-weight:700;line-height:.98;text-wrap:balance;margin:0}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--info);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:20px}
+.mono{font-family:var(--mono);font-size:12px}
+.over{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+
+/* header */
+.top{background:var(--dark);color:var(--on-dark)}
+.top .wrap{padding-block:36px 0;display:grid;gap:18px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.02em}
+.diamond{width:18px;height:18px;border:3px solid var(--primary);transform:rotate(45deg)}
+.top h1{color:var(--on-dark);font-size:clamp(34px,5.4vw,60px);max-width:16ch}
+.top p{color:var(--on-dark-mute);max-width:64ch;margin:0;font-size:17px}
+.tabs{display:flex;gap:4px;margin-top:10px;overflow-x:auto}
+.tabs button{background:transparent;color:var(--on-dark-mute);border:0;border-bottom:3px solid transparent;padding:14px 4px;margin-right:22px;font-size:15px;font-weight:700;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--on-dark);border-bottom-color:var(--primary)}
+main .wrap{padding-block:40px 80px}
+
+/* producto */
+.thesis{display:grid;grid-template-columns:1.25fr 1fr;gap:40px;align-items:start}
+.thesis h2{font-size:clamp(26px,3.4vw,38px);margin-bottom:16px}
+.thesis p{max-width:62ch;margin:0 0 12px}
+.pivot{border:1px solid var(--line-strong);display:grid;grid-template-columns:1fr 1fr}
+.pivot>div{padding:18px;display:grid;gap:8px;align-content:start}
+.pivot>div+div{border-left:1px solid var(--line-strong);background:var(--soft)}
+.pivot h4{font-size:16px}
+.pivot ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:14px}
+.pillars{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:1px solid var(--line-strong);margin-top:44px}
+.pillar{padding:20px 18px 20px 0;display:grid;gap:8px;align-content:start;min-width:0}
+.pillar+.pillar{padding-left:18px;border-left:1px solid var(--line)}
+.pillar h3{font-size:20px}
+.pillar p{margin:0;font-size:14px;color:var(--mute)}
+.pillar .mono{color:var(--body)}
+.sec-h{display:flex;justify-content:space-between;align-items:end;gap:16px;margin:56px 0 18px;flex-wrap:wrap}
+.sec-h h2{font-size:28px}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:640px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);background:var(--soft)}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:2px 9px;border-radius:46px;white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.s-ok{color:var(--ok);background:var(--ok-bg)} .s-warn{color:var(--warn);background:var(--warn-bg)}
+.s-bad{color:var(--bad);background:var(--bad-bg)} .s-info{color:var(--info);background:var(--info-bg)} .s-plan{color:var(--plan);background:var(--plan-bg)}
+.lang{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:28px;align-items:start}
+.princ{margin:0;padding:0;list-style:none;display:grid;gap:0;border-top:1px solid var(--line-strong)}
+.princ li{padding:11px 0;border-bottom:1px solid var(--line);font-size:14px}
+.princ b{color:var(--ink)}
+.odds{display:grid;gap:12px}
+.odds div{display:grid;grid-template-columns:minmax(0,1fr) 1.2fr 44px;gap:10px;align-items:center;font-size:14px}
+.odds i{display:block;height:14px;background:var(--line);position:relative}
+.odds em{position:absolute;inset:0 auto 0 0;background:var(--mute)}
+.odds .key em{background:var(--ink)}
+.odds b{color:var(--ink);font-variant-numeric:tabular-nums;text-align:right}
+.plan{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--line-strong)}
+.plan>div{padding:16px;display:grid;gap:6px;align-content:start}
+.plan>div+div{border-left:1px solid var(--line)}
+.plan h3{font-size:20px}
+.plan p{margin:0;font-size:14px}
+.gate{font-size:12px;font-weight:700;color:var(--mute);border-top:1px dashed var(--line);padding-top:8px;margin-top:4px}
+.gate.key{color:var(--ink)}
+.risks{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border:1px solid var(--line)}
+.risk{padding:18px 20px;display:grid;gap:6px;align-content:start}
+.risk:nth-child(odd){border-right:1px solid var(--line)}
+.risk:nth-child(n+3){border-top:1px solid var(--line)}
+.risk h4{font-size:16px;line-height:1.2}
+.risk p{margin:0;font-size:14px;color:var(--mute)}
+
+/* casos de uso */
+.uc-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:22px}
+.chip{border:1px solid var(--line-strong);background:transparent;color:var(--ink);border-radius:46px;padding:7px 14px;font-size:13px;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--canvas)}
+.uc-legend{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.mod{margin-bottom:36px}
+.mod-h{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:baseline;border-bottom:2px solid var(--line-strong);padding-bottom:10px;margin-bottom:4px}
+.mod-h h3{font-size:22px}
+.mod-h p{grid-column:1/-1;margin:0;color:var(--mute);font-size:14px;max-width:80ch}
+.mod-h .mod-k{font-family:var(--mono);font-size:13px;color:var(--mute)}
+.uc{display:grid;grid-template-columns:62px minmax(0,1.1fr) minmax(0,1.6fr) 140px;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);align-items:start}
+.uc .id{font-family:var(--mono);font-weight:600;color:var(--ink);font-size:13px;padding-top:2px}
+.uc h4{font-size:16px;line-height:1.25;margin-bottom:4px}
+.uc .trig{font-size:13px;color:var(--mute);font-style:italic}
+.uc ol{margin:0;padding-left:18px;font-size:13.5px;display:grid;gap:2px}
+.uc .side{display:grid;gap:8px;justify-items:start}
+.linkbtn{background:none;border:0;padding:0;color:var(--ink);font-weight:700;font-size:13px;text-decoration:underline;text-underline-offset:3px}
+.linkbtn:disabled{color:var(--mute);text-decoration:none;cursor:default;font-weight:500}
+
+/* prototipo */
+.proto-grid{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:28px;align-items:start}
+.map-box{border:1px solid var(--line);background:var(--soft);overflow-x:auto}
+.map-box svg{display:block;width:100%;min-width:860px;height:auto}
+.map-legend{display:flex;gap:16px;flex-wrap:wrap;padding:10px 14px;border-top:1px solid var(--line);font-size:12px;color:var(--mute);background:var(--canvas)}
+.map-legend span{display:inline-flex;align-items:center;gap:6px}
+.lg-sw{width:22px;height:0;border-top:2px solid var(--ink)} .lg-sw.d{border-top-style:dashed;border-color:var(--plan)}
+.node{cursor:pointer}
+.node rect{fill:var(--canvas);stroke:var(--ink);stroke-width:1.2}
+.node.sys rect{fill:var(--soft);stroke:var(--mute);stroke-dasharray:0}
+.node.plan rect{stroke:var(--plan);stroke-dasharray:5 4}
+.node text{fill:var(--ink);font-family:var(--display)}
+.node .nt{font-weight:700;font-size:14px}
+.node .ns{font-size:11px;fill:var(--mute)}
+.node .nid{font-family:var(--mono);font-size:10px;fill:var(--mute)}
+.node.active rect{fill:var(--primary);stroke:#000}
+.node.active text,.node.active .ns,.node.active .nid{fill:#000}
+.node:hover rect{stroke-width:2.4}
+.edge{fill:none;stroke:var(--ink);stroke-width:1.3}
+.edge.d{stroke:var(--plan);stroke-dasharray:5 4}
+.edge.s{stroke:var(--mute)}
+.elabel{font-size:10.5px;fill:var(--mute);font-family:var(--display)}
+.band{font-size:10px;font-weight:700;letter-spacing:.1em;fill:var(--mute);font-family:var(--display)}
+.screen-info{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.screen-info h3{font-size:22px;margin-bottom:8px}
+.screen-info p{margin:0 0 10px;font-size:14px;max-width:60ch}
+.ucl{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.ucl li{display:grid;grid-template-columns:56px 1fr auto;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px;align-items:center}
+.ucl .mono{font-weight:600;color:var(--ink)}
+
+.phone{width:100%;max-width:400px;height:760px;border:10px solid var(--phone-edge);border-radius:34px;background:var(--phone);overflow:hidden;display:flex;flex-direction:column;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+.p-top{height:52px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--line);background:var(--phone)}
+.p-top .brand{color:var(--ink);font-size:15px}
+.p-top .diamond{width:13px;height:13px;border-width:2.5px;border-color:var(--ink)}
+.p-body{flex:1;overflow-y:auto;position:relative;background:var(--phone)}
+.p-nav{flex:none;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);background:var(--phone)}
+.p-nav button{background:none;border:0;padding:9px 0 11px;font-size:11px;font-weight:600;color:var(--mute);display:grid;justify-items:center;gap:3px;position:relative}
+.p-nav button svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8}
+.p-nav button[aria-current="true"]{color:var(--ink)}
+.p-nav button[aria-current="true"]::after{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;background:var(--ink)}
+.p-nav .dot{position:absolute;top:5px;right:calc(50% - 18px);min-width:16px;height:16px;border-radius:9px;background:var(--primary);color:#000;font-size:10px;font-weight:800;display:grid;place-items:center;padding:0 4px}
+
+/* contenido del teléfono */
+.hero{background:#000;color:#fff;padding:22px 16px 18px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-40% -20% auto auto;width:260px;height:260px;background:radial-gradient(circle,rgba(255,237,0,.32),transparent 65%);pointer-events:none}
+.hero h2{color:#fff;font-size:28px;margin-bottom:8px;position:relative}
+.hero p{color:rgba(255,255,255,.72);font-size:13px;margin:0 0 14px;position:relative}
+.qbox{display:flex;background:#fff;position:relative}
+.qbox input{flex:1;min-width:0;border:0;padding:12px;font:inherit;font-size:14px;color:#000;background:#fff}
+.qbox button{border:0;background:var(--primary);color:#000;font-weight:800;padding:0 14px;font-size:13px}
+.ex{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;position:relative}
+.ex button{background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:46px;padding:4px 10px;font-size:11.5px}
+.ps{padding:14px 16px}
+.ps+.ps{padding-top:0}
+.ps h3{font-size:19px;margin-bottom:4px}
+.ps .sub{font-size:12.5px;color:var(--mute);margin:0 0 10px}
+.fchips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.fchips span{font-size:11.5px;font-weight:600;border:1px solid var(--line-strong);color:var(--ink);border-radius:46px;padding:3px 9px}
+.fchips span.on{background:var(--ink);color:var(--phone)}
+.portals{display:grid;gap:0;border:1px solid var(--line);margin-bottom:12px}
+.portals div{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px;font-size:12.5px;color:var(--ink)}
+.portals div+div{border-top:1px solid var(--line)}
+.portals .pill{font-size:10.5px;padding:1px 7px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{border:0;background:var(--phone);text-align:left;padding:0;color:var(--body);display:grid;gap:0;position:relative}
+.card .ph{aspect-ratio:4/3;display:grid;place-items:center;position:relative;max-width:100%}
+.card .ph svg{width:78%;height:auto}
+.card .rb{position:absolute;left:6px;bottom:6px;background:var(--primary);color:#000;font-size:10px;font-weight:800;padding:2px 7px;border-radius:46px}
+.card .rb.down{background:#000;color:#fff}
+.card .src{position:absolute;right:0;top:0;background:var(--phone);color:var(--ink);font-size:9.5px;font-weight:700;padding:2px 6px}
+.card .cb{padding:7px 0 2px;display:grid;gap:1px}
+.card .ct{font-weight:700;font-size:12.5px;color:var(--ink);line-height:1.2}
+.card .cm{font-size:11px;color:var(--mute)}
+.card .cp{font-weight:800;font-size:14px;color:var(--ink);font-variant-numeric:tabular-nums}
+.card .cp s{font-weight:500;font-size:11px;color:var(--mute);margin-left:4px}
+.card.dis{opacity:.45}
+.cta{width:100%;border:0;background:var(--primary);color:#000;font-weight:800;font-size:14px;padding:13px;border-radius:2px}
+.cta2{width:100%;border:0;background:var(--ink);color:var(--phone);font-weight:700;font-size:13.5px;padding:12px;border-radius:2px}
+.ghost{width:100%;border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-weight:700;font-size:13px;padding:11px;border-radius:2px}
+.row{display:flex;gap:8px}
+.alist{border-top:1px solid var(--line)}
+.arow{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:12px 0;border-bottom:1px solid var(--line);width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left;color:var(--body)}
+.arow b{color:var(--ink);font-size:14px}
+.arow .m{font-size:11.5px;color:var(--mute);grid-column:1}
+.arow .badge{grid-row:1/3;grid-column:2;align-self:center;background:var(--primary);color:#000;font-weight:800;font-size:11px;border-radius:46px;padding:2px 8px}
+.arow .badge.z{background:var(--soft);color:var(--mute)}
+.wtabs{display:flex;gap:6px;overflow-x:auto;padding:0 16px 10px}
+.wtabs button{border:1px solid var(--line-strong);background:transparent;color:var(--ink);border-radius:46px;padding:5px 12px;font-size:12px;font-weight:600;white-space:nowrap}
+.wtabs button[aria-selected="true"]{background:var(--ink);color:var(--phone)}
+.toast{position:sticky;bottom:10px;margin:0 16px;background:#000;color:#fff;padding:10px 12px;font-size:12.5px;display:flex;gap:8px;align-items:center;z-index:5}
+.toast b{color:var(--primary)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:12.5px}
+.kv dt{color:var(--mute)} .kv dd{margin:0;color:var(--ink);font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.tl{list-style:none;margin:0;padding:0 0 0 14px;border-left:2px solid var(--line);display:grid;gap:8px;font-size:12px}
+.tl li{position:relative}
+.tl li::before{content:"";position:absolute;left:-20px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--phone);border:2px solid var(--ink)}
+.tl li.hl::before{background:var(--primary);border-color:#000}
+.tl b{color:var(--ink)}
+.mkt{position:relative;height:30px;margin:6px 0 2px}
+.mkt .bar{position:absolute;top:12px;left:0;right:0;height:6px;background:var(--line)}
+.mkt .iqr{position:absolute;top:12px;height:6px;background:var(--mute)}
+.mkt .me{position:absolute;top:4px;width:3px;height:22px;background:var(--ink)}
+.mkt-l{display:flex;justify-content:space-between;font-size:10.5px;color:var(--mute);font-variant-numeric:tabular-nums}
+.sc{display:grid;gap:5px}
+.sc div{display:grid;grid-template-columns:1fr 70px 30px;gap:8px;align-items:center;font-size:12px}
+.sc i{display:block;height:5px;background:var(--line);position:relative}
+.sc i em{position:absolute;inset:0 auto 0 0;background:var(--ink)}
+.sc span{text-align:right;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.ck{display:grid;gap:0;border-top:1px solid var(--line)}
+.ck button{display:flex;justify-content:space-between;align-items:center;background:none;border:0;border-bottom:1px solid var(--line);padding:9px 0;font-size:12.5px;color:var(--ink);text-align:left}
+.ck .v{font-size:11px;font-weight:700;border-radius:46px;padding:1px 8px}
+.v.n{background:var(--soft);color:var(--mute)} .v.y{background:var(--ok-bg);color:var(--ok)} .v.x{background:var(--bad-bg);color:var(--bad)}
+.alert-note{font-size:12px;padding:8px 10px;background:var(--warn-bg);color:var(--warn);font-weight:600}
+.st{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.st button{border:1px solid var(--line-strong);background:transparent;color:var(--ink);font-size:11.5px;font-weight:700;padding:8px 4px;border-radius:2px}
+.st button[aria-pressed="true"]{background:var(--ink);color:var(--phone)}
+.back{background:none;border:0;color:var(--ink);font-weight:700;font-size:13px;padding:12px 16px 4px;display:flex;align-items:center;gap:4px}
+.chat{display:grid;gap:10px;padding:14px 16px}
+.msg{font-size:13px;padding:10px 12px;max-width:88%;line-height:1.45}
+.msg.u{justify-self:end;background:var(--ink);color:var(--phone)}
+.msg.a{background:var(--soft);color:var(--body);border-left:3px solid var(--primary)}
+.msg.a b{color:var(--ink)}
+.ctxbar{font-size:11.5px;color:var(--mute);padding:8px 16px;border-bottom:1px solid var(--line);background:var(--soft)}
+.asks{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 14px}
+.asks button{border:1px solid var(--line-strong);background:transparent;color:var(--ink);border-radius:46px;padding:5px 10px;font-size:11.5px;font-weight:600}
+.hint{font-size:11.5px;color:var(--mute)}
+.tag-plan{font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--plan);border:1px dashed var(--plan);padding:1px 6px;text-transform:uppercase}
+.empty{padding:18px;border:1px dashed var(--line-strong);font-size:12.5px;color:var(--mute);text-align:center}
+.sparkw svg{display:block;width:100%;height:56px}
+.mcard{border-top:1px solid var(--line);padding:12px 0;display:grid;gap:6px}
+.mrank{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.mrank b{font-size:15px;color:var(--ink);line-height:1.2}
+.mrank .n{font-family:var(--mono);font-size:11px;color:var(--mute);margin-right:6px}
+.match{font-weight:800;font-size:11.5px;background:var(--ink);color:var(--phone);padding:2px 7px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.attrs{display:flex;flex-wrap:wrap;gap:4px}
+.attr{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:46px}
+.attr.y{background:var(--ok-bg);color:var(--ok)} .attr.x{background:var(--bad-bg);color:var(--bad)} .attr.m{background:var(--soft);color:var(--mute)}
+.why{font-size:12px;margin:0}
+.why b{color:var(--ink)}
+.mbtns{display:flex;gap:14px}
+.avoid{border-left:3px solid var(--bad);padding:8px 10px;background:var(--bad-bg);font-size:12px;color:var(--body);display:grid;gap:2px}
+.avoid b{color:var(--ink)}
+.understood{background:var(--soft);padding:10px 12px;font-size:12px;display:grid;gap:6px;margin-bottom:10px}
+.entries{display:grid;gap:10px}
+.entry{display:grid;gap:8px;text-align:left;padding:16px;border:1px solid var(--line-strong);background:var(--phone);color:var(--body);margin:0}
+.entry b{font-size:17px;color:var(--ink)}
+.entry span{font-size:12.5px;color:var(--mute)}
+.entry.dark{background:#000;border-color:#000}
+.entry.dark b{color:var(--primary)} .entry.dark span{color:rgba(255,255,255,.75)}
+.opts{display:grid;gap:8px}
+.opt{display:grid;gap:2px;width:100%;text-align:left;border:1px solid var(--line-strong);background:transparent;color:var(--ink);padding:13px 14px;font-size:15px;font-weight:700;border-radius:2px}
+.opt small{font-size:12px;font-weight:400;color:var(--mute)}
+.opt[aria-pressed="true"]{background:var(--ink);color:var(--phone)} .opt[aria-pressed="true"] small{color:var(--phone);opacity:.75}
+.cta2:disabled{opacity:.35;cursor:default}
+.prog{display:flex;gap:4px;margin-bottom:12px} .prog i{flex:1;height:3px;background:var(--line)} .prog i.on{background:var(--ink)}
+.verdict{padding:12px 14px;display:grid;gap:3px;border-left:4px solid currentColor}
+.verdict b{font-size:19px}
+.verdict span{color:var(--body);font-size:13px}
+.verdict.ok{background:var(--ok-bg);color:var(--ok)} .verdict.info{background:var(--info-bg);color:var(--info)} .verdict.warn{background:var(--warn-bg);color:var(--warn)} .verdict.bad{background:var(--bad-bg);color:var(--bad)}
+.pv{font-size:11px;font-weight:700} .pv.ok{color:var(--ok)} .pv.bad{color:var(--bad)} .pv.info{color:var(--mute)}
+.s-info.pill{} 
+.ticks{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:12.5px;color:var(--body)}
+.ticks li{padding-left:18px;position:relative}
+.ticks li::before{content:"✓";position:absolute;left:0;color:var(--ok);font-weight:800}
+.ticks.w li::before{content:"!";color:var(--warn);left:4px}
+details.more{border-top:1px solid var(--line);padding-top:8px;font-size:12px;color:var(--body)}
+details.more summary{cursor:pointer;font-weight:700;color:var(--ink)}
+.rail-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px}
+.rail-h h3{font-size:17px}
+.rail{display:grid;grid-auto-flow:column;grid-auto-columns:46%;gap:10px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory}
+.rail .card{scroll-snap-align:start}
+.cats{display:flex;gap:6px;overflow-x:auto;padding:0 16px 12px}
+.cats button{border:1px solid var(--line-strong);background:transparent;color:var(--ink);border-radius:46px;padding:6px 12px;font-size:12px;font-weight:600;white-space:nowrap}
+.cats button[aria-pressed="true"]{background:var(--ink);color:var(--phone)}
+.picker{border:1px solid var(--line-strong);padding:12px;display:grid;gap:8px;margin-top:10px}
+.picker .opt{padding:10px 12px;font-size:13.5px;display:flex;justify-content:space-between;align-items:center}
+.newlist{display:flex;gap:6px}
+.newlist input{flex:1;min-width:0;border:1px solid var(--line-strong);padding:9px;font:inherit;font-size:13px;background:var(--phone);color:var(--body)}
+.newlist button{border:0;background:var(--ink);color:var(--phone);font-weight:700;font-size:12.5px;padding:0 12px}
+.likes{font-size:14px;font-weight:700;color:var(--ink)}
+.likes.mine{color:var(--bad)}
+.ranked{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:start}
+.ranked .rk{font-size:26px;font-weight:800;color:var(--ink);line-height:1;padding-top:4px}
+.callout{border-left:4px solid var(--primary);background:var(--soft);padding:14px 18px;font-size:15px;margin-bottom:32px;max-width:80ch}
+.callout b{color:var(--ink)}
+.feed{display:grid;gap:18px}
+.bcard{display:grid;gap:0;text-align:left;border:0;background:none;padding:0;color:var(--body);width:100%}
+.bcard .ph{aspect-ratio:16/10;display:grid;place-items:center;position:relative;max-width:100%}
+.bcard .ph svg{width:70%;height:auto}
+.bcard .rb{position:absolute;left:8px;bottom:8px;background:var(--primary);color:#000;font-size:12px;font-weight:800;padding:3px 9px;border-radius:46px}
+.bcard .rb.down{background:#000;color:#fff}
+.bcard .src{position:absolute;right:0;top:0;background:var(--phone);color:var(--ink);font-size:11px;font-weight:800;padding:3px 8px}
+.bcard .bb{padding:10px 0 0;display:grid;gap:4px}
+.bcard .ct{font-weight:800;font-size:18px;color:var(--ink);line-height:1.15}
+.bcard .sp{font-size:15px;line-height:1.4}
+.bcard .bm{font-size:14px;color:var(--mute)}
+.bcard .bm b{color:var(--ink);font-size:16px}
+.hero-card .ct{font-size:21px}
+.hunted{display:grid;gap:4px;width:100%;text-align:left;background:var(--primary);color:#000;border:0;padding:14px 16px}
+.hunted b{font-size:18px}
+.hunted span{font-size:14px}
+.big-p{font-size:16px;line-height:1.45;margin:6px 0 0;color:var(--body)}
+.big-btns{display:grid;gap:10px}
+.big-btns .cta,.big-btns .cta2{font-size:16px;padding:16px}
+.ojo{border-left:4px solid var(--warn);background:var(--warn-bg);padding:12px 14px;display:grid;gap:4px}
+.ojo b{color:var(--warn);font-size:15px}
+.ojo span{font-size:15px;color:var(--body)}
+.newlist.big input{font-size:16px;padding:14px}
+.newlist.big button{font-size:15px;padding:0 16px;background:var(--primary);color:#000}
+.cats button{font-size:13.5px;padding:8px 14px}
+.switch{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12.5px;color:var(--ink);background:none;border:0;border-bottom:1px solid var(--line);padding:10px 0;width:100%;text-align:left}
+.switch i{width:36px;height:20px;border-radius:10px;background:var(--line);position:relative;flex:none}
+.switch i::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--phone);box-shadow:0 0 0 1px var(--mute)}
+.switch[aria-pressed="true"] i{background:var(--ink)} .switch[aria-pressed="true"] i::after{left:18px}
+
+@media (max-width:1000px){
+  .thesis,.proto-grid,.screen-info,.lang{grid-template-columns:1fr}
+  .pillars{grid-template-columns:1fr 1fr}
+  .plan{grid-template-columns:1fr 1fr}
+  .plan>div:nth-child(3){border-left:0}
+  .plan>div:nth-child(n+3){border-top:1px solid var(--line)}
+  .pillar:nth-child(odd){padding-left:0;border-left:0}
+  .phone{position:relative;top:0;margin:0 auto}
+  .uc{grid-template-columns:52px minmax(0,1fr);}
+  .uc .flow,.uc .side{grid-column:2}
+  .uc .side{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+}
+@media (max-width:620px){
+  .pivot,.risks{grid-template-columns:1fr}
+  .pivot>div+div{border-left:0;border-top:1px solid var(--line-strong)}
+  .risk:nth-child(odd){border-right:0}
+  .risk+.risk{border-top:1px solid var(--line)}
+  .pillars{grid-template-columns:1fr}
+  .plan{grid-template-columns:1fr}
+  .plan>div+div{border-left:0;border-top:1px solid var(--line)}
+  .pillar,.pillar+.pillar{padding-left:0;border-left:0}
+  .pillar+.pillar{border-top:1px solid var(--line)}
+  .uc-legend{margin-left:0}
+  .phone{height:700px;border-width:6px;border-radius:24px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><span class="diamond"></span> EL GARAJE</div>
+    <h1>Los autos más lindos del país, para mirar, guardar y compartir</h1>
+    <p>Lectura del producto a partir de SPECS.md, README, DESIGN.md, el system prompt y el código del último commit (91b1486). Prioridad desde el 2 de octubre: el apasionado de los autos, que no es tecnológico. Incluye casos de uso, un prototipo navegable con su mapa y la evaluación del MVP.</p>
+    <nav class="tabs" role="tablist">
+      <button role="tab" id="t-producto" aria-selected="true" data-tab="producto">Qué entiendo</button>
+      <button role="tab" id="t-casos" aria-selected="false" data-tab="casos">Casos de uso</button>
+      <button role="tab" id="t-proto" aria-selected="false" data-tab="proto">Prototipo y mapa</button>
+      <button role="tab" id="t-mvp" aria-selected="false" data-tab="mvp">MVP y riesgos</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- ======================= PRODUCTO ======================= -->
+<section class="wrap" id="producto" role="tabpanel">
+  <div class="callout"><b>Cambio de prioridad (2 de octubre).</b> Primero va el apasionado: mira autos aunque no los vaya a comprar, y no es tecnológico. El MVP son cuatro cosas: mirar, avisame, guardar y mandar por WhatsApp. Lo que sigue en esta pestaña describe el producto original, pensado para el comprador, que ahora es la segunda etapa. Detalle en la pestaña "MVP y riesgos".</div>
+  <div class="thesis">
+    <div>
+      <div class="over">La tesis</div>
+      <h2>Buscar un usado en Argentina es repetir la misma búsqueda en cinco portales, todos los días.</h2>
+      <p>El Garaje junta MercadoLibre, Kavak, Rosario Garage y Facebook Marketplace en una sola búsqueda en lenguaje natural ("4x4 diesel de menos de 35 millones"). Esa búsqueda se guarda como <strong>alerta</strong>, y desde ahí el producto vigila: cada auto queda registrado con su portal de origen, cuándo apareció y cómo se movió su precio.</p>
+      <p>La pantalla principal es <strong>Hoy</strong>: lo que apareció y lo que bajó de precio desde la última vez, cruzando todas tus alertas. Sobre cada aviso hay herramientas para decidir (score, precio contra mercado, ficha del modelo, checklist de papeles) y un asesor con IA que opina sobre lo que tenés en pantalla.</p>
+      <p>Antes de todo eso hay una pregunta previa: <strong>qué auto comprar</strong>. Quien dice "un auto de ciudad que no se rompa" no sabe todavía qué modelo buscar. El Garaje traduce esa necesidad en criterios concretos (distribución a cadena, motor aspirado, caja simple, repuestos baratos) y en 3 a 5 modelos con años y versión, cada uno con su motivo y con lo que conviene evitar. De ahí sale la búsqueda en portales.</p>
+      <p>Hay un segundo perfil, que ahora es el primero: <strong>el apasionado de los autos</strong>. Navega sin buscar nada puntual, arma listas ("Si gano la lotería", "Proyecto de finde") y mira autos que tal vez nunca compre. No es quien más rápido paga, pero es quien vuelve todas las semanas, aunque no esté comprando.</p>
+      <p>Para quién: una persona que compra un usado en los próximos 1 a 3 meses, con presupuesto definido y poca paciencia para refrescar portales. El caso de prueba es Rosario.</p>
+    </div>
+    <div>
+      <div class="over" style="margin-bottom:10px">Cómo cambió el producto</div>
+      <div class="pivot">
+        <div>
+          <h4>Antes · asesor chat-first</h4>
+          <ul>
+            <li>Chat con Claude como centro</li>
+            <li>Scraping de MercadoLibre como herramienta del chat</li>
+            <li>Cards de tasación y recomendación</li>
+            <li>Métrica: turnos por sesión</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Ahora · ojeador con alertas</h4>
+          <ul>
+            <li>Búsqueda multiportal + alertas guardadas</li>
+            <li>Trazabilidad por aviso y precio</li>
+            <li>Vista Hoy como home</li>
+            <li>Chat como dock secundario con contexto</li>
+          </ul>
+        </div>
+      </div>
+      <p class="hint" style="margin-top:10px">SPECS.md todavía describe la versión chat-first (secciones 1, 2 y 6). README y el código ya reflejan el giro.</p>
+    </div>
+  </div>
+
+  <div class="sec-h"><h2>Para todo público: cómo lo decimos</h2><span class="hint">El target no sabe de mecánica ni de datos</span></div>
+  <div class="lang">
+    <ul class="princ">
+      <li><b>Veredictos antes que datos.</b> "Buena compra" en lugar de un score de 0 a 100.</li>
+      <li><b>Beneficios antes que piezas.</b> "No necesita arreglos caros" en lugar de "distribución a cadena".</li>
+      <li><b>Preguntas antes que filtros.</b> Tres preguntas en lugar de siete chips.</li>
+      <li><b>Tres opciones, no siete.</b> El resto queda detrás de "Ver más".</li>
+      <li><b>Lo técnico existe, pero plegado.</b> "¿Por qué?" y "Datos técnicos" para quien quiera.</li>
+      <li><b>Palabras de la gente.</b> "Avisame", "Me gusta", "Lo que seguís". Nunca "alerta", "tablero" o "portal".</li>
+    </ul>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Lo que hay por detrás</th><th>Cómo lo ve la persona</th></tr></thead>
+      <tbody>
+        <tr><td>Distribución a cadena · motor aspirado</td><td>"No necesita arreglos caros cada 60 mil km" · "Motor simple"</td></tr>
+        <tr><td>Correa bañada en aceite · caja PowerShift</td><td>"Ojo con este: si se descuidó, el arreglo es caro"</td></tr>
+        <tr><td>Precio contra p25 / p75 del mercado</td><td>"Buen precio: $ 1,9 M menos que autos parecidos"</td></tr>
+        <tr><td>Score por unidad (0 a 100)</td><td>"Buena compra" · "Revisalo bien" · "Con cuidado"</td></tr>
+        <tr><td>first_seen_at · price_history</td><td>"Lo publicaron hace 21 días · bajó $ 1,3 M"</td></tr>
+        <tr><td>last_seen_at viejo</td><td>"Hace 6 días que no aparece: puede que se haya vendido"</td></tr>
+        <tr><td>Alerta · tablero · workspace</td><td>"Avisame si aparecen más" · "Búsquedas que seguís"</td></tr>
+        <tr><td>Estado por portal (partial, link_only)</td><td>"Juntamos 3 sitios. En Facebook buscalo vos"</td></tr>
+        <tr><td>guardado · contactado · descartado</td><td>"Me gusta" · "Ya consulté" · "No me interesa"</td></tr>
+        <tr><td>Checklist (vtv_ok, titular_ok…)</td><td>"Antes de comprar, pedí: VTV al día, papeles a nombre de quien vende…"</td></tr>
+      </tbody></table></div>
+  </div>
+
+  <div class="pillars">
+    <div class="pillar"><div class="over">Pilar 0</div><h3>Elegir</h3><p>De una necesidad ("de ciudad, que no se rompa") a modelos concretos, con criterios explícitos y qué evitar.</p><span class="mono">/api/recommend-search · knowledge</span></div>
+    <div class="pillar"><div class="over">Pilar 1</div><h3>Ojear</h3><p>Una búsqueda coloquial se convierte en filtros y sale a N portales en paralelo. El feed muestra el estado real de cada portal.</p><span class="mono">POST /api/discover</span></div>
+    <div class="pillar"><div class="over">Pilar 2</div><h3>Vigilar</h3><p>La alerta es un tablero con filtros y portales. Al re-correrla marca lo nuevo y registra bajadas de precio.</p><span class="mono">boards · refresh · /api/today</span></div>
+    <div class="pillar"><div class="over">Pilar 3</div><h3>Rastrear</h3><p>Cada aviso es único por portal y link, con primera y última vez visto e historial de precio.</p><span class="mono">listings · price_history</span></div>
+    <div class="pillar"><div class="over">Pilar 4</div><h3>Decidir</h3><p>Score por unidad, precio contra p25/p75 del mercado, ficha por año y versión, checklist y guía de transferencia.</p><span class="mono">listing-score · checklist</span></div>
+  </div>
+
+  <div class="sec-h"><h2>Elegir modelo: qué hay y qué falta</h2><span class="hint">Código del commit 91b1486</span></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Pieza</th><th>Qué hace hoy</th><th>Estado</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">interpretarBusqueda</span> (llm.js)</td><td>Convierte la búsqueda en un brief: 2 a 4 modelos con generación, años y versión, más <i>criterios</i> y <i>evitar</i></td><td><span class="pill s-ok">Construido</span></td></tr>
+        <tr><td><span class="mono">POST /api/recommend-search</span></td><td>Brief, búsqueda en portales y tablero en un solo paso. No hay pantalla intermedia para ver y elegir los modelos</td><td><span class="pill s-warn">Parcial</span></td></tr>
+        <tr><td><span class="mono">knowledge.js</span> · <span class="mono">vehicle-catalog.js</span></td><td>Ficha curada con distribución, ESP, airbags, problemas y qué chequear. Solo 6 modelos curados; el resto lo genera el LLM</td><td><span class="pill s-warn">Parcial</span></td></tr>
+        <tr><td><span class="mono">scoreConfiabilidad</span></td><td>Marca + distribución (cadena +14, correa −10) + alertas de motor (CVT, turbo, correa bañada)</td><td><span class="pill s-ok">Construido</span></td></tr>
+        <tr><td>Prioridades explícitas</td><td>Que la persona prenda o apague criterios (cadena, sin turbo, caja simple) y el ranking cambie</td><td><span class="pill s-plan">Propuesto</span></td></tr>
+        <tr><td>Atributos estructurados por motor</td><td>Aspirado o turbo, tipo de caja (manual, AT convencional, CVT, automatizada, doble embrague), costo de repuestos, red de talleres</td><td><span class="pill s-plan">Propuesto</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="hint" style="margin-top:10px">Dos datos para revisar en la base curada: <span class="mono">knowledge.js</span> marca el Polo 1.6 MSI como "cadena", y hasta donde sé el motor EA211 usa correa. Y <span class="mono">listing-score.js</span> penaliza cualquier "1.6 8v" con la nota "correa bañada", que no aplica a motores como el Renault K7M. Para este pilar, la exactitud de la ficha es el producto: conviene que cada dato tenga fuente.</p>
+
+  <div class="sec-h"><h2>Motor de datos: acceso y entendimiento</h2><span class="hint">Estado validado en vivo el 8 de junio de 2026</span></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Portal</th><th>Acceso</th><th>Entendimiento</th><th>Estado</th><th>Qué falta</th></tr></thead>
+      <tbody>
+        <tr><td><b>Kavak</b></td><td>Fetch directo (HTML SSR)</td><td>Receta cacheada <span class="mono">card-product</span></td><td><span class="pill s-ok">Real</span></td><td>Solo página 1 (30 autos) con post-filtro local; modelos de nicho no aparecen</td></tr>
+        <tr><td><b>Rosario Garage</b></td><td>Render con ScraperAPI, asíncrono (~50 s)</td><td>Receta <span class="mono">.box_aviso_base</span></td><td><span class="pill s-ok">Real, lento</span></td><td>UX de resultados "pendientes" que llegan después</td></tr>
+        <tr><td><b>MercadoLibre</b></td><td>Muro anti-bot; adaptador de API oficial listo</td><td>API estructurada</td><td><span class="pill s-warn">Parcial</span></td><td>Registrar la app de ML y conectar OAuth</td></tr>
+        <tr><td><b>Facebook Marketplace</b></td><td>Requiere sesión</td><td>No aplica</td><td><span class="pill s-info">Solo link</span></td><td>Descartado server-side; queda como link asistido</td></tr>
+        <tr><td><b>Mas Poco Vendo</b></td><td>Dominio muerto o vacío</td><td>No aplica</td><td><span class="pill s-bad">No viable</span></td><td>Sacarlo de la lista de portales</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="hint" style="margin-top:10px">Cascada de extracción: datos estructurados (JSON-LD, <span class="mono">__NEXT_DATA__</span>) → receta cacheada → el LLM aprende una receta nueva si no hay o si se rompió → CSS heurístico. Regla "real o nada": sin estimados sintéticos, siempre link honesto y estado por portal.</p>
+
+  <div class="sec-h"><h2>Tensiones y huecos que veo</h2></div>
+  <div class="risks">
+    <div class="risk"><h4>Las alertas todavía no alertan</h4><p>El re-chequeo es un botón manual. Sin scheduler ni canal de notificación (push o email), el pilar "vigilar" depende de que la persona entre. Es el próximo paso que ya está identificado.</p></div>
+    <div class="risk"><h4>La cobertura real es chica</h4><p>Hoy hay datos reales de Kavak (30 autos) y Rosario Garage. MercadoLibre, que concentra la oferta, espera la conexión a la API. El valor "multiportal" depende de eso.</p></div>
+    <div class="risk"><h4>Sin cuentas no hay producto multiusuario</h4><p>Todo es single-tenant. Notificar, guardar alertas por persona y medir retención requiere auth (el spec propone magic link).</p></div>
+    <div class="risk"><h4>Faltan dos señales clave de trazabilidad</h4><p>No se detecta cuándo un aviso desaparece (probablemente vendido) ni cuándo el mismo auto está publicado en dos portales. Los dos salen de datos que ya existen (<span class="mono">last_seen_at</span>, título/año/km).</p></div>
+  </div>
+</section>
+
+<!-- ======================= CASOS DE USO ======================= -->
+<section class="wrap" id="casos" role="tabpanel" hidden>
+  <div class="uc-tools" id="uc-filters">
+    <button class="chip" aria-pressed="true" data-f="all">Todos</button>
+    <button class="chip" aria-pressed="false" data-f="ok">Construidos</button>
+    <button class="chip" aria-pressed="false" data-f="warn">Parciales</button>
+    <button class="chip" aria-pressed="false" data-f="plan">Propuestos / roadmap</button>
+    <div class="uc-legend" id="uc-count"></div>
+  </div>
+  <div id="uc-list"></div>
+</section>
+
+<!-- ======================= PROTOTIPO ======================= -->
+<section class="wrap" id="proto" role="tabpanel" hidden>
+  <div class="proto-grid">
+    <div style="min-width:0">
+      <div class="sec-h" style="margin-top:0"><h2>Mapa de pantallas</h2><span class="hint">Tocá un nodo para ir a esa pantalla del prototipo</span></div>
+      <div class="map-box">
+        <svg id="map" viewBox="0 0 1060 470" role="img" aria-label="Mapa de navegación y flujo de datos de El Garaje"></svg>
+        <div class="map-legend">
+          <span><i class="lg-sw"></i> Navegación construida</span>
+          <span><i class="lg-sw d"></i> Roadmap / propuesto</span>
+          <span><i class="lg-sw" style="border-color:var(--mute)"></i> Flujo de datos</span>
+          <span><i style="width:12px;height:12px;background:var(--primary);display:inline-block;border:1px solid #000"></i> Pantalla actual</span>
+        </div>
+      </div>
+      <div class="screen-info">
+        <div>
+          <div class="over" id="si-k">Pantalla</div>
+          <h3 id="si-t"></h3>
+          <p id="si-d"></p>
+          <p class="hint" id="si-api"></p>
+        </div>
+        <div>
+          <div class="over" style="margin-bottom:8px">Casos de uso en esta pantalla</div>
+          <ul class="ucl" id="si-ucs"></ul>
+        </div>
+      </div>
+    </div>
+    <div class="phone" aria-label="Prototipo">
+      <div class="p-top"><div class="brand"><span class="diamond"></span> El Garaje</div><button class="linkbtn" data-go="asesor" style="font-size:12px">Preguntar</button></div>
+      <div class="p-body" id="pbody"></div>
+      <nav class="p-nav" id="pnav"></nav>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======================= MVP ======================= -->
+<section class="wrap" id="mvp" role="tabpanel" hidden>
+  <div class="thesis">
+    <div>
+      <div class="over">Nueva prioridad · 2 de octubre de 2026</div>
+      <h2>Primero, el fierrero: el que mira autos aunque no los vaya a comprar.</h2>
+      <p>La promesa, en sus palabras: <strong>"Los autos más lindos que se venden en el país. Y te avisamos cuando aparece el que buscás."</strong></p>
+      <p>El fierrero no es tecnológico. Usa WhatsApp y Facebook, y poco más. Por eso el producto tiene solo cuatro cosas, palabras de todos los días y botones grandes. Comprar un usado común queda como segunda etapa.</p>
+      <p class="hint">Versión completa y editable: <a href="https://claude.ai/code/artifact/9dc0450e-9e3a-4831-ac13-3f6034b0073e" style="color:var(--ink)">El Garaje · MVP, riesgos y chances de éxito</a></p>
+    </div>
+    <div>
+      <div class="over" style="margin-bottom:10px">Chances (estimación de criterio)</div>
+      <div class="odds">
+        <div><span>El MVP funciona</span><i><em style="width:70%"></em></i><b>70%</b></div>
+        <div class="key"><span>Los fierreros vuelven</span><i><em style="width:39%"></em></i><b>39%</b></div>
+        <div><span>Alguien paga</span><i><em style="width:8%"></em></i><b>8%</b></div>
+      </div>
+      <p class="hint" style="margin-top:10px">70% × 55% × 20%. Contra el foco en el comprador (30% y 9%), es más probable que vuelvan y menos claro cómo cobrar.</p>
+    </div>
+  </div>
+
+  <div class="sec-h"><h2>Las cuatro cosas del MVP</h2><span class="hint">Nada más</span></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Lo que dice el fierrero</th><th>Lo que hace El Garaje</th></tr></thead>
+    <tbody>
+      <tr><td>"Mostrame lo lindo, no 3.000 avisos de Gol"</td><td><b>Autos para mirar.</b> Una lista corta y elegida, de todo el país, con una frase de por qué cada auto es lindo</td></tr>
+      <tr><td>"Busco un Sierra XR4 hace años"</td><td><b>Avisame.</b> Escribe el auto una vez y le avisamos cuando aparece</td></tr>
+      <tr><td>"¡Qué joya!"</td><td><b>♥ Me gusta:</b> un solo botón que también guarda el auto. En la portada se ve lo que más les gusta a todos ("A 41 fierreros les gusta"), sin nombres</td></tr>
+      <tr><td>"Miren lo que encontré"</td><td><b>Mandar por WhatsApp</b> con un toque</td></tr>
+    </tbody></table></div>
+
+  <div class="sec-h"><h2>Reglas para que sea fácil</h2></div>
+  <ul class="princ" style="max-width:760px">
+    <li><b>Frases cortas y palabras de todos los días.</b> "Avisame", "Guardar", "Bajó de precio". Nunca "alerta", "filtro" o "caza".</li>
+    <li><b>Un botón grande por cosa.</b> Nada escondido en menús.</li>
+    <li><b>Letras grandes.</b> Mucha gente lo va a usar sin anteojos.</li>
+    <li><b>Nada que aprender.</b> Si hay que explicarlo, no va.</li>
+    <li><b>Cuando dudemos, sacamos.</b> Votos, comentarios y perfiles quedan para después.</li>
+  </ul>
+
+  <div class="sec-h"><h2>Qué queda para después</h2></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Para después</th><th>Por qué</th></tr></thead>
+    <tbody>
+      <tr><td>Muro con nombres: "A Raúl, de Córdoba, le gusta"</td><td>Con pocos usuarios se ve vacío. Además, cada uno tiene que elegir si aparece, y conviene usar frases fijas en vez de texto libre</td></tr>
+      <tr><td>Votar cuánto vale un auto</td><td>Necesita mucha gente para tener sentido</td></tr>
+      <tr><td>Mandarnos un auto que encontraste</td><td>Suma un paso más. Primero ver si la gente vuelve</td></tr>
+      <tr><td>Compartir una lista entera</td><td>Mandar un auto por WhatsApp alcanza para empezar</td></tr>
+      <tr><td>Comprar un usado común y vender el tuyo</td><td>Es la segunda etapa, y el momento natural de cobrar</td></tr>
+    </tbody></table></div>
+
+  <div class="sec-h"><h2>Riesgos con este foco</h2></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Riesgo</th><th>Prob.</th><th>Impacto</th><th>Qué hacemos</th></tr></thead>
+    <tbody>
+      <tr><td><b>Muchos clásicos se venden en grupos de Facebook, que no podemos leer</b></td><td><span class="pill s-bad">Alta</span></td><td><span class="pill s-bad">Alto</span></td><td>MercadoLibre de todo el país, más Rosario Garage y otros sitios que sí se pueden leer</td></tr>
+      <tr><td><b>Un dato mal y los fierreros dejan de confiar</b></td><td><span class="pill s-warn">Media</span></td><td><span class="pill s-bad">Alto</span></td><td>Frases cortas y prudentes. Que alguien de un club revise el auto del día</td></tr>
+      <tr><td><b>Usa mucho pero no paga</b></td><td><span class="pill s-bad">Alta</span></td><td><span class="pill s-bad">Alto</span></td><td>Medir quién quiere más avisos o avisos más rápidos. Más adelante: vendedores de clásicos y sponsors</td></tr>
+      <tr><td>Que la app cueste usarla</td><td><span class="pill s-warn">Media</span></td><td><span class="pill s-bad">Alto</span></td><td>Probar con 5 fierreros reales antes de salir. Si uno se traba, se simplifica</td></tr>
+      <tr><td>Pocos autos lindos por día</td><td><span class="pill s-warn">Media</span></td><td><span class="pill s-warn">Medio</span></td><td>Todo el país desde el día uno. Mejor 10 buenos que 200 regulares</td></tr>
+    </tbody></table></div>
+
+  <div class="sec-h"><h2>Cómo saber si funciona</h2><span class="hint">100 fierreros de 3 grupos o clubes, 4 semanas</span></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Qué miramos</th><th>Seguir si</th><th>Repensar si</th></tr></thead>
+    <tbody>
+      <tr><td>Vuelven 2 o más veces por semana</td><td>4 de cada 10</td><td>menos de 2 de cada 10</td></tr>
+      <tr><td>Piden que les avisemos de algún auto</td><td>5 de cada 10</td><td>menos de 2 de cada 10</td></tr>
+      <tr><td>Mandan algún auto por WhatsApp en la semana</td><td>1 de cada 4</td><td>casi nadie</td></tr>
+      <tr><td>Se traban usando la app (prueba con 5 personas)</td><td>ninguno</td><td>2 o más</td></tr>
+    </tbody></table></div>
+
+  <div class="sec-h"><h2>Plan de 8 semanas</h2></div>
+  <div class="plan">
+    <div><div class="over">Sem 1–2 · 5 al 16 oct</div><h3>Datos</h3><p>Autos de todo el país, elegir los lindos y escribir la frase de cada uno.</p><span class="gate">Control: ¿salen 10 autos lindos por día?</span></div>
+    <div><div class="over">Sem 3–4 · 19 al 30 oct</div><h3>App</h3><p>Las cuatro cosas: mirar, avisame, guardar y mandar por WhatsApp.</p></div>
+    <div><div class="over">Sem 5–6 · 2 al 13 nov</div><h3>Prueba chica</h3><p>5 fierreros reales la usan delante nuestro. Después, 30 de un club.</p></div>
+    <div><div class="over">Sem 7–8 · 16 al 27 nov</div><h3>Prueba grande</h3><p>100 fierreros de 3 grupos.</p><span class="gate key">Decisión: seguir, ajustar o volver al comprador</span></div>
+  </div>
+  <p class="hint" style="margin-top:14px;max-width:70ch">Lo del comprador y el vendedor sigue en el prototipo, en la pestaña "Comprar", como segunda etapa.</p>
+</section>
+</main>
+
+<script>
+(function(){
+/* ---------------- DATOS ---------------- */
+const fmt = p => '$ ' + (p/1e6).toLocaleString('es-AR',{minimumFractionDigits:1,maximumFractionDigits:1}) + ' M';
+const fkm = k => k.toLocaleString('es-AR') + ' km';
+
+const MARKET = { // p25 / mediana / p75 (ARS) del feed por modelo
+  'Toyota Hilux': [30.5e6, 33.8e6, 37.2e6], 'Ford Ranger':[28e6,31e6,34.5e6], 'VW Amarok':[29e6,32.5e6,36e6],
+  'Toyota Corolla':[22.8e6,24.9e6,27e6], 'Fiat Cronos':[14.5e6,15.9e6,17.2e6], 'Peugeot 208':[15.5e6,17e6,18.8e6]
+};
+
+let cars = [
+ {id:1, m:'Toyota Hilux', v:'SRV 2.8 TDI 4x4', y:2019, km:98000, p:31900000, hist:[34500000,33200000,31900000], portal:'Kavak', first:9, last:0, board:'b1', isNew:false, drop:true, status:'guardado', tone:'#d9d6cf', alerts:[], score:{marca:92,seg:80,motor:90,uso:74,precio:84}},
+ {id:2, m:'Ford Ranger', v:'XLT 3.2 4x4 AT', y:2018, km:121000, p:29400000, hist:[29400000], portal:'Rosario Garage', first:0, last:0, board:'b1', isNew:true, drop:false, status:'nuevo', tone:'#c9d3dc', alerts:['Caja automática: pedir historial de service'], score:{marca:72,seg:78,motor:80,uso:60,precio:72}},
+ {id:3, m:'VW Amarok', v:'Highline 2.0 TDI 4x4', y:2017, km:142000, p:27800000, hist:[27800000], portal:'MercadoLibre', first:0, last:0, board:'b1', isNew:true, drop:false, status:'nuevo', tone:'#e3ddcf', alerts:['Turbo: exige service documentado'], score:{marca:78,seg:74,motor:68,uso:52,precio:90}},
+ {id:4, m:'Toyota Hilux', v:'DX 2.4 4x2', y:2020, km:76000, p:36900000, hist:[36900000], portal:'Rosario Garage', first:21, last:0, board:'b1', isNew:false, drop:false, status:'contactado', tone:'#d6d6d6', alerts:[], score:{marca:92,seg:76,motor:92,uso:80,precio:58}},
+ {id:5, m:'Toyota Corolla', v:'XEI 2.0 CVT', y:2019, km:78000, p:24500000, hist:[25900000,24500000], portal:'Kavak', first:12, last:0, board:'b2', isNew:false, drop:true, status:'visto', tone:'#d3d9d1', alerts:['CVT: revisar mantenimiento de caja'], score:{marca:92,seg:88,motor:82,uso:76,precio:70}},
+ {id:6, m:'Fiat Cronos', v:'Precision 1.8 AT', y:2021, km:54000, p:15200000, hist:[15200000], portal:'Kavak', first:0, last:0, board:'b2', isNew:true, drop:false, status:'nuevo', tone:'#dcd2d2', alerts:[], score:{marca:65,seg:62,motor:78,uso:82,precio:80}},
+ {id:7, m:'Peugeot 208', v:'Feline 1.6 AT', y:2020, km:61000, p:18900000, hist:[18900000], portal:'MercadoLibre', first:30, last:6, board:'b2', isNew:false, drop:false, status:'visto', tone:'#d5d3dd', alerts:['No aparece en el portal hace 6 días'], score:{marca:64,seg:70,motor:70,uso:80,precio:48}},
+ {id:8, m:'Ford Ranger', v:'XLS 2.2 4x2', y:2016, km:165000, p:22500000, hist:[22500000], portal:'Facebook', first:4, last:4, board:'b1', isNew:false, drop:false, status:'descartado', tone:'#dad7d0', alerts:[], score:{marca:72,seg:70,motor:76,uso:40,precio:70}},
+];
+
+let boards = [
+ {id:'b1', name:'Pickup 4x4 diesel hasta $35 M', q:'pickup 4x4 diesel menos de 35 millones', filters:['Pickup','Diésel','4x4','≤ $35 M','Rosario'], portals:['Kavak','Rosario Garage','MercadoLibre','Facebook'], on:true, checked:'hoy 08:10'},
+ {id:'b2', name:'Sedán o hatch automático hasta $26 M', q:'auto automático hasta 26 millones', filters:['Automático','≤ $26 M','2018+'], portals:['Kavak','MercadoLibre'], on:true, checked:'ayer 21:40'},
+ {id:'b3', name:'Corolla 2017–2020', q:'toyota corolla 2017 a 2020', filters:['Toyota','Corolla','2017–2020'], portals:['Kavak','Rosario Garage','MercadoLibre'], on:false, checked:'hace 5 días'}
+];
+
+/* Modelos para "qué auto comprar". Datos ilustrativos del prototipo: en el producto salen de la ficha curada. */
+const MODELS = [
+ {id:'etios', n:'Toyota Etios 1.5', gen:'Etios hatch y sedán', years:'2016–2022', ver:'XLS 1.5 manual', y0:2016, y1:2022, price:[9.5e6,13.5e6], a:{cadena:1,aspirado:1,caja:1,repuestos:3,ciudad:3,reventa:3,seg:2},
+  motor:'1.5 16v nafta, familia NR', caja:'Manual 5/6 o automática de 4 convencional', why:'Motor con cadena y sin turbo, mecánica muy conocida y la red Toyota. Es el que menos sorpresas da del segmento.', ojo:'Interior básico y ruidoso en ruta. Hay pocas unidades automáticas.', prob:['Ruidos de plásticos interiores','Amortiguadores traseros en calles muy rotas'], check:['Service oficial o con facturas','Embrague (en unidades de remís o app)','Que no haya sido taxi o auto de flota'], pub:14},
+ {id:'cronos', n:'Fiat Cronos / Argo 1.3', gen:'Motor Firefly', years:'2018–2024', ver:'Drive 1.3 manual', y0:2018, y1:2024, price:[11e6,16e6], a:{cadena:1,aspirado:1,caja:1,repuestos:3,ciudad:3,reventa:2,seg:2},
+  motor:'1.3 Firefly nafta, aspirado', caja:'Manual 5. Evitá la GSR (manual automatizada)', why:'El Firefly tiene cadena y es simple. Repuestos Fiat en todo el país y fabricado en Argentina (Cronos).', ojo:'Si querés automático, la 1.8 con caja de 6 convencional es mejor opción que la 1.3 GSR.', prob:['Caja GSR: tirones y costo de reparación','Detalles de terminación en primeras unidades'], check:['Que sea manual, o la 1.8 AT6 si querés automático','Recall atendidos'], pub:22},
+ {id:'yaris', n:'Toyota Yaris 1.5', gen:'Yaris hatch y sedán', years:'2018–2023', ver:'XS 1.5 manual 6', y0:2018, y1:2023, price:[15e6,21e6], a:{cadena:1,aspirado:1,caja:.5,repuestos:3,ciudad:3,reventa:3,seg:3},
+  motor:'1.5 16v nafta, familia NR', caja:'Manual 6 o CVT', why:'Misma lógica que el Etios con más seguridad y equipamiento. Reventa muy firme.', ojo:'Es más caro. La CVT anda bien con service de fluido; pedí el comprobante.', prob:['CVT sin cambio de fluido en unidades de mucho uso'], check:['Service de CVT si es automático','Que no venga de flota'], pub:9},
+ {id:'march', n:'Nissan March 1.6', gen:'March K13', years:'2011–2020', ver:'Active / Advance 1.6', y0:2011, y1:2020, price:[7.5e6,11e6], a:{cadena:1,aspirado:1,caja:1,repuestos:2,ciudad:3,reventa:2,seg:1},
+  motor:'1.6 16v nafta HR16, aspirado', caja:'Manual 5', why:'Cadena, motor aspirado y chico por fuera. Barato de comprar y de mantener.', ojo:'Seguridad floja en las primeras versiones. Para ruta hay mejores opciones.', prob:['Suspensión delantera','Plásticos y tapizados'], check:['Airbags y ABS según versión','Ruidos de tren delantero'], pub:11},
+ {id:'fit', n:'Honda Fit 1.5', gen:'Fit 2ª gen', years:'2009–2014', ver:'EX / LX 1.5', y0:2009, y1:2014, price:[8e6,12e6], a:{cadena:1,aspirado:1,caja:1,repuestos:2,ciudad:3,reventa:3,seg:2},
+  motor:'1.5 i-VTEC nafta, aspirado', caja:'Manual 5 o automática de 5 convencional', why:'Cadena, motor muy durable y un interior enorme para su tamaño. Retiene bien el valor.', ojo:'Ya tiene años: el estado individual pesa más que el modelo.', prob:['Bujes y amortiguadores por edad','Aire acondicionado en unidades viejas'], check:['Historial completo','Óxido en zócalos'], pub:6},
+ {id:'sandero', n:'Renault Sandero 1.6', gen:'Sandero II', years:'2015–2023', ver:'Expression 1.6 8v', y0:2015, y1:2023, price:[8e6,12.5e6], a:{cadena:0,aspirado:1,caja:1,repuestos:3,ciudad:2,reventa:2,seg:1},
+  motor:'1.6 8v/16v nafta, aspirado', caja:'Manual 5', why:'Mecánica de las más simples y repuestos de los más baratos. Cualquier taller lo conoce.', ojo:'Tiene correa: cambiarla cada 60 mil km (o según manual) y pedir el comprobante.', prob:['Correa de distribución vencida','Electrónica menor (levantavidrios, sensores)'], check:['Comprobante de cambio de correa y bomba','Testigos del tablero'], pub:31},
+ {id:'corolla', n:'Toyota Corolla 1.8', gen:'Corolla 11ª gen', years:'2014–2019', ver:'XEI 1.8 manual', y0:2014, y1:2019, price:[18e6,26e6], a:{cadena:1,aspirado:1,caja:.5,repuestos:3,ciudad:1,reventa:3,seg:3},
+  motor:'1.8 16v nafta, aspirado', caja:'Manual 6 o CVT', why:'De los autos más confiables del mercado, con reventa excelente. Más grande de lo que pide la ciudad.', ojo:'Fuera de presupuesto para un auto de ciudad. La CVT necesita service de fluido.', prob:['CVT sin mantenimiento'], check:['Service de caja','Que no sea ex remís'], pub:18},
+];
+const AVOID = [
+ ['Chevrolet Onix 2020+ (1.0 turbo y 1.2)','Correa bañada en aceite: exige el aceite exacto y el service en fecha. Si falla, la reparación es cara.'],
+ ['Peugeot 208 1.2 PureTech','Correa bañada en aceite, con historial de problemas en Europa.'],
+ ['Ford Fiesta y Focus con caja PowerShift','Caja de doble embrague con fallas conocidas en embragues y mecatrónica.'],
+ ['Turbos chicos (TSI, THP) sin service documentado','Andan muy bien, pero no perdonan un mantenimiento salteado.'],
+];
+const PRIOS = [['cadena','Distribución a cadena'],['aspirado','Sin turbo'],['caja','Caja simple'],['repuestos','Repuestos baratos'],['ciudad','Tamaño ciudad'],['reventa','Buena reventa'],['seg','Seguridad']];
+let prioOn = {cadena:true,aspirado:true,caja:true,repuestos:true,ciudad:true,reventa:false,seg:false};
+let budget = 15e6, needQ = 'auto de ciudad que no se rompa, con poco mantenimiento', curModel='etios', cmpModel='cronos', searchModel=null;
+function matchOf(m){
+  const act = PRIOS.filter(([k])=>prioOn[k]).map(([k])=>k);
+  if(!act.length) return 50;
+  const norm = k => ['cadena','aspirado','caja'].includes(k) ? m.a[k] : m.a[k]/3;
+  let v = act.reduce((t,k)=>t+norm(k),0)/act.length;
+  if(m.price[0] > budget) v *= 0.62;
+  return Math.min(97, Math.round(v*100));
+}
+const rankModels = () => MODELS.map(m=>({m, s:matchOf(m)})).sort((a,b)=>b.s-a.s);
+function genListings(m){
+  const bid='m-'+m.id; if(cars.some(c=>c.board===bid)) return bid;
+  boards.push({id:bid, draft:true, name:`${m.n} ${m.years}`, q:'', filters:[m.n, m.years, m.a.cadena?'Cadena':'Correa'], portals:['Kavak','Rosario Garage','MercadoLibre'], on:true, checked:'recién'});
+  const portals=['Kavak','Rosario Garage','MercadoLibre','Kavak'];
+  const [lo,hi]=m.price; MARKET[m.n]=[lo+(hi-lo)*.25, lo+(hi-lo)*.5, lo+(hi-lo)*.75];
+  [0,1,2,3].forEach(i=>{
+    const y = m.y1 - i*2 < m.y0 ? m.y0 : m.y1 - i*2;
+    const p = Math.round((hi - (hi-lo)*(.15+i*.22))/1e5)*1e5;
+    cars.push({id:500+cars.length, m:m.n, v:m.ver, y, km:28000+i*31000, p, hist:i===1?[p+900000,p]:[p], portal:portals[i], first:i===0?0:i*5, last:0, board:bid, isNew:i===0, drop:i===1, status:i===0?'nuevo':'visto', tone:['#d3d9d1','#d9d6cf','#d5d3dd','#dcd2d2'][i], alerts: m.a.cadena?[]:['Correa: pedir comprobante de cambio'], score:{marca:m.id==='etios'||m.id==='yaris'||m.id==='corolla'?92:m.id==='fit'?88:68, seg:m.a.seg*30, motor:m.a.cadena?90:70, uso:85-i*8, precio:80-i*6}});
+  });
+  return bid;
+}
+const yn = (v,a,b) => v===1?`<span class="attr y">${a}</span>`:v===0?`<span class="attr x">${b}</span>`:`<span class="attr m">${a} / ${b}</span>`;
+
+const CHECK = [['vtv_ok','VTV al día'],['service_al_dia','Service documentado'],['dueno_unico','Dueño único'],['precio_negociable','Precio negociable'],['titular_ok','Titular y papeles ok'],['sin_siniestros','Sin siniestros declarados']];
+const checks = {}; // id -> {key: null|true|false}
+
+/* ---------------- CASOS DE USO ---------------- */
+const MODS = [
+ {t:'Apasionado: mirar, guardar, mandar y avisame', d:'PRIORIDAD desde el 2 de octubre. Para quien mira autos aunque no los vaya a comprar. No es tecnológico: cuatro cosas, palabras simples, botones grandes.', ucs:[
+  {id:'UC-43', t:'Mirar los autos más lindos del país', trig:'"A ver qué apareció hoy"', f:['Abre la app y ve "Autos para mirar"','Arriba, el auto del día; abajo, una lista corta','Cada auto trae una frase de por qué es lindo'], s:'plan', scr:'hallazgos', note:'La IA elige y escribe la frase; alguien de confianza revisa'},
+  {id:'UC-44', t:'Elegir qué tipo de autos ver', trig:'"Solo clásicos"', f:['Toca: clásicos, deportivos, raros o bajaron de precio'], s:'plan', scr:'hallazgos'},
+  {id:'UC-49', t:'Pedir que le avisen cuando aparezca un auto', trig:'"Busco un Sierra XR4 hace años"', f:['Escribe el auto que le gusta','Cuando aparece a la venta en cualquier lugar del país, le avisamos'], s:'warn', scr:'cazador', note:'El motor de alertas ya existe; falta todo el país y el aviso'},
+  {id:'UC-52', t:'Mandar un auto por WhatsApp', trig:'"Miren lo que encontré"', f:['Toca "Mandar por WhatsApp"','Elige el grupo o la persona'], s:'plan', scr:'auto', note:'Es cómo vamos a crecer'},
+  {id:'UC-55', t:'Ver lo que más les gusta a los fierreros', trig:'Abre la app', f:['En la portada ve los 3 autos con más ♥ del día','Cada auto dice "A 41 fierreros les gusta". Sin nombres'], s:'plan', scr:'hallazgos', note:'Sin nombres a propósito: anda con pocos usuarios, sin moderar y sin problemas de privacidad'},
+  {id:'UC-45', t:'Poner ♥ Me gusta (y queda guardado)', trig:'Ve un Torino 380W', f:['Toca "♡ Me gusta"','El auto suma un ♥ en la portada y queda en su lista "Me gustan"','Si quiere, lo pone también en otra lista con nombre propio'], s:'warn', scr:'auto', note:'Un solo botón en vez de "Me gusta" y "Guardar"'},
+  {id:'UC-47', t:'Ver qué pasó con sus autos guardados', trig:'El Torino que guardó bajó de precio', f:['Ve en la lista si bajó o si se vendió'], s:'plan', scr:'lista'},
+  {id:'UC-51', t:'Ver la historia de un auto', trig:'"Este Torino lo vi el año pasado"', f:['Ve hace cuánto lo publicaron y si bajó','Si ya estuvo a la venta antes, ve cuándo y a cuánto'], s:'plan', scr:'auto', note:'Hoy la historia es por aviso; falta reconocer el mismo auto en otro aviso'},
+  {id:'UC-53', t:'Después del MVP: muro con nombres ("A Raúl, de Córdoba, le gusta"), votar cuánto vale, mandar un auto encontrado, compartir listas', trig:'Cuando haya gente suficiente', f:['Se suman de a una, solo si la gente las pide'], s:'plan', scr:'hallazgos', note:'Fuera del MVP a propósito: no complicar'},
+ ]},
+ {t:'Elegir modelo', d:'Pasar de una necesidad a modelos concretos antes de mirar avisos. Es el paso previo a ojear.', ucs:[
+  {id:'UC-31', t:'Pedir qué auto comprar según la necesidad', trig:'"Un auto de ciudad que no se rompa y con poco mantenimiento"', f:['Toca "Ayudame a elegir" o escribe lo que necesita','Responde 3 preguntas: para qué lo usa, qué le importa, cuánto quiere gastar','Recibe 3 autos con los años que convienen y beneficios simples','Lo técnico queda plegado en "¿Por qué lo recomendamos?"'], s:'warn', scr:'elegir', note:'El brief existe; falta la pantalla'},
+  {id:'UC-32', t:'Cambiar las respuestas y ver otras opciones', trig:'"Mejor que sea automático"', f:['Toca "Cambiar respuestas"','La lista se rearma; "Ver más opciones" muestra el resto'], s:'plan', scr:'elegir'},
+  {id:'UC-33', t:'Ver qué modelos evitar para este caso', trig:'"¿Y el Onix nuevo?"', f:['Lista de "no te lo recomendaría para esto" con el motivo concreto','Ej.: correa bañada en aceite, caja de doble embrague, turbo chico sin service'], s:'warn', scr:'elegir', note:'Hoy es el campo "evitar" del brief'},
+  {id:'UC-34', t:'Leer la ficha del modelo con foco en mantenimiento', trig:'"¿Por qué el Etios y no el Sandero?"', f:['Distribución, tipo de motor y caja, versiones y años que convienen','Problemas comunes en Argentina y qué chequear al ir a verlo'], s:'ok', scr:'modelo'},
+  {id:'UC-35', t:'Pasar de modelo a búsqueda', trig:'Le cierra el Etios 2016–2022', f:['Toca "Buscar este modelo"','Se arma la búsqueda multiportal con modelo, años y versión','Desde ahí puede guardarla como alerta'], s:'warn', scr:'resultados', note:'Hoy pasa en un solo paso, sin elegir'},
+  {id:'UC-36', t:'Comparar 2 o 3 modelos lado a lado', trig:'"Etios vs Cronos vs March"', f:['Tabla: distribución, motor, caja, seguridad, repuestos, reventa','Resalta en qué gana cada uno'], s:'plan', scr:'modelo', note:'Roadmap V1.3'},
+  {id:'UC-37', t:'Buscar algo parecido a mi auto actual', trig:'"Algo como mi Gol pero más nuevo"', f:['Toma segmento, tamaño y perfil del auto actual','Propone evoluciones del mismo segmento'], s:'warn', scr:'elegir', note:'CU-5 del spec'},
+ ]},
+ {k:'A', t:'Ojear', d:'Encontrar autos en varios portales con una sola búsqueda.', ucs:[
+  {id:'UC-01', t:'Buscar en lenguaje natural en todos los portales', trig:'"pickup 4x4 diesel menos de 35 millones"', f:['Escribe la búsqueda o toca un ejemplo','El sistema la convierte en filtros (segmento, combustible, tracción, precio, zona)','Consulta N portales en paralelo','Muestra un feed unificado con el portal de cada auto'], s:'ok', scr:'resultados'},
+  {id:'UC-02', t:'Ajustar filtros con chips', trig:'"Ahora solo Toyota, 2019 en adelante"', f:['Toca o quita chips de filtro','El feed se refiltra sin volver a scrapear'], s:'ok', scr:'resultados'},
+  {id:'UC-03', t:'Ver el estado real de cada portal', trig:'MercadoLibre no devolvió precios', f:['Ve una fila por portal: real, parcial, pendiente, bloqueado, solo link','Si un portal falla, abre su búsqueda en el sitio original'], s:'ok', scr:'resultados'},
+  {id:'UC-04', t:'Recibir resultados que tardan (render asíncrono)', trig:'Rosario Garage tarda ~50 s', f:['El feed muestra primero lo rápido (Kavak)','Rosario Garage queda "pendiente" y sus autos se suman al llegar'], s:'ok', scr:'resultados'},
+ ]},
+ {k:'B', t:'Vigilar', d:'Convertir una búsqueda en una alerta que trabaja sola.', ucs:[
+  {id:'UC-05', t:'Guardar una búsqueda como alerta', trig:'Le gusta lo que ve y quiere seguirlo', f:['Toca "Guardar como alerta"','Se guardan filtros + portales como tablero','Los autos actuales quedan como línea base'], s:'ok', scr:'resultados'},
+  {id:'UC-06', t:'Revisar novedades de una alerta', trig:'Vuelve al día siguiente', f:['Toca "Revisar novedades"','Se re-corre la alerta','Lo que no estaba se marca como nuevo y suma al badge'], s:'ok', scr:'busqueda'},
+  {id:'UC-07', t:'Editar o pausar una alerta', trig:'Subió el presupuesto', f:['Cambia filtros o portales','Activa o pausa la alerta'], s:'ok', scr:'guardados'},
+  {id:'UC-08', t:'Recibir un aviso sin entrar a la app', trig:'Aparece una Hilux que matchea a las 3 AM', f:['Un scheduler re-corre las alertas activas','Si hay nuevos o bajadas, manda push o email','El link abre Hoy'], s:'plan', scr:'notif', note:'Próximo paso identificado en README'},
+ ]},
+ {k:'C', t:'Hoy', d:'La home: qué cambió desde la última vez, en todas las alertas.', ucs:[
+  {id:'UC-09', t:'Ver el resumen del día', trig:'Abre la app a la mañana', f:['Ve autos nuevos y autos que bajaron de precio (últimos 14 días)','Los descartados no aparecen'], s:'ok', scr:'inicio'},
+  {id:'UC-10', t:'Marcar novedades como vistas', trig:'Ya revisó lo nuevo', f:['Abrir la alerta apaga los "nuevo"','El badge vuelve a cero'], s:'ok', scr:'inicio'},
+ ]},
+ {k:'D', t:'Rastrear', d:'La historia de cada aviso: de dónde salió, cuánto lleva y cómo se movió.', ucs:[
+  {id:'UC-11', t:'Ver origen y antigüedad de un aviso', trig:'"¿Esta Hilux hace cuánto está publicada?"', f:['La card muestra portal y "visto hace X"','El detalle muestra primera y última vez visto'], s:'ok', scr:'auto'},
+  {id:'UC-12', t:'Ver historial de precio', trig:'"¿Bajó o siempre estuvo así?"', f:['Precio anterior tachado y "Bajó de precio"','Línea de tiempo con cada cambio'], s:'ok', scr:'auto'},
+  {id:'UC-13', t:'Mover un auto por su ciclo de vida', trig:'Ya le escribió al vendedor', f:['Nuevo → visto → guardado / contactado / descartado','Los descartados se ocultan salvo que pida verlos'], s:'ok', scr:'auto'},
+  {id:'UC-14', t:'Pinear un aviso suelto en un tablero', trig:'Ve un auto en una búsqueda efímera', f:['Lo pinea en un tablero existente o en uno nuevo'], s:'ok', scr:'resultados'},
+  {id:'UC-15', t:'Detectar que un aviso probablemente se vendió', trig:'El Peugeot dejó de aparecer', f:['Si last_seen supera N días sin verse, se marca "no aparece"','Sale de Hoy y queda en historial'], s:'plan', scr:'auto', note:'Los datos ya existen'},
+  {id:'UC-16', t:'Unificar el mismo auto en dos portales', trig:'La misma Ranger está en ML y en Rosario Garage', f:['Se agrupan avisos con mismo modelo, año, km y precio cercano','Se muestra una card con los dos links y el más barato'], s:'plan', scr:'auto'},
+ ]},
+ {k:'E', t:'Decidir', d:'Herramientas para evaluar una unidad concreta sin salir del tablero.', ucs:[
+  {id:'UC-17', t:'Ver el score de un aviso', trig:'"¿Cuál de estas tres es mejor compra?"', f:['Score 0–100 sin LLM: confiabilidad de marca, seguridad (NCAP, airbags), alertas de motor, km por año, precio','Se explican las penalidades (CVT, turbo, correa bañada)'], s:'ok', scr:'auto'},
+  {id:'UC-18', t:'Comparar el precio contra el mercado', trig:'"¿Está caro?"', f:['Se ubica el precio en el rango p25–p75 del modelo en el feed','Etiqueta: por debajo, en mercado o por encima'], s:'ok', scr:'auto'},
+  {id:'UC-19', t:'Consultar la ficha del modelo por año y versión', trig:'"¿La Hilux 2019 trae control de estabilidad?"', f:['Catálogo marca → modelo → generación → versión → año','Problemas comunes y versiones a evitar en Argentina'], s:'ok', scr:'modelo'},
+  {id:'UC-20', t:'Completar el checklist de compra', trig:'Fue a ver el auto', f:['Marca VTV, service, dueño único, titular, siniestros, negociable','Cada ítem queda sí / no / sin revisar'], s:'ok', scr:'auto'},
+  {id:'UC-21', t:'Seguir la guía de compra y transferencia', trig:'Va a cerrar la operación', f:['Antes de cerrar, papeles del auto, de las partes, dinero y transferencia','Aviso: orientativo, no asesoramiento legal'], s:'ok', scr:'auto'},
+  {id:'UC-22', t:'Tomar notas en el tablero', trig:'"El de la Ranger dice que acepta permuta"', f:['Notas libres por tablero'], s:'ok', scr:'busqueda'},
+ ]},
+ {k:'F', t:'Asesor', d:'Chat con Claude que conoce el feed y el tablero en pantalla. Secundario por decisión de producto.', ucs:[
+  {id:'UC-23', t:'Preguntar sobre los autos en pantalla', trig:'"¿Cuál conviene de estas?"', f:['El asesor recibe feedResumen + tableroActivo','Razona sobre esos autos puntuales, sin volver a scrapear'], s:'ok', scr:'asesor'},
+  {id:'UC-24', t:'Filtrar el tablero hablando', trig:'"Mostrame las de más potencia"', f:['La consulta se interpreta como filtro o ranking','El grid se filtra y el asesor explica por qué'], s:'ok', scr:'asesor'},
+  {id:'UC-25', t:'Tasar el auto actual y calcular cuánto poner', trig:'"Tengo un Fiesta 2013 con 90 mil km"', f:['Busca comparables y da un rango','Pregunta cuánto puede poner arriba','Propone 3 a 5 opciones'], s:'warn', scr:'asesor', note:'CU-1 del spec; depende de cobertura de ML'},
+  {id:'UC-26', t:'Preguntar por un modelo', trig:'"¿Qué onda los Peugeot 208?"', f:['Consulta la ficha del modelo','Responde problemas comunes y qué versión evitar'], s:'ok', scr:'asesor'},
+ ]},
+ {t:'Vender tu auto', d:'Pedido nuevo. Ataca los dos riesgos principales: da un motivo para quedarse después de comprar y alguien que pague.', ucs:[
+  {id:'UC-38', t:'Saber cuánto vale mi auto', trig:'"Tengo un Fiesta 2013 con 90 mil km"', f:['Carga marca, modelo, año y km','Ve un rango de precio armado con autos parecidos publicados hoy','Ve a qué precio le conviene publicarlo'], s:'warn', scr:'vender', note:'Entra en el MVP. La tasación del asesor ya existe'},
+  {id:'UC-39', t:'Anotar interés en publicarlo desde acá', trig:'Le gusta el precio y quiere vender', f:['Toca "Quiero publicarlo desde acá"','Elige cuánto pagaría','Queda anotado para cuando esté listo'], s:'plan', scr:'vender', note:'Prueba del MVP: 1 de cada 5'},
+  {id:'UC-40', t:'Publicar en MercadoLibre desde El Garaje', trig:'Ya tiene fotos y datos', f:['Conecta su cuenta de MercadoLibre','Sube fotos; el texto se arma solo','Se publica con el precio sugerido'], s:'plan', scr:'vender', note:'Después del MVP. Tiene costo según el plan de ML'},
+  {id:'UC-41', t:'Llevarse el aviso listo para otros sitios', trig:'También quiere estar en Facebook', f:['Copia texto y fotos ya armados','Los pega en Facebook Marketplace u otros sitios'], s:'plan', scr:'vender'},
+  {id:'UC-42', t:'Seguir la venta', trig:'Pasaron 2 semanas sin consultas', f:['Ve cuántas consultas y visitas tuvo','Recibe sugerencias: "Autos parecidos bajaron $ 500 mil"'], s:'plan', scr:'vender'},
+ ]},
+ {k:'G', t:'Operación del motor', d:'Casos del sistema y del operador, invisibles para quien compra.', ucs:[
+  {id:'UC-27', t:'Aprender a leer un portal nuevo', trig:'Primer contacto con un portal', f:['El LLM recibe HTML limpio y devuelve una receta de selectores','La receta se guarda y se reusa gratis'], s:'ok', scr:'motor'},
+  {id:'UC-28', t:'Detectar que un portal cambió y re-aprender', trig:'La receta devuelve 0 avisos', f:['Chequeo de salud por portal','Si hay drift, se re-aprende la receta y se marca "changed"'], s:'warn', scr:'motor'},
+  {id:'UC-29', t:'Conectar MercadoLibre por API oficial', trig:'El scraping choca con el anti-bot', f:['OAuth en /api/ml/auth','Búsquedas por API en lugar de HTML'], s:'warn', scr:'motor', note:'Falta registrar la app en ML'},
+  {id:'UC-30', t:'Diagnosticar portales', trig:'Algo devuelve vacío', f:['npm run diagnose prueba cada portal y reporta estado'], s:'ok', scr:'motor'},
+ ]},
+];
+const ALLUC = MODS.flatMap(m=>m.ucs);
+const SLABEL = {ok:['Construido','s-ok'], warn:['Parcial','s-warn'], plan:['Propuesto','s-plan']};
+
+/* ---------------- TABS ---------------- */
+const tabs = document.querySelectorAll('.tabs button');
+function showTab(id){
+  tabs.forEach(b=>b.setAttribute('aria-selected', String(b.dataset.tab===id)));
+  ['producto','casos','proto','mvp'].forEach(s=>document.getElementById(s).hidden = s!==id);
+  try{localStorage.setItem('garaje-tab',id)}catch(e){}
+}
+tabs.forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+const h = (location.hash||'').slice(1);
+let initTab = ['producto','casos','proto','mvp'].includes(h)?h:null;
+if(!initTab){ try{initTab=localStorage.getItem('garaje-tab')}catch(e){} }
+showTab(initTab||'producto');
+
+/* ---------------- RENDER CASOS ---------------- */
+let ucFilter='all';
+function renderUC(){
+  const list=document.getElementById('uc-list');
+  const c={ok:0,warn:0,plan:0}; ALLUC.forEach(u=>c[u.s]++);
+  document.getElementById('uc-count').innerHTML = Object.entries(c).map(([k,n])=>`<span class="pill ${SLABEL[k][1]}">${n} ${SLABEL[k][0].toLowerCase()}${n>1?'s':''}</span>`).join('');
+  list.innerHTML = MODS.map(m=>{
+    const ucs = m.ucs.filter(u=>ucFilter==='all'||u.s===ucFilter);
+    if(!ucs.length) return '';
+    return `<div class="mod"><div class="mod-h"><span class="mod-k">${'ABCDEFGHIJ'[MODS.indexOf(m)]}</span><h3>${m.t}</h3><p>${m.d}</p></div>
+    ${ucs.map(u=>`<div class="uc"><div class="id">${u.id}</div>
+      <div><h4>${u.t}</h4><div class="trig">${u.trig}</div></div>
+      <div class="flow"><ol>${u.f.map(x=>`<li>${x}</li>`).join('')}</ol></div>
+      <div class="side"><span class="pill ${SLABEL[u.s][1]}">${SLABEL[u.s][0]}</span>${u.note?`<span class="hint">${u.note}</span>`:''}
+      <button class="linkbtn" data-goto="${u.scr}">Ver en prototipo</button></div></div>`).join('')}</div>`;
+  }).join('');
+}
+document.getElementById('uc-filters').addEventListener('click',e=>{
+  const b=e.target.closest('.chip'); if(!b) return;
+  ucFilter=b.dataset.f;
+  document.querySelectorAll('#uc-filters .chip').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+  renderUC();
+});
+document.getElementById('uc-list').addEventListener('click',e=>{
+  const b=e.target.closest('[data-goto]'); if(!b) return;
+  showTab('proto'); go(b.dataset.goto); document.getElementById('proto').scrollIntoView({behavior:'smooth'});
+});
+renderUC();
+
+/* ---------------- MAPA ---------------- */
+const SCREENS = {
+  inicio:{t:'Comprar', s:'segunda etapa', k:'Comprador', d:'Dos puertas grandes: "Ayudame a elegir" para quien no sabe qué auto, y un buscador para quien ya sabe. Abajo, lo nuevo y lo que bajó de precio en lo que sigue.', api:'GET /api/today'},
+  elegir:{t:'Ayudame a elegir', s:'3 preguntas → 3 autos', k:'Elegir', d:'Tres preguntas en lenguaje de todos los días (para qué lo usás, qué te importa, cuánto querés gastar) y tres autos recomendados con beneficios simples. Lo técnico queda plegado en "¿Por qué?".', api:'POST /api/recommend-search (brief) · hoy sin pantalla propia'},
+  modelo:{t:'Modelo', s:'lo bueno y lo que hay que saber', k:'Elegir', d:'La ficha de un modelo contada como lo haría un amigo mecánico: lo bueno, lo que tenés que saber y qué pedir cuando lo vayas a ver. Los datos técnicos están, pero plegados.', api:'GET /api/knowledge'},
+  resultados:{t:'Autos a la venta', s:'de varios sitios juntos', k:'Buscar', d:'Los autos de Kavak, MercadoLibre y Rosario Garage en una sola lista, ordenados de mejor a peor compra. Un solo botón: "Avisame si aparecen más".', api:'POST /api/discover · POST /api/searches'},
+  auto:{t:'Un auto', s:'foto, precio, guardar, mandar', k:'Apasionado y comprador', d:'Para el apasionado: foto, precio, por qué es lindo, un "Ojo" y su historia en frases cortas, con dos botones grandes (Guardar y Mandar por WhatsApp). Para el comprador: el veredicto de buena compra y qué pedir antes de comprar.', api:'PATCH /api/boards/:boardId/listings/:listingId'},
+  guardados:{t:'Guardados', s:'lo que seguís + favoritos', k:'Volver', d:'Las búsquedas que seguís, con cuántos autos nuevos tiene cada una, y los autos que marcaste con "Me gusta".', api:'GET /api/boards'},
+  busqueda:{t:'Una búsqueda que seguís', s:'', k:'Volver', d:'Los autos de una búsqueda guardada, el interruptor para recibir avisos por email y el botón para buscar novedades ahora.', api:'GET /api/boards/:id · POST /refresh · POST /seen'},
+  asesor:{t:'Preguntar', s:'chat opcional', k:'Opcional', d:'Para quien prefiere preguntar. Sabe qué autos estás mirando y responde corto y sin tecnicismos.', api:'POST /api/chat'},
+  hallazgos:{t:'Autos para mirar', s:'los más lindos del país', k:'Apasionado · inicio', d:'La pantalla de entrada. El auto del día arriba y una lista corta de todo el país, cada uno con una frase de por qué es lindo. Si apareció un auto que la persona pidió, se muestra primero.', api:'Propuesto · la IA elige y escribe la frase; alguien de confianza revisa'},
+  cazador:{t:'Avisame', s:'el auto que buscás', k:'Apasionado', d:'La persona escribe el auto que le gusta y le avisamos cuando aparece a la venta en cualquier lugar del país. Sin opciones avanzadas.', api:'Base: alertas (boards + refresh) a nivel país'},
+  lista:{t:'Una lista', s:'', k:'Apasionado', d:'Una lista propia ("Si gano la lotería") con sus autos y lo que les pasó: bajó de precio o se vendió.', api:'Base: tableros + POST /api/pins'},
+  vender:{t:'Vender tu auto', s:'cuánto vale + publicar', k:'Vender', d:'Pedido nuevo. "¿Cuánto vale tu auto?" con los mismos datos de mercado, dónde conviene publicarlo y el botón que mide cuánta gente quiere publicar desde acá. La publicación real queda para después del MVP.', api:'Tasación: datos del feed · Publicar: API de MercadoLibre (a confirmar)'},
+  notif:{t:'Aviso', s:'email o WhatsApp', k:'Roadmap', d:'Propuesto. Todas las mañanas se revisan las búsquedas que seguís y, si hay algo nuevo o un precio bajó, llega un email. Sin esto, la persona tiene que acordarse de entrar.', api:'Requiere scheduler + cuentas + envío de email'},
+  motor:{t:'Motor de portales', s:'', k:'Interno', d:'Cómo llegan los datos: acceso a cada sitio, extracción con recetas que se auto-reparan y registro de cada auto con su historia. La persona nunca ve esto.', api:'scraper.js · lib/extract.js · portal_recipes'},
+};
+const NODES = [
+  {id:'hallazgos',x:30,y:80},{id:'auto',x:240,y:80},{id:'guardados',x:450,y:80},{id:'cazador',x:660,y:80},{id:'notif',x:870,y:80,plan:true},
+  {id:'inicio',x:30,y:230},{id:'elegir',x:240,y:230},{id:'modelo',x:450,y:230},{id:'resultados',x:660,y:230},{id:'vender',x:870,y:230},
+  {id:'portales',x:30,y:386,sys:true,t:'Portales',s:'todo el país'},{id:'acceso',x:240,y:386,sys:true,t:'Acceso',s:'directo / render'},
+  {id:'entender',x:450,y:386,sys:true,t:'Entendimiento',s:'la IA lee y elige'},{id:'listings',x:660,y:386,sys:true,t:'Historia de cada auto',s:'aparición · precios'},
+  {id:'sched',x:870,y:386,sys:true,plan:true,t:'Revisión diaria',s:'automática'},
+];
+const W=160,H=64;
+const EDGES = [
+  ['hallazgos','auto','ver'],['auto','guardados','guardar'],['auto','cazador','avisame si aparece otro',false,'arc'],['cazador','notif','cuando aparece'],
+  ['inicio','elegir','no sé qué auto'],['elegir','modelo','conocerlo'],['modelo','resultados','ver a la venta'],['resultados','auto','ver auto'],['inicio','vender','quiero vender',false,'arcb'],
+  ['portales','acceso','',false,'s'],['acceso','entender','',false,'s'],['entender','listings','',false,'s'],['listings','resultados','',false,'s'],['sched','listings','',true],
+];
+const nodePos = id => NODES.find(n=>n.id===id);
+function anchor(a,b){
+  const A=nodePos(a),B=nodePos(b);
+  const ac={x:A.x+W/2,y:A.y+H/2}, bc={x:B.x+W/2,y:B.y+H/2};
+  if(Math.abs(A.y-B.y)<5) return A.x<B.x?[A.x+W,ac.y,B.x,bc.y]:[A.x,ac.y,B.x+W,bc.y];
+  return A.y<B.y?[ac.x,A.y+H,bc.x,B.y]:[ac.x,A.y,bc.x,B.y+H];
+}
+function drawMap(){
+  const svg=document.getElementById('map');
+  svg.setAttribute('viewBox','0 0 1060 470');
+  const mk=(id,c)=>`<marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(${c})"/></marker>`;
+  let s=`<defs>${mk('ar','--ink')}${mk('arp','--plan')}${mk('ars','--mute')}</defs>
+    <text class="band" x="30" y="22">APASIONADO · PRIORIDAD</text><text class="band" x="30" y="216">COMPRAR Y VENDER · SEGUNDA ETAPA</text><text class="band" x="30" y="372">POR DETRÁS (LA PERSONA NO LO VE)</text>
+    <line x1="20" x2="1040" y1="344" y2="344" style="stroke:var(--line);stroke-width:1"/>`;
+  EDGES.forEach(([a,b,l,plan,kind])=>{
+    const cls = plan||kind==='t'?'edge d':(kind==='s'?'edge s':'edge');
+    const m = plan||kind==='t'?'arp':(kind==='s'?'ars':'ar');
+    let d,lx,ly,anc='middle';
+    if(kind==='arcb'){
+      const A=nodePos(a),B=nodePos(b), x1=A.x+W/2, x2=B.x+40, y=A.y+H;
+      d=`M${x1},${y} C${x1},${y+40} ${x2},${y+40} ${x2},${y}`; lx=(x1+x2)/2; ly=y+40;
+    } else if(kind==='arc'){
+      const A=nodePos(a),B=nodePos(b), x1=A.x+W/2, x2=B.x+W/2, y=A.y;
+      d=`M${x1},${y} C${x1},${y-48} ${x2},${y-48} ${x2},${y}`; lx=(x1+x2)/2; ly=y-40;
+    } else {
+      const [x1,y1,x2,y2]=anchor(a,b);
+      if(y1===y2||x1===x2){ d=`M${x1},${y1} L${x2},${y2}`; } else { const my=(y1+y2)/2; d=`M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}`; }
+      lx=(x1+x2)/2; ly=(y1+y2)/2-(y1===y2?7:0);
+      if(y1!==y2){ lx+=6; anc='start'; }
+    }
+    s+=`<path class="${cls}" d="${d}" marker-end="url(#${m})"/>`;
+    if(l) s+=`<text class="elabel" x="${lx}" y="${ly}" text-anchor="${anc}">${l}</text>`;
+  });
+  NODES.forEach(n=>{
+    const sc=SCREENS[n.id]||{}; const t=n.t||sc.t, sub=n.s||sc.s;
+    const target = SCREENS[n.id]?n.id:'motor';
+    s+=`<g class="node ${n.sys?'sys':''} ${n.plan?'plan':''}" data-node="${target}" data-id="${n.id}" tabindex="0" role="button" aria-label="${t}">
+      <rect x="${n.x}" y="${n.y}" width="${W}" height="${H}"/>
+      <text class="nt" x="${n.x+12}" y="${n.y+27}">${t}</text>
+      <text class="ns" x="${n.x+12}" y="${n.y+47}">${sub}</text>
+      ${n.plan?`<text class="nid" x="${n.x+W-10}" y="${n.y+16}" text-anchor="end">PRÓXIMO</text>`:''}</g>`;
+  });
+  svg.innerHTML=s;
+  svg.querySelectorAll('.node').forEach(g=>{
+    const f=()=>go(g.dataset.node);
+    g.addEventListener('click',f);
+    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f()}});
+  });
+}
+drawMap();
+
+/* ---------------- PROTOTIPO (lenguaje para todo público) ---------------- */
+let cur='hallazgos', prev='hallazgos', curBoard='b1', curCar=null, query='', chat=[], toast='', refreshing=false, showDisc=false, showMore=false;
+let step=0; const ans={uso:null, imp:[], plata:null};
+/* Autos para el apasionado. Datos de ejemplo. Textos cortos y simples: el fierrero no es tecnológico. */
+const FAN = [
+ {m:'Torino 380W', y:1974, km:112000, p:32000000, hist:[34500000,32000000], portal:'MercadoLibre', first:40, cat:'clasico', raro:true, badge:'Raro', loc:'Córdoba',
+  special:'El auto argentino más querido de su época.', ojo:'Tiene pintura nueva. Preguntá por qué lo pintaron.', seen:{when:'marzo de 2025', price:27000000}},
+ {m:'Ford Sierra XR4', y:1987, km:98000, p:16500000, hist:[16500000], portal:'MercadoLibre', first:0, cat:'deportivo', raro:true, badge:'Raro', loc:'Villa María, Córdoba', hunt:'h1',
+  special:'Muy buscado por los fanáticos de Ford.', ojo:'Fijate que sea XR4 de verdad y no un Sierra común modificado.'},
+ {m:'Fiat 600', y:1972, km:3100, p:14000000, hist:[15500000,14000000], portal:'MercadoLibre', first:2, cat:'clasico', raro:true, badge:'Casi sin uso', loc:'Mendoza',
+  special:'Estuvo guardado toda la vida. Tiene solo 3.100 km.', ojo:'Pedí algún papel que muestre que los kilómetros son reales.'},
+ {m:'Renault Fuego GTA', y:1988, km:146000, p:9500000, hist:[9500000], portal:'Facebook', first:3, cat:'clasico', raro:true, badge:'Raro', loc:'Rosario, Santa Fe',
+  special:'La coupé de los 80 que todos querían. Quedan pocas enteras.', ojo:'Dice "con detalles". Pedí fotos de abajo del auto.'},
+ {m:'BMW 325i', y:1990, km:180000, p:22000000, hist:[23500000,22000000], portal:'Facebook', first:18, cat:'deportivo', raro:true, badge:null, loc:'La Plata, Buenos Aires',
+  special:'Un clásico de culto. Manual y de 6 cilindros.', ojo:'Dice "motor hecho". Pedí la factura del taller.', seen:{when:'noviembre de 2024', price:18000000}},
+ {m:'Peugeot 504 SR', y:1983, km:140000, p:7800000, hist:[7800000], portal:'Facebook', first:1, cat:'clasico', badge:null, loc:'San Rafael, Mendoza',
+  special:'El auto de la ruta y la familia en Argentina.', ojo:'Mirá bien el óxido en el piso y las puertas.'},
+ {m:'Mazda MX-5', y:2008, km:74000, p:19000000, hist:[19000000], portal:'MercadoLibre', first:6, cat:'deportivo', raro:true, badge:'Raro', loc:'Córdoba',
+  special:'Hay muy pocos en el país. Descapotable y divertido.', ojo:'Revisá que la capota no deje pasar agua.'},
+ {m:'Ford Falcon Futura', y:1979, km:210000, p:8500000, hist:[8500000], portal:'Rosario Garage', first:12, cat:'clasico', badge:null, loc:'Rosario, Santa Fe',
+  special:'El clásico más fácil de mantener. Hay repuestos en todos lados.', ojo:'Fijate que no tire humo cuando arranca en frío.', seen:{when:'agosto de 2025', price:7200000}},
+ {m:'VW Golf GTI', y:2015, km:98000, p:24000000, hist:[24000000], portal:'Kavak', first:4, cat:'deportivo', badge:null, loc:'CABA',
+  special:'Deportivo y cómodo para usar todos los días.', ojo:'Pedí las facturas de los services.'},
+].map((c,i)=>Object.assign(c,{id:900+i, v:'', board:'x', fan:true, last:0, isNew:c.first<=1, drop:c.hist.length>1, status:'visto', tone:['#d8cfc4','#cfd5d9','#e2dccd','#d6d2c8','#d5d5cf','#dcd6cc','#d9d0cf','#d2d8d2','#d2d6d8'][i], alerts:[], score:{marca:80,seg:50,motor:80,uso:60,precio:70}}));
+cars.push(...FAN);
+const CATS=[['todos','Todos'],['clasico','Clásicos'],['deportivo','Deportivos'],['raro','Raros'],['bajaron','Bajaron de precio']];
+const CAT_L={clasico:'Clásico',deportivo:'Deportivo'};
+let lists=[{id:'l0', name:'Me gustan', ids:[900,902]},{id:'l1', name:'Si gano la lotería', ids:[900,904]},{id:'l2', name:'Para el finde', ids:[907]},{id:'l3', name:'Para comprar este año', ids:[1,5]}];
+let hunts=[{id:'h1', name:'Ford Sierra XR4'},{id:'h2', name:'Peugeot 205 GTI'}];
+let exCat='todos', curList='l1', showPicker=false, sharedMsg=false;
+const DAY_PICK = 902;
+const LIKES = {900:41, 901:28, 902:63, 903:19, 904:33, 905:12, 906:22, 907:15, 908:9};
+FAN.forEach(c=>{ c.likes = LIKES[c.id]||0; });
+const likedByMe = id => lists[0].ids.includes(id);
+function toggleLike(id){ const c=cars.find(x=>x.id===id), l=lists[0], i=l.ids.indexOf(id); if(i>=0){ l.ids.splice(i,1); c.likes--; } else { l.ids.push(id); c.likes++; } }
+const inLists = id => lists.filter(l=>l.ids.includes(id));
+
+let sellStep=0, sellWant=false, sellPay=null; const sellCar={n:'Ford Fiesta Kinetic', y:2013, km:90000, lo:9.5e6, hi:11e6, sug:10.6e6, n_comp:23};
+const notifyOn={b1:true};
+const body=document.getElementById('pbody'), nav=document.getElementById('pnav');
+nav.style.gridTemplateColumns='repeat(4,1fr)';
+
+const PLAIN = {
+  etios:{why:'De los autos que menos se rompen en Argentina. Mantenerlo es barato y cualquier taller lo conoce.', ojo:'Por dentro es simple y en ruta se escucha bastante.', pedi:['Las facturas de los services','Que no haya sido taxi o auto de aplicación']},
+  cronos:{why:'Simple, barato de mantener y con repuestos en todo el país.', ojo:'Si lo querés automático, elegí el motor 1.8: el automático del 1.3 da problemas.', pedi:['Las facturas de los services','Si es automático, que sea el 1.8']},
+  yaris:{why:'Igual de confiable que el Etios, pero más seguro y mejor equipado.', ojo:'Cuesta más. Si es automático, pedí que te muestren el service de la caja.', pedi:['Las facturas de los services','Si es automático, el service de la caja']},
+  march:{why:'Chico, barato y duradero. Ideal para moverse en la ciudad.', ojo:'No es de los más seguros: para viajar seguido a la ruta hay mejores opciones.', pedi:['Que tenga airbags (algunas versiones no traen)','Que no haga ruidos en la parte de adelante']},
+  fit:{why:'Muy duradero y con mucho espacio adentro para lo chico que es.', ojo:'Ya tiene sus años: importa más cómo lo cuidaron que el modelo en sí.', pedi:['Todos los papeles de service que tenga','Que no tenga óxido abajo de las puertas']},
+  sandero:{why:'De los más baratos de arreglar. Cualquier mecánico lo conoce.', ojo:'Cada ~60 mil km hay que hacerle un cambio que cuesta (la correa). Preguntá cuándo se lo hicieron.', pedi:['El comprobante del cambio de correa','Que no tenga luces de falla en el tablero']},
+  corolla:{why:'De los autos más confiables que hay y se vende muy fácil después.', ojo:'Es grande y caro para usarlo solo en la ciudad.', pedi:['Las facturas de los services','Que no haya sido remís']},
+};
+const AVOID_PLAIN = [
+  ['Chevrolet Onix 2020 en adelante','Necesita un mantenimiento muy estricto. Si se descuidó, el arreglo es caro.','Motores 1.0 turbo y 1.2 con correa bañada en aceite.'],
+  ['Peugeot 208 1.2 (2020 en adelante)','Mismo caso: si no se cuidó, el arreglo es caro.','Motor 1.2 PureTech con correa bañada en aceite.'],
+  ['Ford Fiesta y Focus automáticos','La caja automática de esos años tuvo muchas fallas.','Caja PowerShift de doble embrague.'],
+  ['Cualquier auto turbo sin papeles de service','Andan muy bien, pero no perdonan los descuidos.','Turbos chicos (TSI, THP) sin historial.'],
+];
+const AT_OK = ['etios','yaris','fit','cronos','corolla'];
+
+const benefits = m => [m.a.cadena&&'No necesita arreglos caros cada 60 mil km', m.a.aspirado&&'Motor simple, sin turbo', m.a.caja===1&&'Caja que dura', m.a.repuestos===3&&'Repuestos baratos, cualquier taller lo arregla', m.a.reventa===3&&'Se vende rápido después', m.a.seg===3&&'Muy seguro'].filter(Boolean);
+const warnings = m => [!m.a.cadena&&'Cada ~60 mil km necesita un cambio que cuesta (la correa)', m.price[0]>budget&&'Se pasa de tu presupuesto', m.a.seg===1&&'No es de los más seguros para ruta'].filter(Boolean);
+const ago = d => d===0?'hoy':d===1?'ayer':`hace ${d} días`;
+const total = c => { const s=c.score; return Math.round(s.marca*.25+s.seg*.2+s.motor*.2+s.uso*.15+s.precio*.2); };
+const verdict = c => { const t=total(c); return t>=80?['Buena compra','ok']:t>=68?['Revisalo bien','warn']:['Con cuidado','bad']; };
+function priceInfo(c){
+  const mk=MARKET[c.m]; if(!mk) return ['Precio normal','info','Parecido a otros autos iguales'];
+  if(c.p<mk[0]) return ['Buen precio','ok',`${fmt(mk[1]-c.p)} menos que autos parecidos`];
+  if(c.p>mk[2]) return ['Caro','bad',`${fmt(c.p-mk[1])} más que autos parecidos`];
+  return ['Precio normal','info','Parecido a otros autos iguales'];
+}
+function tips(c){
+  return c.alerts.map(a=>/CVT|Caja autom/.test(a)?'Si es automático, pedí el comprobante del service de la caja.':/Turbo/.test(a)?'Pedí las facturas de los services: este motor no perdona descuidos.':/Correa/.test(a)?'Preguntá cuándo le cambiaron la correa. Si no hay comprobante, negociá el precio.':null).filter(Boolean);
+}
+const CHECK_PLAIN = {vtv_ok:'VTV al día',service_al_dia:'Facturas de los services',dueno_unico:'Que sea de un solo dueño',precio_negociable:'Si acepta negociar el precio',titular_ok:'Papeles a nombre de quien vende',sin_siniestros:'Que no haya tenido choques'};
+const ICON = {
+  inicio:'<svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/></svg>',
+  elegir:'<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.5 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg>',
+  guardados:'<svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',
+  hallazgos:'<svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  cazador:'<svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',
+  comprar:'<svg viewBox="0 0 24 24"><path d="M5 16l1.5-6h11L19 16"/><path d="M3 16h18v3H3z"/><circle cx="7" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg>'
+};
+const carSvg = () => `<svg viewBox="0 0 120 50" aria-hidden="true"><path d="M8 36 L10 26 Q12 22 20 21 L36 19 L48 10 Q52 8 60 8 L82 8 Q88 8 92 12 L102 20 L110 22 Q114 23 114 28 L114 36 Z" style="fill:#1b1b1b"/><path d="M50 12 L60 11 L60 19 L42 19 Z M64 11 L80 11 Q86 11 90 15 L94 19 L64 19 Z" style="fill:#9fb4c6"/><circle cx="30" cy="37" r="8" style="fill:#000"/><circle cx="30" cy="37" r="3.5" style="fill:#bbb"/><circle cx="92" cy="37" r="8" style="fill:#000"/><circle cx="92" cy="37" r="3.5" style="fill:#bbb"/></svg>`;
+const newCount = bid => cars.filter(c=>c.board===bid&&c.isNew&&c.status!=='descartado').length;
+const totalNew = () => cars.filter(c=>c.isNew&&c.status!=='descartado'&&!(boards.find(b=>b.id===c.board)||{}).draft).length;
+
+function card(c){
+  const drop = c.hist.length>1 ? c.hist[0]-c.p : 0;
+  const rb = c.isNew?'<span class="rb">Nuevo</span>':(drop?`<span class="rb down">Bajó ${fmt(drop)}</span>`:'');
+  const [pl,pc]= c.fan ? [(c.raro?'Raro · ':'')+CAT_L[c.cat],'info'] : priceInfo(c);
+  return `<button class="card ${c.status==='descartado'?'dis':''}" data-car="${c.id}">
+    <div class="ph" style="background:${c.tone}">${carSvg()}${rb}</div>
+    <div class="cb"><span class="ct">${c.m} ${c.y}</span><span class="cm">${fkm(c.km)}</span><span class="cp">${fmt(c.p)}</span><span class="pv ${pc}">${pl}</span><span class="cm">${c.portal} · ${ago(c.first)}</span></div></button>`;
+}
+const keep = () => { const y=body.scrollTop; render(); body.scrollTop=y; };
+
+function bigCard(c, hero){
+  const drop = c.hist.length>1 ? c.hist[0]-c.p : 0;
+  const b = c.badge ? `<span class="rb">${c.badge}</span>` : (drop?`<span class="rb down">Bajó ${fmt(drop)}</span>`:'');
+  return `<button class="bcard${hero?' hero-card':''}" data-car="${c.id}">
+    <div class="ph" style="background:${c.tone}">${carSvg()}${b}${c.isNew?'<span class="src">Nuevo</span>':''}</div>
+    <div class="bb"><span class="ct">${c.m} ${c.y}</span><span class="sp">${c.special}</span>
+    <span class="bm"><b>${fmt(c.p)}</b> · ${c.loc}</span>
+    <span class="likes${likedByMe(c.id)?' mine':''}">♥ A ${c.likes} fierreros les gusta</span></div></button>`;
+}
+function fanAuto(c){
+  const drop = c.hist.length>1 ? c.hist[0]-c.p : 0;
+  const n = inLists(c.id).length;
+  return `<button class="back" data-go="${prev==='auto'?'hallazgos':prev}">← Volver</button>
+   <div class="card" style="padding:0 16px"><div class="ph" style="background:${c.tone}">${carSvg()}${c.badge?`<span class="rb">${c.badge}</span>`:''}</div></div>
+   <div class="ps"><h3 style="font-size:24px">${c.m} ${c.y}</h3>
+    <div style="font-size:28px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:6px">${fmt(c.p)}</div>
+    <p class="big-p">${fkm(c.km)} · ${c.loc}</p>
+    <p class="big-p">${c.special}</p></div>
+   <div class="ps"><div class="big-btns">
+     <button class="cta" data-act="like">${likedByMe(c.id)?'♥ Te gusta':'♡ Me gusta'}</button>
+     <button class="cta2" data-act="share">Mandar por WhatsApp</button></div>
+    <p class="big-p" style="text-align:center;color:var(--mute)">${likedByMe(c.id)?`A vos y a ${c.likes-1} fierreros más les gusta. Quedó en "Me gustan".`:`A ${c.likes} fierreros les gusta`}</p>
+    <p style="text-align:center;margin:6px 0 0"><button class="linkbtn" data-act="pick">Ponerlo también en otra lista</button></p>
+    ${sharedMsg?`<p class="hint" style="margin-top:8px;text-align:center">Listo. Elegí a quién mandarlo en WhatsApp.</p>`:''}
+    ${showPicker?`<div class="picker"><div class="over">¿En qué lista?</div>${lists.slice(1).map(l=>`<button class="opt" aria-pressed="${l.ids.includes(c.id)}" data-tl="${l.id}"><span>${l.name}</span><span>${l.ids.includes(c.id)?'✓':'+'}</span></button>`).join('')}
+      <form class="newlist" id="newlist"><input id="newlistname" aria-label="Nombre de la lista nueva" placeholder="Lista nueva"><button>Crear</button></form></div>`:''}</div>
+   <div class="ps"><div class="ojo"><b>Ojo</b><span>${c.ojo}</span></div></div>
+   <div class="ps"><div class="over" style="margin-bottom:6px">Su historia</div>
+    <p class="big-p">Lo publicaron ${ago(c.first)} en ${c.portal}.</p>
+    ${drop?`<p class="big-p">Bajó ${fmt(drop)} desde que lo vimos.</p>`:''}
+    ${c.seen?`<p class="big-p">Ya estuvo a la venta en ${c.seen.when}, por ${fmt(c.seen.price)}.</p>`:''}</div>
+   <div class="ps"><button class="ghost" data-hunt-from="${c.m}">Avisame si aparece otro igual</button>
+    <p class="hint" style="margin-top:10px;text-align:center">Ver el aviso en ${c.portal} ↗</p></div>`;
+}
+
+const V = {
+ inicio(){
+  const seen=new Set(), nov=cars.filter(c=>c.status!=='descartado'&&(boards.some(b=>b.id===c.board&&!b.draft)||inLists(c.id).length)&&(c.isNew||c.drop)).filter(c=>!seen.has(c.id)&&seen.add(c.id));
+  return `<div class="ps" style="padding-top:20px"><h3 style="font-size:28px">Hola</h3><p class="sub" style="font-size:14px">¿Qué estás buscando?</p>
+    <div class="entries">
+      <button class="entry dark" data-go="elegir"><b>Ayudame a elegir →</b><span>Te hago 3 preguntas y te digo qué autos te convienen</span></button>
+      <button class="entry" data-go="hallazgos"><b>Solo quiero mirar</b><span>Clásicos, deportivos y rarezas a la venta</span></button>
+      <button class="entry" data-go="vender"><b>Quiero vender mi auto</b><span>Te decimos cuánto vale y dónde publicarlo</span></button>
+      <form class="entry" id="qform"><b>Ya sé qué auto quiero</b><div class="qbox" style="border:1px solid var(--line-strong)"><input id="q" aria-label="Qué auto buscás" placeholder="Ej: Hilux 2019, Corolla automático"><button>Buscar</button></div><span>Lo buscamos en Kavak, MercadoLibre y Rosario Garage al mismo tiempo</span></form>
+    </div></div>
+   <div class="ps"><h3>Novedades</h3><p class="sub">De lo que seguís y de tus listas, desde tu última visita</p>
+    ${nov.length?`<div class="grid">${nov.map(card).join('')}</div>`:'<div class="empty">Todavía no seguís ninguna búsqueda. Cuando sigas una, acá vas a ver los autos nuevos y los que bajaron de precio.</div>'}
+    <p style="margin-top:12px"><button class="linkbtn" data-go="guardados">Ver todo lo que seguís</button></p></div>`;
+ },
+ elegir(){
+  const prog=`<div class="prog">${[0,1,2].map(i=>`<i class="${i<=Math.min(step,2)?'on':''}"></i>`).join('')}</div>`;
+  const opt=(k,v,l,sub)=>{ const on = k==='imp'?ans.imp.includes(v):ans[k]===v; return `<button class="opt" aria-pressed="${on}" data-ans="${k}:${v}"><span>${l}</span>${sub?`<small>${sub}</small>`:''}</button>`; };
+  if(step===0) return `<div class="ps" style="padding-top:18px">${prog}<div class="over">Pregunta 1 de 3</div><h3 style="font-size:22px;margin:6px 0 14px">¿Para qué lo vas a usar más?</h3><div class="opts">
+    ${opt('uso','ciudad','En la ciudad','Ir a trabajar, hacer mandados')}${opt('uso','ruta','Para viajar','Ruta seguido, vacaciones')}${opt('uso','familia','Con la familia','Chicos, sillita, baúl grande')}${opt('uso','trabajo','Para trabajar','Carga, campo, reparto')}</div></div>`;
+  if(step===1) return `<button class="back" data-step="0">← Atrás</button><div class="ps">${prog}<div class="over">Pregunta 2 de 3</div><h3 style="font-size:22px;margin:6px 0 4px">¿Qué es lo más importante para vos?</h3><p class="sub">Elegí hasta 2</p><div class="opts">
+    ${opt('imp','rompa','Que no se rompa')}${opt('imp','arreglos','Gastar poco en arreglos')}${opt('imp','seguro','Que sea seguro')}${opt('imp','auto','Que sea automático')}${opt('imp','venta','Venderlo fácil después')}</div>
+    <button class="cta2" style="margin-top:14px" data-step="2" ${ans.imp.length?'':'disabled'}>Seguir</button></div>`;
+  if(step===2) return `<button class="back" data-step="1">← Atrás</button><div class="ps">${prog}<div class="over">Pregunta 3 de 3</div><h3 style="font-size:22px;margin:6px 0 14px">¿Cuánto querés gastar como máximo?</h3><div class="opts">
+    ${[10e6,15e6,20e6,25e6].map(v=>opt('plata',v,'Hasta '+fmt(v))).join('')}</div></div>`;
+  // resultados
+  budget = ans.plata||15e6;
+  const imp=ans.imp;
+  Object.assign(prioOn,{cadena:imp.includes('rompa')||imp.includes('arreglos'), aspirado:imp.includes('rompa'), caja:imp.includes('rompa'), repuestos:imp.includes('arreglos')||imp.includes('rompa'), ciudad:ans.uso==='ciudad', reventa:imp.includes('venta'), seg:imp.includes('seguro')||ans.uso==='familia'||ans.uso==='ruta'});
+  let r=rankModels(); if(imp.includes('auto')) r=r.filter(x=>AT_OK.includes(x.m.id));
+  const shown = showMore ? r : r.slice(0,3);
+  const usoL={ciudad:'En la ciudad',ruta:'Para viajar',familia:'Con la familia',trabajo:'Para trabajar'}[ans.uso]||'En la ciudad';
+  const impL={rompa:'Que no se rompa',arreglos:'Gastar poco en arreglos',seguro:'Que sea seguro',auto:'Automático',venta:'Venderlo fácil'};
+  return `<div class="ps" style="padding-top:18px"><div class="over">Para vos</div><h3 style="font-size:24px;margin:6px 0 8px">Estos ${Math.min(3,r.length)} autos te convienen</h3>
+    <div class="fchips">${[usoL,...imp.map(i=>impL[i]),'Hasta '+fmt(budget)].map(x=>`<span class="on">${x}</span>`).join('')}</div>
+    <button class="linkbtn" data-step="0">Cambiar respuestas</button>
+    ${shown.map(({m},i)=>{ const p=PLAIN[m.id], w=warnings(m); return `<div class="mcard">
+      <div class="mrank"><b><span class="n">${i+1}</span>${m.n}</b></div>
+      <span style="font-size:12px;color:var(--mute)">Los que convienen: años ${m.years}</span>
+      <p class="why" style="font-size:13px">${p.why}</p>
+      <ul class="ticks">${benefits(m).slice(0,3).map(x=>`<li>${x}</li>`).join('')}</ul>
+      ${w.length?`<ul class="ticks w">${w.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}
+      <span style="font-size:12px;color:var(--ink);font-weight:600">Desde ${fmt(m.price[0])} · hay ${m.pub} a la venta</span>
+      <div class="mbtns"><button class="cta2" style="width:auto;padding:9px 14px" data-search="${m.id}">Ver los ${m.pub} a la venta</button><button class="linkbtn" data-model="${m.id}">Conocerlo</button></div>
+      <details class="more"><summary>¿Por qué lo recomendamos?</summary><p style="margin:6px 0 0">${m.why} Motor: ${m.motor}. Caja: ${m.caja}.</p></details></div>`; }).join('')}
+    ${r.length>3?`<button class="ghost" style="margin-top:10px" data-act="more">${showMore?'Ver menos':`Ver ${r.length-3} opciones más`}</button>`:''}</div>
+   <div class="ps"><h3 style="font-size:18px">Ojo con estos</h3><p class="sub">Pueden andar bien, pero si te toca uno descuidado, el arreglo es caro</p><div style="display:grid;gap:6px">
+    ${AVOID_PLAIN.map(([t,d,tech])=>`<div class="avoid"><b>${t}</b><span>${d}</span><details class="more" style="border:0;padding:0"><summary style="font-weight:600;font-size:11.5px">Detalle técnico</summary>${tech}</details></div>`).join('')}</div>
+    <p class="hint" style="margin-top:10px">Datos de ejemplo del prototipo.</p></div>`;
+ },
+ modelo(){
+  const m=MODELS.find(x=>x.id===curModel), p=PLAIN[m.id];
+  return `<button class="back" data-go="elegir">← Tus recomendaciones</button>
+   <div class="card" style="padding:0 16px"><div class="ph" style="background:#d9d6cf">${carSvg()}</div></div>
+   <div class="ps"><div class="over">Los que convienen: años ${m.years}</div><h3 style="font-size:24px;margin-top:6px">${m.n}</h3><p class="why" style="font-size:13.5px;margin-top:8px">${p.why}</p></div>
+   <div class="ps"><div class="over" style="margin-bottom:6px">Lo bueno</div><ul class="ticks">${benefits(m).map(x=>`<li>${x}</li>`).join('')}</ul></div>
+   <div class="ps"><div class="over" style="margin-bottom:6px">Lo que tenés que saber</div><ul class="ticks w">${[p.ojo,...warnings(m)].map(x=>`<li>${x}</li>`).join('')}</ul></div>
+   <div class="ps"><div class="over" style="margin-bottom:6px">Cuando lo vayas a ver, pedí</div><ul class="ticks">${p.pedi.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+   <div class="ps"><details class="more"><summary>Datos técnicos</summary><dl class="kv" style="margin-top:8px"><dt>Distribución</dt><dd>${m.a.cadena?'Cadena':'Correa'}</dd><dt>Motor</dt><dd>${m.motor}</dd><dt>Caja</dt><dd>${m.caja}</dd><dt>Versión sugerida</dt><dd>${m.ver}</dd></dl><p style="margin:8px 0 0">Problemas conocidos: ${m.prob.join('; ')}.</p></details></div>
+   <div class="ps"><button class="cta" data-search="${m.id}">Ver los ${m.pub} que hay a la venta</button><p class="hint" style="margin:6px 0 0;text-align:center">Desde ${fmt(m.price[0])} en Kavak, MercadoLibre y Rosario Garage</p></div>`;
+ },
+ resultados(){
+  const sm = searchModel && MODELS.find(x=>x.id===searchModel);
+  const list = (sm ? cars.filter(c=>c.board==='m-'+sm.id) : cars.filter(c=>c.board==='b1'&&c.status!=='descartado')).slice().sort((a,b)=>total(b)-total(a));
+  const title = sm ? `${sm.n} · ${sm.years}` : (query || 'Pickup 4x4 diésel hasta $35 M');
+  return `<button class="back" data-go="${sm?'modelo':'inicio'}">← Volver</button>
+   <div class="ps"><h3 style="font-size:22px">${list.length} autos a la venta</h3><p class="sub">${title}</p>
+    <p class="hint" style="margin:0 0 4px">Juntamos Kavak, MercadoLibre y Rosario Garage. Ordenados de mejor a peor compra.</p>
+    <p class="hint" style="margin:0 0 12px">En Facebook Marketplace buscalo vos: <span style="text-decoration:underline">abrir Facebook ↗</span></p>
+    <div class="grid">${list.map(card).join('')}</div></div>
+   <div class="ps" style="position:sticky;bottom:0;background:var(--phone);padding-top:10px;border-top:1px solid var(--line)">
+    <button class="cta" data-act="save">Avisame si aparecen más</button><p class="hint" style="margin:6px 0 0;text-align:center">Te avisamos cuando haya uno nuevo o baje un precio</p></div>`;
+ },
+ auto(){
+  const c=cars.find(x=>x.id===curCar)||cars[0];
+  if(c.fan) return fanAuto(c);
+  const [vl,vc]=verdict(c), [pl,pc,ps]=priceInfo(c), t=tips(c);
+  const ck=checks[c.id]||(checks[c.id]=Object.fromEntries(CHECK.map(([k])=>[k,null])));
+  const cb=boards.find(b=>b.id===c.board)||{};
+  const hist=[`<li class="${c.first===0?'hl':''}">Lo publicaron <b>${ago(c.first)}</b> en ${c.portal}</li>`];
+  if(c.hist.length>1) hist.push(`<li class="hl">Bajó <b>${fmt(c.hist[0]-c.p)}</b> desde que lo vimos${c.hist.length>2?` (${c.hist.length-1} veces)`:''}</li>`);
+  if(c.last>0) hist.push(`<li>Hace ${c.last} días que no aparece: <b>puede que se haya vendido</b></li>`);
+  else hist.push(`<li>Sigue a la venta</li>`);
+  const nego = c.first>=14 ? '<p class="why" style="margin-top:8px"><b>Lleva bastante publicado:</b> hay margen para negociar.</p>' : '';
+  const fanV = c.fan ? ['Pieza para disfrutar','info'] : null;
+  const why = c.fan ? c.note : vc==='ok' ? `${pl === 'Buen precio' ? 'Está bien de precio y ' : ''}es un modelo confiable.` : vc==='warn' ? (t[0]||'Revisá bien su estado antes de decidir.') : 'Tiene puntos flojos: mirá abajo qué revisar.';
+  return `<button class="back" data-go="${cb.draft?'resultados':(prev==='auto'?'inicio':prev)}">← Volver</button>
+   <div class="card" style="padding:0 16px"><div class="ph" style="background:${c.tone}">${carSvg()}${c.isNew?'<span class="rb">Nuevo</span>':''}</div></div>
+   <div class="ps"><h3>${c.m} ${c.y}</h3><p class="sub">${c.v} · ${fkm(c.km)} · Rosario</p>
+    <div style="font-size:26px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums">${fmt(c.p)}</div>
+    ${c.hist.length>1?`<span class="hint">Antes: <s>${fmt(c.hist[0])}</s></span>`:''}</div>
+   <div class="ps"><div class="verdict ${fanV?fanV[1]:vc}"><b>${fanV?fanV[0]:vl}</b><span>${why}</span></div>
+    <button class="ghost" style="margin-top:10px" data-act="pick">${inLists(c.id).length?`En ${inLists(c.id).length} lista${inLists(c.id).length>1?'s':''} · cambiar`:'Guardar en una lista'}</button>
+    ${showPicker?`<div class="picker"><div class="over">Guardar en</div>${lists.map(l=>`<button class="opt" aria-pressed="${l.ids.includes(c.id)}" data-tl="${l.id}"><span>${l.name}</span><span>${l.ids.includes(c.id)?'✓':'+'}</span></button>`).join('')}
+      <form class="newlist" id="newlist"><input id="newlistname" aria-label="Nombre de la lista nueva" placeholder="Nueva lista, ej: Autos de mi viejo"><button>Crear</button></form></div>`:''}</div>
+   ${c.fan?'':`<div class="ps"><div class="over" style="margin-bottom:4px">¿Está bien de precio?</div><p class="why" style="font-size:13px"><span class="pill s-${pc}">${pl}</span> ${ps}</p></div>`}
+   <div class="ps"><div class="over" style="margin-bottom:8px">Su historia</div><ul class="tl">${hist.join('')}</ul>${nego}</div>
+   <div class="ps" ${c.fan?'hidden':''}><div class="over" style="margin-bottom:6px">Antes de comprar, pedí</div>
+    ${t.length?`<ul class="ticks w" style="margin-bottom:8px">${t.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}
+    <div class="ck">${CHECK.map(([k])=>`<button data-ck="${k}"><span>${CHECK_PLAIN[k]}</span><span class="v ${ck[k]===true?'y':ck[k]===false?'x':'n'}">${ck[k]===true?'✓ Listo':ck[k]===false?'No':'Pendiente'}</span></button>`).join('')}</div></div>
+   ${c.fan?`<div class="ps"><p class="hint" style="text-align:center">Ver la publicación en ${c.portal} ↗</p></div>`:''}
+   <div class="ps" ${c.fan?'hidden':''}><div class="st">${[['guardado','Me gusta'],['contactado','Ya consulté'],['descartado','No me interesa']].map(([s,l])=>`<button aria-pressed="${c.status===s}" data-st="${s}">${l}</button>`).join('')}</div>
+    <p class="hint" style="margin-top:10px;text-align:center">Ver la publicación en ${c.portal} ↗</p></div>
+   <div class="ps"><details class="more"><summary>¿Cómo lo calculamos?</summary><div class="sc" style="margin-top:8px">${[['Marca confiable',c.score.marca],['Seguridad',c.score.seg],['Motor y caja',c.score.motor],['Kilómetros para su edad',c.score.uso],['Precio',c.score.precio]].map(([l,v])=>`<div><span style="text-align:left;font-weight:500;color:var(--body)">${l}</span><i><em style="width:${v}%"></em></i><span>${v}</span></div>`).join('')}</div></details>
+    <details class="more" style="margin-top:8px"><summary>Cómo hacer la compra segura</summary><ul style="padding-left:18px;margin:6px 0"><li>Miralo de día y probalo en calle y ruta</li><li>Consultá en el registro que no tenga deudas ni prendas</li><li>Pagá por banco o en escribanía, nunca efectivo en la calle</li><li>Firmá el 08 certificado y sacá turno para la transferencia</li></ul></details></div>`;
+ },
+ guardados(){
+  const vis=boards.filter(b=>!b.draft), fav=cars.filter(c=>['guardado','contactado'].includes(c.status));
+  return `<div class="ps" style="padding-top:20px"><h3 style="font-size:28px">Guardados</h3></div>
+   <div class="ps"><div class="over" style="margin-bottom:6px">Mis listas</div><div class="alist">${lists.map(l=>{ const ch=l.ids.map(id=>cars.find(c=>c.id===id)).filter(c=>c&&(c.drop||c.isNew)).length; return `<button class="arow" data-list="${l.id}"><b>${l.name}</b><span class="m">${l.ids.length} autos</span><span class="badge ${ch?'':'z'}">${ch?ch+' cambios':'0'}</span></button>`; }).join('')}</div></div>
+   <div class="ps"><div class="over" style="margin-bottom:6px">Búsquedas que seguís</div><div class="alist">${vis.map(b=>`<button class="arow" data-board="${b.id}"><b>${b.name}</b><span class="m">${cars.filter(c=>c.board===b.id&&c.status!=='descartado').length} autos · ${notifyOn[b.id]?'te avisamos por email':'sin avisos'}</span><span class="badge ${newCount(b.id)?'':'z'}">${newCount(b.id)?newCount(b.id)+' nuevos':'0'}</span></button>`).join('')}</div></div>
+   <div class="ps"><div class="over" style="margin-bottom:8px">Autos que te gustan</div>${fav.length?`<div class="grid">${fav.map(card).join('')}</div>`:'<div class="empty">Tocá "Me gusta" en un auto para tenerlo acá.</div>'}</div>`;
+ },
+ busqueda(){
+  const b=boards.find(x=>x.id===curBoard)||boards[0];
+  const list=cars.filter(c=>c.board===b.id&&(showDisc||c.status!=='descartado')).sort((a,b2)=>(b2.isNew-a.isNew)||total(b2)-total(a));
+  return `<button class="back" data-go="guardados">← Guardados</button>
+   <div class="ps" style="padding-bottom:6px"><h3 style="font-size:22px">${b.name}</h3><p class="sub">${list.length} autos · ${newCount(b.id)} nuevos · revisada ${b.checked}</p>
+    <button class="switch" aria-pressed="${!!notifyOn[b.id]}" data-act="notify"><span>Avisarme por email cuando haya algo nuevo <span class="tag-plan">Próximamente</span></span><i></i></button>
+    <button class="ghost" style="margin-top:10px" data-act="refresh">${refreshing?'Buscando en los sitios…':'Buscar novedades ahora'}</button></div>
+   <div class="ps"><div class="grid">${list.map(card).join('')}</div>
+    <p style="margin-top:12px"><button class="linkbtn" data-act="disc">${showDisc?'Ocultar los que no me interesan':'Ver los que no me interesan'}</button></p></div>
+   ${toast?`<div class="toast">${toast}</div>`:''}`;
+ },
+ asesor(){
+  const b=boards.find(x=>x.id===curBoard)||boards[0];
+  return `<div class="ctxbar">Estoy mirando: <b style="color:var(--ink)">${b.name}</b></div>
+   <div class="chat">${chat.length?chat.map(m=>`<div class="msg ${m.r}">${m.t}</div>`).join(''):`<div class="msg a">Preguntame lo que quieras sobre estos autos. Te respondo corto y sin vueltas.</div>`}</div>
+   <div class="asks">${Object.keys(ANS).map(q=>`<button data-ask="${q}">${q}</button>`).join('')}</div>`;
+ },
+ hallazgos(){
+  const pool = cars.filter(c=>c.fan);
+  const pick = pool.find(c=>c.id===DAY_PICK);
+  const f = exCat==='todos' ? pool.filter(c=>c!==pick)
+    : pool.filter(c=> exCat==='raro'?c.raro : exCat==='bajaron'?c.drop : c.cat===exCat);
+  const hunted = pool.filter(c=>c.hunt);
+  return `<div class="ps" style="padding-top:20px;padding-bottom:10px"><h3 style="font-size:28px">Autos para mirar</h3><p class="big-p" style="color:var(--mute)">Los más lindos que se venden en el país.</p></div>
+   ${hunted.length?`<div class="ps" style="padding-top:0"><button class="hunted" data-car="${hunted[0].id}"><b>¡Apareció un ${hunted[0].m}!</b><span>El que nos pediste. Está en ${hunted[0].loc}.</span></button></div>`:''}
+   ${exCat==='todos'?`<div class="ps" style="padding-top:0"><div class="over" style="margin-bottom:8px">El de hoy</div>${bigCard(pick,true)}</div>`:''}
+   ${exCat==='todos'?`<div class="ps" style="padding-top:6px"><div class="over" style="margin-bottom:4px">Lo que más les gusta a los fierreros hoy</div><p class="big-p" style="color:var(--mute);margin:0 0 10px">Tocá ♥ en un auto y suma acá.</p>
+    <div class="feed">${pool.filter(c=>c!==pick).sort((a,b)=>b.likes-a.likes).slice(0,3).map((c,i)=>`<div class="ranked"><span class="rk">${i+1}</span>${bigCard(c)}</div>`).join('')}</div></div>
+   <div class="ps" style="padding-bottom:4px"><div class="over">Más autos para mirar</div></div>`:''}
+   <div class="cats">${CATS.map(([k,l])=>`<button aria-pressed="${exCat===k}" data-cat="${k}">${l}</button>`).join('')}</div>
+   <div class="ps"><div class="feed">${f.map(c=>bigCard(c)).join('')}</div>
+    <p class="hint" style="margin-top:12px">Datos de ejemplo.</p></div>`;
+ },
+ cazador(){
+  const pool = cars.filter(c=>c.fan);
+  return `<div class="ps" style="padding-top:20px"><h3 style="font-size:28px">Avisame</h3><p class="big-p" style="color:var(--mute)">Escribí el auto que te gusta. Cuando aparezca a la venta, te avisamos.</p>
+    <form class="newlist big" id="huntform"><input id="huntname" aria-label="Qué auto te gusta" placeholder="Ej: Peugeot 205 GTI"><button>Avisame</button></form></div>
+   <div class="ps"><div class="over" style="margin-bottom:6px">Te vamos a avisar de estos</div><div class="alist">${hunts.map(h=>{ const found=pool.filter(c=>c.hunt===h.id); return found.length
+      ? `<button class="arow" data-car="${found[0].id}"><b>${h.name}</b><span class="m">¡Apareció uno! Tocá para verlo</span><span class="badge">1</span></button>`
+      : `<div class="arow"><b>${h.name}</b><span class="m">Todavía no apareció. Seguimos mirando.</span></div>`; }).join('')}</div></div>`;
+ },
+ lista(){
+  const l=lists.find(x=>x.id===curList); const list=l.ids.map(id=>cars.find(c=>c.id===id)).filter(Boolean);
+  const changes=list.filter(c=>c.drop||c.isNew).length;
+  return `<button class="back" data-go="guardados">← Guardados</button>
+   <div class="ps"><div class="over">Lista</div><h3 style="font-size:24px;margin-top:6px">${l.name}</h3><p class="sub">${list.length} autos${changes?` · ${changes} con cambios`:''}</p>
+</div>
+   <div class="ps">${list.length?`<div class="grid">${list.map(card).join('')}</div>`:'<div class="empty">Todavía no hay autos en esta lista. Guardalos desde cualquier auto con "Guardar en una lista".</div>'}</div>`;
+ },
+ vender(){
+  const v=sellCar;
+  if(sellStep===0) return `<button class="back" data-go="inicio">← Inicio</button>
+   <div class="ps"><div class="over">Vender tu auto</div><h3 style="font-size:24px;margin:6px 0 12px">¿Cuánto vale tu auto?</h3>
+    <dl class="kv" style="border-top:1px solid var(--line);padding-top:10px"><dt>Auto</dt><dd>${v.n}</dd><dt>Año</dt><dd>${v.y}</dd><dt>Kilómetros</dt><dd>${fkm(v.km)}</dd><dt>Dónde</dt><dd>Rosario</dd></dl>
+    <p class="hint">Datos de ejemplo cargados.</p>
+    <button class="cta" data-act="tasar" style="margin-top:12px">Ver cuánto vale</button></div>`;
+  return `<button class="back" data-sell="0">← Cambiar datos</button>
+   <div class="ps"><div class="over">${v.n} ${v.y} · ${fkm(v.km)}</div><h3 style="font-size:26px;margin:6px 0 4px">Entre ${fmt(v.lo)} y ${fmt(v.hi)}</h3>
+    <p class="sub">Según ${v.n_comp} autos parecidos publicados hoy en Kavak, MercadoLibre y Rosario Garage.</p>
+    <div class="verdict ok"><b>Publicalo a ${fmt(v.sug)}</b><span>Está en el rango de autos parecidos y te deja margen para negociar.</span></div></div>
+   <div class="ps"><div class="over" style="margin-bottom:6px">Dónde venderlo</div><div class="portals">
+    <div><span><b>MercadoLibre</b> · lo publicamos por vos</span><span class="tag-plan">Próximamente</span></div>
+    <div><span><b>Facebook</b> · aviso listo para copiar</span><span class="tag-plan">Próximamente</span></div>
+    <div><span><b>Kavak</b> · te lo compra directo, más rápido y por menos</span><span class="pill s-info">Alternativa</span></div></div></div>
+   <div class="ps">${sellWant?`<div class="verdict ok"><b>¡Anotado!</b><span>Te avisamos cuando puedas publicarlo desde acá.</span></div>
+     <div class="over" style="margin:12px 0 6px">¿Cuánto pagarías por publicarlo en todos lados?</div><div class="opts">${['Nada, solo si es gratis','Hasta $ 10.000','Hasta $ 30.000','Un % si se vende'].map(o=>`<button class="opt" aria-pressed="${sellPay===o}" data-pay="${o}">${o}</button>`).join('')}</div>`
+     :`<button class="cta2" data-act="want">Quiero publicarlo desde acá</button><p class="hint" style="margin:6px 0 0;text-align:center">En el MVP este botón solo mide el interés</p>`}</div>`;
+ },
+ notif(){
+  return `<div class="ps"><span class="tag-plan">Próximamente</span><h3 style="margin-top:10px;font-size:22px">Así llega el aviso</h3><p class="sub">Todas las mañanas, solo si hay algo nuevo.</p></div>
+   <div class="ps"><div style="border:1px solid var(--line);display:grid">
+     <div style="padding:10px 12px;border-bottom:1px solid var(--line);font-size:12px;color:var(--mute)">De: El Garaje · 08:10<br><b style="color:var(--ink);font-size:14px">2 pickups nuevas y 1 bajó de precio</b></div>
+     <div style="padding:12px;display:grid;gap:8px;font-size:13px">
+       <span><b style="color:var(--ink)">Nueva:</b> Ford Ranger 2018 a $ 29,4 M · Precio normal</span>
+       <span><b style="color:var(--ink)">Nueva:</b> VW Amarok 2017 a $ 27,8 M · Buen precio</span>
+       <span><b style="color:var(--ink)">Bajó $ 1,3 M:</b> Toyota Hilux 2019, ahora $ 31,9 M</span>
+       <button class="cta" data-go="inicio" style="margin-top:4px">Ver en El Garaje</button></div></div></div>
+   <div class="ps"><div class="over">Qué hace falta (equipo)</div><ul style="font-size:12.5px;padding-left:18px;margin:6px 0"><li>Revisión automática diaria de cada búsqueda</li><li>Cuentas con link por email (sin contraseña)</li><li>Envío de email; WhatsApp como segunda etapa</li></ul></div>`;
+ },
+ motor(){
+  return `<div class="ps"><div class="over">Interno · la persona no lo ve</div><h3 style="font-size:22px;margin-top:6px">Motor de portales</h3></div>
+   <div class="ps"><div class="portals">
+    <div><span><b>Kavak</b> · directo</span><span class="pill s-ok">Funciona</span></div>
+    <div><span><b>Rosario Garage</b> · render (~50 s)</span><span class="pill s-ok">Funciona, lento</span></div>
+    <div><span><b>MercadoLibre</b> · API oficial</span><span class="pill s-warn">Falta conectar</span></div>
+    <div><span><b>Facebook</b></span><span class="pill s-info">Solo link</span></div></div></div>
+   <div class="ps"><ul class="tl"><li><b>1. Datos estructurados</b> de la página</li><li class="hl"><b>2. Receta guardada</b> (gratis)</li><li><b>3. La IA aprende la receta</b> si no hay o se rompió</li><li><b>4. Heurística</b> como último recurso</li></ul></div>`;
+ }
+};
+
+const ANS = {
+ '¿Cuál me conviene?': ()=>`La <b>Hilux 2019</b>. Bajó dos veces, está más barata que otras parecidas y es la marca que menos se rompe. La Amarok es más barata, pero tiene muchos kilómetros: solo si te muestran los papeles de service.`,
+ '¿Alguno está caro?': ()=>`La <b>Hilux 2020 a $ 36,9 M</b>. Por esa plata conseguís una más completa. Lleva 21 días publicada, así que hay margen para negociar.`,
+ '¿Qué auto de ciudad no se rompe?': ()=>`Los que menos problemas dan son el <b>Toyota Etios</b>, el <b>Fiat Cronos 1.3</b> y el <b>Nissan March</b>. Te hago 3 preguntas y te digo cuál te conviene más. <button class="linkbtn" data-go="elegir">Empezar</button>`,
+ '¿Cuánto vale mi Fiesta 2013?': ()=>`Uno con 90 mil km hoy se publica entre <b>$ 9,5 M y $ 11 M</b> en Rosario. ¿Cuánta plata podrías sumar para el próximo?`
+};
+
+function go(scr){
+  if(SCREENS[scr] && scr!==cur){ prev=cur; cur=scr; }
+  if(scr==='elegir' && step>3) step=0;
+  toast=''; showPicker=false; sharedMsg=false;
+  render();
+}
+function render(){
+  body.innerHTML=V[cur]();
+  body.scrollTop=0;
+  const activeNav = {lista:'guardados',vender:'inicio',elegir:'inicio',modelo:'inicio',auto:'',resultados:'inicio',auto:'inicio',busqueda:'guardados',notif:'inicio',motor:'',asesor:''}[cur] ?? cur;
+  const gn = boards.filter(b=>!b.draft).reduce((t,b)=>t+newCount(b.id),0);
+  nav.innerHTML=[['hallazgos','Mirar'],['cazador','Avisame'],['guardados','Guardados'],['inicio','Comprar']].map(([k,l])=>`<button data-go="${k}" aria-current="${activeNav===k}">${ICON[k==='inicio'?'comprar':k]}${l}${k==='guardados'&&gn?`<span class="dot">${gn}</span>`:''}</button>`).join('');
+  document.querySelectorAll('#map .node').forEach(g=>{
+    const id=g.dataset.id;
+    g.classList.toggle('active', id===cur || (cur==='busqueda'&&id==='guardados') || (cur==='motor'&&['portales','acceso','entender','listings'].includes(id)));
+  });
+  const S=SCREENS[cur];
+  document.getElementById('si-k').textContent=S.k;
+  document.getElementById('si-t').textContent=S.t;
+  document.getElementById('si-d').textContent=S.d;
+  document.getElementById('si-api').innerHTML='<span class="mono">'+S.api+'</span>';
+  const ucs=ALLUC.filter(u=>u.scr===cur);
+  document.getElementById('si-ucs').innerHTML=ucs.length?ucs.map(u=>`<li><span class="mono">${u.id}</span><span>${u.t}</span><span class="pill ${SLABEL[u.s][1]}">${SLABEL[u.s][0]}</span></li>`).join(''):'<li><span></span><span class="hint">Sin casos propios</span><span></span></li>';
+}
+
+const phone=document.querySelector('.phone');
+phone.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.closest('summary')) return;
+  const g=t.closest('[data-go]'); if(g){ go(g.dataset.go); return; }
+  const an=t.closest('[data-ans]'); if(an){ const [k,v]=an.dataset.ans.split(':');
+    if(k==='imp'){ const i=ans.imp.indexOf(v); if(i>=0) ans.imp.splice(i,1); else { if(ans.imp.length>=2) ans.imp.shift(); ans.imp.push(v); } keep(); return; }
+    ans[k]= k==='plata'?+v:v; step = k==='uso'?1:3; showMore=false; render(); return; }
+  const hf=t.closest('[data-hunt-from]'); if(hf){ const n=hf.dataset.huntFrom||hf.dataset['hunt-from']; if(!hunts.some(h=>h.name===n)) hunts.push({id:'h'+(hunts.length+1), name:n}); go('cazador'); return; }
+  const ct=t.closest('[data-cat]'); if(ct){ exCat=ct.dataset.cat; keep(); return; }
+  const li=t.closest('[data-list]'); if(li){ curList=li.dataset.list; go('lista'); return; }
+  const tl=t.closest('[data-tl]'); if(tl){ const l=lists.find(x=>x.id===tl.dataset.tl); const i=l.ids.indexOf(curCar); if(i>=0) l.ids.splice(i,1); else l.ids.push(curCar); keep(); return; }
+  const sl=t.closest('[data-sell]'); if(sl){ sellStep=+sl.dataset.sell; render(); return; }
+  const py=t.closest('[data-pay]'); if(py){ sellPay=py.dataset.pay; keep(); return; }
+  const sp=t.closest('[data-step]'); if(sp){ if(sp.disabled) return; step=+sp.dataset.step; render(); return; }
+  const bd=t.closest('[data-board]'); if(bd){ curBoard=bd.dataset.board; go('busqueda'); return; }
+  const cd=t.closest('[data-car]'); if(cd){ curCar=+cd.dataset.car; const c=cars.find(x=>x.id===curCar); if(!c.fan) curBoard=c.board; c.isNew=false; go('auto'); return; }
+  const st=t.closest('[data-st]'); if(st){ const c=cars.find(x=>x.id===curCar); c.status = c.status===st.dataset.st?'visto':st.dataset.st; keep(); return; }
+  const ck=t.closest('[data-ck]'); if(ck){ const m=checks[curCar]; const v=m[ck.dataset.ck]; m[ck.dataset.ck]= v===null?true:v===true?false:null; keep(); return; }
+  const ask=t.closest('[data-ask]'); if(ask){ const q=ask.dataset.ask; chat.push({r:'u',t:q},{r:'a',t:ANS[q]()}); render(); body.scrollTop=body.scrollHeight; return; }
+  const md=t.closest('[data-model]'); if(md){ curModel=md.dataset.model; go('modelo'); return; }
+  const sr=t.closest('[data-search]'); if(sr){ const m=MODELS.find(x=>x.id===sr.dataset.search); searchModel=m.id; genListings(m); go('resultados'); return; }
+  const a=t.closest('[data-act]'); if(!a) return;
+  const act=a.dataset.act;
+  if(act==='more'){ showMore=!showMore; keep(); }
+  if(act==='pick'){ showPicker=!showPicker; keep(); }
+  if(act==='share'){ sharedMsg=true; keep(); }
+  if(act==='like'){ toggleLike(curCar); keep(); }
+  if(act==='tasar'){ sellStep=1; render(); }
+  if(act==='want'){ sellWant=true; keep(); }
+  if(act==='disc'){ showDisc=!showDisc; keep(); }
+  if(act==='notify'){ notifyOn[curBoard]=!notifyOn[curBoard]; keep(); }
+  if(act==='save'){
+    let bid='b1';
+    if(searchModel){ const m=MODELS.find(x=>x.id===searchModel); bid='m-'+m.id; const nb=boards.find(b=>b.id===bid); nb.draft=false; boards.splice(boards.indexOf(nb),1); boards.unshift(nb); }
+    curBoard=bid; notifyOn[bid]=true; cur='busqueda'; render();
+    toast='<b>Listo.</b> Te avisamos cuando aparezca uno nuevo o baje un precio.'; render();
+  }
+  if(act==='refresh' && !refreshing){
+    refreshing=true; toast='Buscando en Kavak, MercadoLibre y Rosario Garage…'; keep();
+    setTimeout(()=>{
+      refreshing=false;
+      const b=boards.find(x=>x.id===curBoard);
+      const m = curBoard.startsWith('m-') ? MODELS.find(x=>'m-'+x.id===curBoard) : null;
+      const add = m
+        ? {id:100+cars.length, m:m.n, v:m.ver, y:m.y1-1, km:41000, p:Math.round(m.price[0]/1e5)*1e5+300000, hist:[Math.round(m.price[0]/1e5)*1e5+300000], portal:'MercadoLibre', first:0, last:0, board:curBoard, isNew:true, drop:false, status:'nuevo', tone:'#d7d3cb', alerts:[], score:{marca:88,seg:m.a.seg*30,motor:90,uso:82,precio:86}}
+        : {id:100+cars.length, m:'Toyota Hilux', v:'SR 2.8 TDI 4x4', y:2018, km:112000, p:30200000, hist:[30200000], portal:'Rosario Garage', first:0, last:0, board:curBoard, isNew:true, drop:false, status:'nuevo', tone:'#d0d6d2', alerts:[], score:{marca:92,seg:76,motor:90,uso:62,precio:86}};
+      cars.unshift(add); b.checked='recién';
+      toast=`<b>1 auto nuevo:</b> ${add.m} ${add.y}`;
+      if(cur==='busqueda') keep();
+    },1400);
+  }
+});
+phone.addEventListener('submit',e=>{
+  e.preventDefault();
+  if(e.target.id==='huntform'){ const n=document.getElementById('huntname'); const name=(n&&n.value.trim()); if(name) hunts.push({id:'h'+(hunts.length+1), name}); keep(); return; }
+  if(e.target.id==='newlist'){ const n=document.getElementById('newlistname'); const name=(n&&n.value.trim())||'Lista nueva'; lists.push({id:'l'+(lists.length+1)+Date.now()%1000, name, ids:[curCar]}); keep(); return; }
+  const q=document.getElementById('q'); query=(q&&q.value.trim())||'';
+  if(!query || /no se rompa|mantenimiento|confiable|qu[eé] auto|parecido a mi|recomend|no s[eé]/i.test(query)){ step=0; go('elegir'); return; }
+  searchModel=null; go('resultados');
+});
+render();
+})();
+
+</script>
+</body>
+</html>
